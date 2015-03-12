@@ -1,17 +1,15 @@
-
-
 //uncomment for control communication type
 //#define I2C
 #define BLUETOOTH
 #define EMERGENCY_STOP
 
 #include <Wire.h>
-#include <Servo.h> 
+#include <Servo.h>
 
 Servo motor;
 Servo steer;
 
-int steering_angle=0; 
+int steering_angle=0;
 int base_speed=0;
 int speed_error=0;
 int real_speed=0;
@@ -20,7 +18,7 @@ boolean _ready=false;
 boolean emergency_stop=true;
 unsigned long timer=0;
 
-void setup() 
+void setup()
 {
 #ifdef I2C
   Wire.begin(4);                 //join as device #4
@@ -37,27 +35,27 @@ void setup()
   }
   timer=millis();
   _ready=true;
-} 
+}
 
-void loop() 
-{ 
-#ifdef BLUETOOTH
-  if(Serial.available()>0)
+void loop()
+{
+#ifdef EMERGENCY_STOP
+  if ( Serial.available() > 0 )
   {
-    base_speed=Serial.parseInt();
-    //steering_angle=Serial.parseInt();
+    emergency_stop=( Serial.read() - 48 );    // test this is still working. might be able to use parseint and get real value rather than asci
+    timer=millis();
+  }
+  if ( ( millis() - timer ) >= 700 )
+  {
+    emergency_stop=true;
   }
 #endif
 
-#ifdef EMERGENCY_STOP
-  if (Serial.available()>0)
+#ifdef BLUETOOTH
+  if ( Serial.available() > 0 )
   {
-    emergency_stop=(Serial.read()-48);    // test this is still working. might be able to use parseint and get real value rather than asci
-    timer=millis();
-  }
-  if ((millis()-timer)>=700)
-  {
-    emergency_stop=true;
+    base_speed = 90 + 10*(Serial.parseFloat()-0.0);
+    steering_angle = 90 + 40*(Serial.parseInt()-0.5);
   }
 #endif
 
@@ -72,7 +70,7 @@ void loop()
     motor.write(90-constrain(base_speed+speed_error,-90,90));
     steer.write(90-constrain(steering_angle,-30,40));
   }
-} 
+}
 
 #ifdef I2C
 void control (int num)
@@ -93,5 +91,3 @@ void check()
   Wire.write(_ready);
 }
 #endif
-
-
