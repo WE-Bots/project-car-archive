@@ -16,10 +16,10 @@ function OnStart()
 	//Create a layout with objects vertically centered.
 	lay = app.CreateLayout( "linear", "VCenter,FillXY" );
 
-  // //Create a button 1/3 of screen width and 1/4 screen height.
-	// btn = app.CreateButton( "Connect", 0.4, 0.15 );
-	// btn.SetOnTouch( btn_OnTouch );
-	// lay.AddChild( btn );
+    //Create a button 1/3 of screen width and 1/4 screen height.
+	 btn = app.CreateButton( "Connect", 0.4, 0.15 );
+	 btn.SetOnTouch( btn_OnTouch );
+	 lay.AddChild( btn );
 
 	//Create stop button
 	tgls = app.CreateButton( "STOP!", 0.9, 0.45, "Lego");
@@ -49,11 +49,11 @@ function OnStart()
 	bt.SetSplitMode( "End", "\n" );
 }
 
-// //Called when user touches the button.
-// function btn_OnTouch()
-// {
-// 	bt.Connect( "SerialBT" );
-// }
+//Called when user touches the button.
+function btn_OnTouch()
+{
+    bt.Connect( "SerialBT" );
+}
 
 //Called when toggle button is touched
 function btn_OnTounch()
@@ -93,7 +93,7 @@ function skb_OnTouch( value )
 //timed comunication function
 function communicate()
 {
-	bt.Write( stop + "," + spd + "," + str);
-	bt.write
+	bt.Write( stop + "," + spd + "," + str + "\n");
+	//bt.write
 	setTimeout( communicate, 100 );
 }

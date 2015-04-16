@@ -5,6 +5,7 @@
 
 #include <Wire.h>
 #include <Servo.h>
+#include "communication_parser.c"
 
 Servo motor;
 Servo steer;
@@ -28,8 +29,8 @@ void setup()
 
   Serial.begin(9600);
 
-  motor.attach(9);     // range 0-180
-  steer.attach(10);    // range 50-120   below 90 turns right
+//  motor.attach(9);     // range 0-180
+//  steer.attach(10);    // range 50-120   below 90 turns right
   while(millis()<2000)
   {
   }
@@ -39,10 +40,17 @@ void setup()
 
 void loop()
 {
+#ifdef DEBUG
+  if ( Serial.available() > 0 )
+  {
+    emergency_stop=(Serial.read() - 48);
+  }
+#endif
+
 #ifdef EMERGENCY_STOP
   if ( Serial.available() > 0 )
   {
-    emergency_stop=( Serial.read() - 48 );    // test this is still working. might be able to use parseint and get real value rather than asci
+    emergency_stop=( Serial.read() - 48 );    // test this is still working. might be able to use parseint and get real value rather than ascii
     timer=millis();
   }
   if ( ( millis() - timer ) >= 700 )
