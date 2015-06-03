@@ -14,7 +14,7 @@ void loop()
     time=millis();
     if (time<7000 && time>2000)
     {
-      motor.write(80);
+      motor.write(65);
     }
     else
     {
