@@ -14,4 +14,5 @@ In the first stage, a person uses the phone to control the car and to tell the P
 
 ##Stage 2
 ![Diagram 2](http://i.imgur.com/03uP9tb.png "Vision Comms Stage 2")
+
 In the second stage, the phone is just used as a remote kill-switch for the car. The flow of data between the Pi and Arduino is reversed. The Pi will use the learned parameters to create throttle and steering commands, and send them over serial to the Arduino.
