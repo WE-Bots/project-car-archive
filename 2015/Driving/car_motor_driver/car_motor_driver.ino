@@ -23,10 +23,12 @@ Pinouts:	D9-Drive motor
 Servo motor;
 Servo steer;
 
+const int encoders [4] = { 0, 1, 2, 3 };		//encoder board addresses
+
 int steering_angle=0; 
-int base_speed=0;
+int base_speed=1500;
 int speed_error=0;
-int real_speed=0;
+int real_speed=1500;
 int accumulated_speed_error=0;
 boolean emergency_stop=true;
 unsigned long timer=0;
@@ -45,11 +47,11 @@ void setup()
   Serial1.begin(9600);			//Start bluetooth communications 
 #endif
 
-  motor.attach(9);     // range 0-180
+  motor.attach(9);     // range 1000-2000		1500=stop
   steer.attach(10);    // range 50-120   below 90 turns right
   while(millis()<2000)
   {
-	  motor.write(90);
+	  motor.writeMicroseconds(1500);
 	  steer.write(90);
   }
   timer=millis();
@@ -57,6 +59,10 @@ void setup()
 
 void loop() 
 { 
+#ifdef I2C
+	get_data();
+#endif
+
 #ifdef BLUETOOTH
   if(Serial1.available()>0)
   {
@@ -88,29 +94,35 @@ void loop()
   //emergency_stop=false;
   if (emergency_stop)
   {
-    motor.write(90);
+    motor.write(1500);
     steer.write(90);
   }
   else
   {
-    motor.write(90-constrain(base_speed+speed_error,-90,90));
+    motor.writeMicroseconds(1500-constrain(base_speed+speed_error,-500,500));
     steer.write(90-constrain(steering_angle,-30,40));
   }
 } 
 
 
-//This needs to be fixed so this board is master
+//This needs to be fixed???
 #ifdef I2C
-void control (int num)
+void get_data ()
 {
-  //read base speed, speed error and stearing angle
-  base_speed=Wire.read();
-  steering_angle=Wire.read();
-  real_speed=Wire.read();
+  //read real speed and find the speed error
+	for (int i=0,i<4,i++)
+	{
+		Wire.requestFrom(encoders[i],1);
+		if (Wire.available())
+		{
+			real_speed+=Wire.read();
+		}
+	}
+	real_speed/=4;
   if (!emergency_stop)
   {
     accumulated_speed_error+=base_speed-real_speed;
   }
-  speed_error=constrain(0.5*(base_speed-real_speed)+0.5*accumulated_speed_error,-10,10);
+  speed_error=constrain(0.5*(base_speed-real_speed)+0.5*accumulated_speed_error,-100,100);
 }
 #endif
