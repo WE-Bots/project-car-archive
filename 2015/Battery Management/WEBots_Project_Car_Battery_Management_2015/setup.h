@@ -159,6 +159,50 @@ FOSC =	Oscillator Selection bits
 #define R_LED RC1
 #define G_LED RD4
 
+/***** Variables *****/
+
+float cellVolt[6]; // array to hold the voltages of each cell
+float supVolt = 4.2; // supply voltage to be set by the sampleReference function
+
+uint16_t refValue = 0; // ADC value of the reference voltage
+
+float current = 0; // current flowing out of the battery
+float shuntRes = 0.01; // the resistance of the current shunt in ohms
+uint8_t currentGain = 200; // gain for the current sense module
+
+/***** Calibration Variables *****/
+
+const float refVolt = 1.982; // calibration value for the reference voltage
+
+const float cell1RDT = 2200; // the value of the resistor at the top of the cell 1 resistor divider (OHM)
+const float cell1RDB = 2200; // the value of the resistor at the bottom of the cell 1 resistor divider (OHM)
+
+const float cell2RDT = 4700; // the value of the resistor at the top of the cell 2 resistor divider (OHM)
+const float cell2RDB = 2200; // the value of the resistor at the bottom of the cell 2 resistor divider (OHM)
+
+const float cell3RDT = 10000; // the value of the resistor at the top of the cell 3 resistor divider (OHM)
+const float cell3RDB = 2200; // the value of the resistor at the bottom of the cell 3 resistor divider (OHM)
+
+const float cell4RDT = 14700; // the value of the resistor at the top of the cell 4 resistor divider (OHM)
+const float cell4RDB = 2200; // the value of the resistor at the bottom of the cell 4 resistor divider (OHM)
+
+const float cell5RDT = 20000; // the value of the resistor at the top of the cell 5 resistor divider (OHM)
+const float cell5RDB = 2200; // the value of the resistor at the bottom of the cell 5 resistor divider (OHM)
+
+const float cell6RDT = 24700; // the value of the resistor at the top of the cell 6 resistor divider (OHM)
+const float cell6RDB = 2200; // the value of the resistor at the bottom of the cell 6 resistor divider (OHM)
+
+
+/***** Functions *****/
+
+float sampleADC ( uint8_t );
+void sampleReference();
+void sampleBatteryCells ();
+void displayLCD ( uint8_t );
+float sampleCurrent ();
+void currentInit ( uint8_t );
+
+
+
 
 #endif	/* SETUP_H */
-
