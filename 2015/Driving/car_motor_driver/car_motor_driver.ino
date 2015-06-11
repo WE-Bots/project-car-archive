@@ -3,7 +3,7 @@
 *	Project:	Project C.A.R. Brain board
 *	Board:		MediaTek LinkIt™ ONE
 *	Pinouts:	D9-Drive motor
-*				D10-Stearing servo
+*				D3-Stearing servo
 *				Serial1(D0,D1)-Bluetooth
 *				Serial(USB)-PI
 *				D18-I2C SDA
@@ -13,8 +13,8 @@
 
 //uncomment for control communication type
 //#define I2C
-#define USB
-//#define BLUETOOTH
+//#define USB
+#define BLUETOOTH
 //#define EMERGENCY_STOP
 
 #include <Wire.h>
@@ -52,7 +52,7 @@ void setup()
 #endif
 
 	motor.attach(9);     // range 1000-2000		1500=stop
-	steer.attach(10);    // range 50-120   below 90 turns right
+	steer.attach(3);    // range 50-120   below 90 turns right
 	while (millis() < 2000)
 	{
 		motor.writeMicroseconds(1500);
@@ -68,51 +68,51 @@ void loop()
 #endif
 
 #ifdef BLUETOOTH
-	if(Serial1.available()>0)
+	if (Serial1.available() > 0)
 	{
 
-		base_speed=(Serial1.parseInt()-48);    // test this is working. might have to do some more wierd stuff to get the correct int from the string
-		steering_angle=(Serial1.parseInt()-48);
+		base_speed = (Serial1.parseInt()-500);    // test this is working. might have to do some more wierd stuff to get the correct int from the string
+		steering_angle = (Serial1.parseInt()/10-90);
+		emergency_stop = false;
 		timer = millis();
 	}
 	if ((millis() - timer) >= 700)
 	{
 		emergency_stop = true;
 	}
-}
 #endif
 
 #ifdef USB
-if (Serial.available() > 0)
-{
-	base_speed = Serial.parseInt();
-	//steering_angle=Serial.parseInt();
-}
+	if (Serial.available() > 0)
+	{
+		base_speed = Serial.parseInt();
+		//steering_angle=Serial.parseInt();
+	}
 #endif
 
 #ifdef EMERGENCY_STOP
-if (Serial1.available()>0)
-{
-	emergency_stop=(Serial1.read()-48);    // test this is still working. might be able to use parseint and get real value rather than asci
-	timer=millis();
-}
-if ((millis()-timer)>=700)
-{
-	emergency_stop=true;
-}
+	if (Serial1.available()>0)
+	{
+		emergency_stop=(Serial1.parseInt());    // test this is still working. might be able to use parseint and get real value rather than asci
+		timer=millis();
+	}
+	if ((millis()-timer)>=700)
+	{
+		emergency_stop=true;
+	}
 #endif
 
-//emergency_stop=false;
-if (emergency_stop)
-{
-	motor.write(1500);
-	steer.write(90);
-}
-else
-{
-	motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500));
-	steer.write(90 - constrain(steering_angle, -30, 40));
-}
+	//emergency_stop=false;
+	if (emergency_stop)
+	{
+		motor.writeMicroseconds(1500);
+		steer.write(90);
+	}
+	else
+	{
+		motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500));
+		steer.write(90 - constrain(steering_angle, -30, 40));
+	}
 }
 
 
