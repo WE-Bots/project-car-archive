@@ -16,6 +16,7 @@
 //#define USB
 #define BLUETOOTH
 //#define EMERGENCY_STOP
+//#define VISION
 
 #include <Wire.h>
 #include <Servo.h> 
@@ -26,12 +27,14 @@ Servo steer;
 const int encoders[4] = { 0, 1, 2, 3 };		//encoder board addresses
 
 int steering_angle = 0;
-int base_speed = 1500;
+int base_speed = 0;
 int speed_error = 0;
-int real_speed = 1500;
+int real_speed = 0;
 int accumulated_speed_error = 0;
 boolean emergency_stop = true;
 unsigned long timer = 0;
+int battery_voltage = 10;
+int battery_current = 4;
 
 void setup()
 {
@@ -70,9 +73,9 @@ void loop()
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
 	{
-
-		base_speed = (Serial1.parseInt()-500);    // test this is working. might have to do some more wierd stuff to get the correct int from the string
-		steering_angle = (Serial1.parseInt()/10-90);
+		base_speed = (Serial1.parseInt() - 500);
+		steering_angle = (Serial1.parseInt() / 10 - 90);
+		Serial1.println(battery_voltage + " " + battery_current);
 		emergency_stop = false;
 		timer = millis();
 	}
@@ -93,7 +96,7 @@ void loop()
 #ifdef EMERGENCY_STOP
 	if (Serial1.available()>0)
 	{
-		emergency_stop=(Serial1.parseInt());    // test this is still working. might be able to use parseint and get real value rather than asci
+		emergency_stop=Serial1.parseInt();    // test this is still working.
 		timer=millis();
 	}
 	if ((millis()-timer)>=700)
@@ -110,7 +113,7 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500));
+		motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
 		steer.write(90 - constrain(steering_angle, -30, 40));
 	}
 }
@@ -135,5 +138,14 @@ void get_data ()
 		accumulated_speed_error+=base_speed-real_speed;
 	}
 	speed_error=constrain(0.5*(base_speed-real_speed)+0.5*accumulated_speed_error,-100,100);
+
+	//get data from power board
+	Wire.requestFrom(encoders[i],1);
+	if (Wire.available())
+	{
+		battery_voltage = Wire.parseInt();
+		battery_current=Wire.parseInt();
+	}
+	Serial1.write(battery_voltage+" "+battery_current);
 }
 #endif
