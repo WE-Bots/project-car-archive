@@ -23,9 +23,9 @@ function OnStart()
 	lay.AddChild( btn );
 
 	//Create stop button
-	tgls = app.CreateButton( "STOP!", 0.9, 0.45, "Lego");
-	tgls.SetOnTouch( tgl_OnTouch );
-	lay.AddChild( tgls );
+	btnGoStop = app.CreateButton( "STOP!", 0.7, 0.35, "Lego");
+	btnGoStop.SetOnTouch( tgl_OnTouch );
+	lay.AddChild( btnGoStop );
 
 	//Create recording toggle button
 	tglRec = app.CreateToggle( "Record", 0.4, 0.15);
@@ -33,16 +33,16 @@ function OnStart()
 	lay.AddChild( tglRec );
 
 	//Create speed toggle button
-	tglSpd = app.CreateToggle( "Toggle Speed" );
+	tglSpd = app.CreateToggle( "Toggle Speed", 0.4, 0.15 );
 	tglSpd.SetOnTouch( spdOnTouch );
 	lay.AddChild( tglSpd );
 
 	//Steering slider
-	skb = app.CreateSeekBar( 0.8 );
+	skb = app.CreateSeekBar( 0.9 );
 	skb.SetRange( 1.0 );
 	skb.SetValue( 0.5 );
 	skb.SetOnTouch( skb_OnTouch );
-	lay.addAddChild( skb );
+	lay.AddChild( skb );
 
 	//Create layout
 	app.AddLayout( lay );
@@ -50,7 +50,7 @@ function OnStart()
 	//Create Bluetooth serial object.
 	bt = app.CreateBluetoothSerial();
 	bt.SetOnConnect( bt_OnConnect );
-	bt.SetOnReceive( bt_OnReceive );
+	//bt.SetOnReceive( bt_OnReceive );
 	// bt.Connect( "SerialBT" );
 	bt.SetSplitMode( "End", "\n" );
 
@@ -65,8 +65,14 @@ function btn_Connect_OnTouch()
 //Called when toggle button is touched
 function spdOnTouch( isChecked )
 {
-	if (isChecked) speed = fast;
-	else spd = slow;
+	if (isChecked) {
+	    speed = fast;
+	    app.ShowPopup("Gotta go fast!");
+	}
+	else {
+	    spd = slow;
+	    app.ShowPopup("Woah boy!");
+	}
 }
 
 //Called when we are connected.
@@ -82,28 +88,34 @@ function tgl_OnTouch()
 	if(stop)
 	{
 		stop = 0;
-		tgls.SetText( "STOP!" );
+		btnGoStop.SetText( "STOP!" );
 	}
 	else
 	{
 		stop = 1;
-		tgls.SetText( "GO!" );
+		btnGoStop.SetText( "GO!" );
 	}
 }
 
 //Called when the user touches the toggle recoring button
-function rec_OnTouch( isChecked )
+function recOnTouch( isChecked )
 {
 	record = isChecked;
+	if (isChecked)
+	    app.ShowPopup("Starting recording...");
+	else
+	    app.ShowPopup("Terminating recording...");
 }
 
-//slider touch function
+//Slider touch function
 function skb_OnTouch( value )
 {
 	str = value;
+	// Map to something other than 0 - 1?
+	app.ShowPopup("Steering angle: " + str);
 }
 
-//timed comunication function
+//Timed comunication function
 function communicate()
 {
 	bt.Write( stop + "," + spd + "," + str + "," + record + "\n");
