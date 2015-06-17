@@ -28,14 +28,14 @@ function OnStart()
 	lay.AddChild( tgls );
 
 	//Create recording toggle button
-	tglRec = app.CreateButton( "Record", 0.4, 0.15, "Lego");
-	tglRec.SetOnTouch( tgl_Rec_OnTouch );
+	tglRec = app.CreateToggle( "Record", 0.4, 0.15);
+	tglRec.SetOnTouch( recOnTouch );
 	lay.AddChild( tglRec );
 
 	//Create speed toggle button
-	btnSpeed = app.CreateButton( "Toggle Speed" );
-	btnSpeed.SetOnTouch( btn_Speed_OnTouch );
-	lay.AddChild( btnSpeed );
+	tglSpd = app.CreateToggle( "Toggle Speed" );
+	tglSpd.SetOnTouch( spdOnTouch );
+	lay.AddChild( tglSpd );
 
 	//Steering slider
 	skb = app.CreateSeekBar( 0.8 );
@@ -54,7 +54,6 @@ function OnStart()
 	// bt.Connect( "SerialBT" );
 	bt.SetSplitMode( "End", "\n" );
 
-
 }
 
 //Called when user touches the button.
@@ -64,9 +63,9 @@ function btn_Connect_OnTouch()
 }
 
 //Called when toggle button is touched
-function btn_Speed_OnTouch()
+function spdOnTouch( isChecked )
 {
-	if (spd == slow) speed = fast;
+	if (isChecked) speed = fast;
 	else spd = slow;
 }
 
@@ -93,12 +92,9 @@ function tgl_OnTouch()
 }
 
 //Called when the user touches the toggle recoring button
-function tgl_Rec_OnTouch()
+function rec_OnTouch( isChecked )
 {
-	if (record)
-		record = false;
-	else
-		record = true;
+	record = isChecked;
 }
 
 //slider touch function
@@ -111,6 +107,5 @@ function skb_OnTouch( value )
 function communicate()
 {
 	bt.Write( stop + "," + spd + "," + str + "," + record + "\n");
-	//bt.write
-	setTimeout( communicate, 100 );
+	setTimeout( communicate, 100 ); // Call self again in 100 ms
 }
