@@ -1,12 +1,14 @@
 //written with androidscript
 
+//Consts
+const slow = 2;
+const fast = 10;
+
 //Vars
 var stop = 0;
 var str  = 0.5;
-var spd  = 0.5;
-var record = false;
-const slow = 0.5;
-const fast = 2.0;
+var spd  = slow;
+var record = 0;
 
 //Called when application is started.
 function OnStart()
@@ -66,12 +68,12 @@ function btn_Connect_OnTouch()
 function spdOnTouch( isChecked )
 {
 	if (isChecked) {
-	    speed = fast;
-	    app.ShowPopup("Gotta go fast!");
+	    spd = fast;
+	    app.ShowPopup("Gotta go fast! Speed is: " + spd);
 	}
 	else {
 	    spd = slow;
-	    app.ShowPopup("Woah boy!");
+	    app.ShowPopup("Woah boy! Speed is: " + spd);
 	}
 }
 
@@ -85,6 +87,7 @@ function bt_OnConnect( ok )
 //Called when user touches our toggle button.
 function tgl_OnTouch()
 {
+    app.ShowPopup("<" + "3," + (0+record)+ "," +(3+record)+ ">");
 	if(stop)
 	{
 		stop = 0;
@@ -111,13 +114,21 @@ function recOnTouch( isChecked )
 function skb_OnTouch( value )
 {
 	str = value;
-	// Map to something other than 0 - 1?
+	// Map to 0 - 180
+	str = Math.floor(str * 180);
 	app.ShowPopup("Steering angle: " + str);
 }
 
 //Timed comunication function
 function communicate()
 {
-	bt.Write( stop + "," + spd + "," + str + "," + record + "\n");
+	//              adr    val           checksum
+	bt.Write( "<" + "0," + stop   + ","+ (0+stop) + ">");
+	bt.Write( "<" + "1," + spd    + ","+ (1+spd)  + ">");
+	bt.Write( "<" + "2," + stop   + ","+ (2+stop) + ">");
+	bt.Write( "<" + "3,"+(0+record)+","+(3+record)+ ">");
+	//0+record is a hack to force the bool to get sent as 0 or 1
+
 	setTimeout( communicate, 100 ); // Call self again in 100 ms
+																	// Faster?
 }
