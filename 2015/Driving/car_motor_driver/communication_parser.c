@@ -28,29 +28,53 @@ public:
     // Static variables remain between calls
     static char buffer[3][7]; // Three parameters, length 6 + '\0' each
     static uint charIdx[3] = {0,0,0}; // Index for each char container
-    static bool buffIdx = 0; // Current container receiving data
-
+    static uint buffIdx = 0; // Current container receiving data
+    static bool stated = false;
     // Read chars until there is no data in the buffer or we find a terminator
     while (Serial.available() > 0) {
       // Check for start of package
       if (Serial.peek() == '<') {
         Serial.read(); // Eat the byte
+        started = true;
         buffIdx = 0;
         for (int i = 0; i < 3; ++i)
           charIdx[i] = 0;
       }
+      else if (!started) {
+        // Skip this char, go to next until a packet opener is found.
+        Serial.read(); // Eat byte.
+        continue;
+      }
       else if (Serial.peek() == ',') {
         Serial.read(); // Eat the byte
+        if ((charIdx[buffIdx]==0)||(buffIdx >= 2)) {
+          // Current is still empty or encountered a seventh char - bad.
+          started = false; // Throw away this packet
+          continue;
+        }
         buffer[buffIdx][charIdx[buffIdx]++] = '\0'; // Add null terminator
         buffIdx++;
       }
       else if (Serial.peek() == '>') {
+        if (!started||charIdx[0]==0||charIdx[1]==0||charIdx[2]==0) {
+          // No valid beginning of package was found, or a buffer
+          // is still empty.
+          // Buffers likely contain garbage. Toss the packet.
+          Serial.read(); // Eat char
+          started = false;
+          continue;
+        }
         // Don't eat the byte - leave it for a check outside of the loop
         buffer[buffIdx][charIdx[buffIdx]++] = '\0'; // Add null terminator
-        buffIdx++;
         break;
       }
       else // Must be a digit. Maybe check just in case?
+        if (charIdx[buffIdx] == 5) {
+          // Too long to be an int16_t integer.
+          Serial.read(); // Eat char
+          started = false; // Packet is invalid
+          continue;
+        }
         buffer[buffIdx][charIdx[buffIdx]++] = Serial.read();
     }
 
@@ -67,7 +91,8 @@ public:
     uint8_t retid;
     int16_t retval;
     int16_t chksum;
-    // Get id
+
+    // Get id TODO: verify that they're all valid integers (atoi does not)
     retid = atoi(buffer[0]);
     // Get value
     retval = atoi(buffer[1]);
