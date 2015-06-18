@@ -4,6 +4,11 @@ This is the development code for the new vision system for the 2015 car. This ye
 
 There are two planned stages to development. The first is remote controlling the car, while capturing steering and throttle readings in addition to the video feed. The second stage is to apply machine learning to the readings to retune our system from last year to re-create the recorded steering and throttle as closely as possible when running against the recorded video.
 
+##Note
+The ROS implementation discussed in this section is replacing the C++ Raspberry Pi Camera libraries that have been left in this directory.
+
+Look at the code in the "ROS Source Code" directory instead. That directory consists of the packages that we are making. There is no markdown in the directory to prevent making a mess of the ROS workspace on the Pi.
+
 ##Hardware
 There are three hardware systems that concern this sub-team: an Android phone, an Arduino microcontroller with Bluetooth, and a Raspberry Pi with a camera module running ROS. The phone connects to the Arduino over Bluetooth, and the Arduino and Raspberry Pi communicate via serial comms over a short USB cable.
 
