@@ -15,7 +15,21 @@ There are three hardware systems that concern this sub-team: an Android phone, a
 ##Stage 1
 ![Diagram 1](http://i.imgur.com/xt48jcH.png "Vision Comms Stage 1")
 
-In the first stage, a person uses the phone to control the car and to tell the Pi when to record. The phone connects to the Arduino using Bluetooth. The Arduino controls the steering and throttle, and passes those values onto the Pi so that they can be recorded in time with the video. The Arduino also passes along the recording command to the Pi so that it knows when to record. The Arduino and Pi will communicate via serial over a short USB cable. The Pi records video, steering angle, and throttle using ROS's 'rosbag' functionality. This allows the data to be played back on another computer as if it were happening in real time. This should help with development because anyone on the team will be able to work on it whenever, and without the actual car. I'm also looking into getting the ROS bag into MATLAB because it has some nice stuff for doing machine learning.
+In the first stage, a person uses the phone to control the car and to tell the Pi when to record. The phone connects to the Arduino using Bluetooth. The Arduino controls the steering and throttle, and passes those values onto the Pi so that they can be recorded in time with the video. The Arduino also passes along the recording command to the Pi so that it knows when to record.
+
+The Arduino and Pi will communicate via serial over a short USB cable. The Pi records video, steering angle, and throttle using ROS's 'rosbag' functionality. This allows the data to be played back on another computer as if it were happening in real time.
+
+This should help with development because anyone on the team will be able to work on it whenever, and without the actual car. Also looking into getting the ROS bag into MATLAB because it has some nice stuff for doing machine learning.
+
+### To Do List
+- Create ROS Launch script to get roscore, raspicam, and carcomms nodes running
+  - Should be configured to run in background at startup
+- Create carcomms node
+  - Just needs to receive from the Arduino and broadcast into a ROS topic
+  - Broadcasts steering, throttle, and recording flag
+- Setup test track
+- Setup hardware
+
 
 ##Stage 2
 ![Diagram 2](http://i.imgur.com/03uP9tb.png "Vision Comms Stage 2")
