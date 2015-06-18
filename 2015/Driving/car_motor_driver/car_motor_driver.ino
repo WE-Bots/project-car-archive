@@ -12,7 +12,7 @@
 */
 
 //uncomment for control communication type
-//#define I2C
+//#define I2C			//Runs CAR as per final design (excluding the emergency stop)
 //#define USB
 #define BLUETOOTH
 //#define EMERGENCY_STOP
@@ -25,6 +25,7 @@ Servo motor;
 Servo steer;
 
 const int encoders[4] = { 0, 1, 2, 3 };		//encoder board addresses
+const int power_board = 4;
 
 int steering_angle = 0;
 int base_speed = 0;
@@ -94,14 +95,14 @@ void loop()
 #endif
 
 #ifdef EMERGENCY_STOP
-	if (Serial1.available()>0)
+	if (Serial1.available() > 0)
 	{
-		emergency_stop=Serial1.parseInt();    // test this is still working.
-		timer=millis();
+		emergency_stop = Serial1.parseInt();    // test this is still working.
+		timer = millis();
 	}
-	if ((millis()-timer)>=700)
+	if ((millis() - timer) >= 700)
 	{
-		emergency_stop=true;
+		emergency_stop = true;
 	}
 #endif
 
@@ -121,31 +122,31 @@ void loop()
 
 //This needs to be fixed???
 #ifdef I2C
-void get_data ()
+void get_data()
 {
 	//read real speed and find the speed error
-	for (int i=0,i<4,i++)
+	for (int i = 0, i < 4, i++)
 	{
-		Wire.requestFrom(encoders[i],1);
+		Wire.requestFrom(encoders[i], 1);
 		if (Wire.available())
 		{
-			real_speed+=Wire.parseInt();
+			real_speed += Wire.parseInt();
 		}
 	}
-	real_speed/=4;
+	real_speed /= 4;
 	if (!emergency_stop)
 	{
-		accumulated_speed_error+=base_speed-real_speed;
+		accumulated_speed_error += base_speed - real_speed;
 	}
-	speed_error=constrain(0.5*(base_speed-real_speed)+0.5*accumulated_speed_error,-100,100);
+	speed_error = constrain(0.5*(base_speed - real_speed) + 0.5*accumulated_speed_error, -100, 100);
 
 	//get data from power board
-	Wire.requestFrom(encoders[i],1);
+	Wire.requestFrom(power_board, 4);
 	if (Wire.available())
 	{
 		battery_voltage = Wire.parseInt();
-		battery_current=Wire.parseInt();
+		battery_current = Wire.parseInt();
 	}
-	Serial1.write(battery_voltage+" "+battery_current);
+	Serial1.write(battery_voltage + " " + battery_current);
 }
 #endif
