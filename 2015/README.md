@@ -2,6 +2,12 @@
 
 This is the current development code for Project CAR.
 
+##Battery Management
+Code for the battery management system.
+
+##Driving
+Code for the car's main controller. Also includes R/C code.
+
 ##Vision
 Code for the vision system.
 
