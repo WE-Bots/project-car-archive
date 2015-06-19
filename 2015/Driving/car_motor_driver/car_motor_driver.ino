@@ -11,12 +11,21 @@
 *
 */
 
-//uncomment for control communication type
-//#define I2C			//Runs CAR as per final design (excluding the emergency stop)
+//uncomment for control type
+//#define AUTONOMOUS
+#define REMOTE_CONTROL
+#define DEBUG
+
+//uncomment for debugging communications active
+//#define I2C
 //#define USB
 #define BLUETOOTH
-//#define EMERGENCY_STOP
-//#define VISION
+
+#ifndef DEBUG
+#define I2C
+#define USB
+#define BLUETOOTH
+#endif
 
 #include <Wire.h>
 #include <Servo.h> 
@@ -39,6 +48,11 @@ int battery_current = 4;
 
 void setup()
 {
+#ifdef DEBUG
+	Serial.begin(9600);
+	Serial.println("Debugging started.");
+#endif
+
 #ifdef I2C
 	Wire.begin();                 //start I2C
 #endif
@@ -48,10 +62,6 @@ void setup()
 #endif
 
 #ifdef BLUETOOTH
-	Serial1.begin(9600);			//Start bluetooth communications 
-#endif
-
-#ifdef EMERGENCY_STOP
 	Serial1.begin(9600);			//Start bluetooth communications 
 #endif
 
@@ -71,6 +81,7 @@ void loop()
 	get_data();
 #endif
 
+#ifndef AUTONOMOUS
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
 	{
@@ -85,16 +96,14 @@ void loop()
 		emergency_stop = true;
 	}
 #endif
-
-#ifdef USB
-	if (Serial.available() > 0)
-	{
-		base_speed = Serial.parseInt();
-		//steering_angle=Serial.parseInt();
-	}
 #endif
 
-#ifdef EMERGENCY_STOP
+#ifdef USB
+	//put pi communication stuff here
+#endif
+
+#ifndef REMOTE_CONTROL
+#ifdef BLUETOOTH
 	if (Serial1.available() > 0)
 	{
 		emergency_stop = Serial1.parseInt();    // test this is still working.
@@ -104,6 +113,7 @@ void loop()
 	{
 		emergency_stop = true;
 	}
+#endif
 #endif
 
 	//emergency_stop=false;
@@ -125,7 +135,7 @@ void loop()
 void get_data()
 {
 	//read real speed and find the speed error
-	for (int i = 0, i < 4, i++)
+	for (int i = 0; i < 4; i++)
 	{
 		Wire.requestFrom(encoders[i], 1);
 		if (Wire.available())
