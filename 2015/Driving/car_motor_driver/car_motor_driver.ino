@@ -8,7 +8,7 @@
 *				Serial(USB)-PI
 *				D18-I2C SDA
 *				D19-I2C SCL
-*
+*	Discription:Handles decision making and communication between components of the car. Programed in Arduino.
 */
 
 //uncomment for control type
@@ -44,8 +44,10 @@ int real_speed = 0;
 int accumulated_speed_error = 0;
 boolean emergency_stop = true;
 unsigned long timer = 0;
-int battery_voltage = 10;
-int battery_current = 4;
+int battery_voltage = 0;
+int battery_current = 0;
+
+Car_Comms pi;
 
 void setup()
 {
@@ -67,7 +69,7 @@ void setup()
 #endif
 
 	motor.attach(9);     // range 1000-2000		1500=stop
-	steer.attach(3);    // range 50-120   below 90 turns right
+	steer.attach(3);    // range 50-120   below 90 turns right		(this will need to be recalibrated when the car chassis is rebuilt)
 	while (millis() < 2000)
 	{
 		motor.writeMicroseconds(1500);
@@ -82,6 +84,7 @@ void loop()
 	get_data();
 #endif
 
+	//Remote control code
 #ifndef AUTONOMOUS
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
@@ -97,12 +100,16 @@ void loop()
 		emergency_stop = true;
 	}
 #endif
-#endif
 
 #ifdef USB
 	//put pi communication stuff here
+	while (!pi.send_value(0, steering_angle)){}
+	while (!pi.send_value(1, base_speed)){}
+	while (!pi.send_value(2, 1)){}
+#endif
 #endif
 
+	//Autonomous code
 #ifndef REMOTE_CONTROL
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
@@ -114,6 +121,10 @@ void loop()
 	{
 		emergency_stop = true;
 	}
+#endif
+
+#ifdef USB
+	//put pi communication stuff here
 #endif
 #endif
 
