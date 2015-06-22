@@ -4,12 +4,17 @@ project(car_serial_comms)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  message_generation
+  genmsg
+)
 
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(serial REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -41,11 +46,12 @@ find_package(Boost REQUIRED COMPONENTS system)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  DIRECTORY
+  msg
+  FILES
+  ThrottleAndSteering.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -62,10 +68,10 @@ find_package(Boost REQUIRED COMPONENTS system)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -79,7 +85,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES car_serial_comms
-#  CATKIN_DEPENDS roscpp std_msgs
+  CATKIN_DEPENDS roscpp std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -92,6 +98,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${serial_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -100,16 +107,17 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(car_serial_comms_node src/car_serial_comms_node.cpp)
+add_executable(car_serial_comms_node src/car_serial_comms_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(car_serial_comms_node car_serial_comms_generate_messages_cpp)
+add_dependencies(car_serial_comms_node car_serial_comms_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(car_serial_comms_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(car_serial_comms_node
+  ${catkin_LIBRARIES}
+  ${serial_LIBRARIES}
+)
 
 #############
 ## Install ##
