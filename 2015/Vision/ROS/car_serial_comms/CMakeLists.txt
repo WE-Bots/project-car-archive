@@ -99,6 +99,7 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${serial_INCLUDE_DIRS}
+  ${roscpp_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -117,6 +118,7 @@ add_dependencies(car_serial_comms_node car_serial_comms_generate_messages_cpp)
 target_link_libraries(car_serial_comms_node
   ${catkin_LIBRARIES}
   ${serial_LIBRARIES}
+  ${roscpp_LIBRARIES}
 )
 
 #############

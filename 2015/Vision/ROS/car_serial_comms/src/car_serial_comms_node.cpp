@@ -7,9 +7,17 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-#include <serial.h>
+#include <serial/serial.h>
 
 #include <sstream>
+
+#include <string>
+#include <iostream>
+#include <cstdio>
+#include <unistd.h>
+
+//HAX
+#include "../include/MessageParser.h"
 
 /*
  * Main - connect to Arduino on specified comm port.
@@ -37,11 +45,11 @@ int main(int argc, char **argv)
   // Initialize serial
   //
   // Open serial port
-  String port="???";
+  std::string port = "???";
   unsigned long baud = 115200;
   serial::Serial serial_port(port, baud,serial::Timeout::simpleTimeout(1000));
   if (!serial_port.isOpen())
-    exit EXIT_ERROR;
+    return 1;
   //****************************************************************************
 
   // For now, we only recieve, and never send.
