@@ -29,7 +29,6 @@
 
 #include <Wire.h>
 #include <Servo.h> 
-#include <communication_parser.c>
 
 Servo motor;
 Servo steer;
@@ -47,7 +46,6 @@ unsigned long timer = 0;
 int battery_voltage = 0;
 int battery_current = 0;
 
-Car_Comms pi;
 
 void setup()
 {
@@ -103,9 +101,6 @@ void loop()
 
 #ifdef USB
 	//put pi communication stuff here
-	while (!pi.send_value(0, steering_angle)){}
-	while (!pi.send_value(1, base_speed)){}
-	while (!pi.send_value(2, 1)){}
 #endif
 #endif
 
