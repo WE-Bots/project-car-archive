@@ -68,36 +68,52 @@ void main()
     /***** INITIALIZATION *****/
 
     // set to 1 for input, 0 for output
-    // set input for the cell measurement, current measurment
-    TRISA = 0b11110100;
+    TRISA = 0b00111111;
     TRISB = 0b00000000;
     TRISC = 0b00000000;
-    TRISD = 0b00000000;
-    TRISE = 0b11100000;
+    TRISD = 0b00100000;
+    TRISE = 0b00000111;
+
+    UC_CGND = 1; // connect the ground for the microcontroller
 
     CMCON0bits.CM = 7; // disable comparitors
-    LCDCONbits.LCDEN = 0; // disable LCD Driver
+    LCDCON = 0; // disable LCD Driver
 
     // ADC Configuration
     ANSEL = 0xFF; // set all of the analog channels as analog inputs
 
-    // Current
-    CG_SEL0 = 1; // Set the current sense module to have a gain of 200
-    CG_SEL1 = 1;
-
-
-    // change if using interrupts
-    ADCON1bits.ADCS = 0b101; // ADC time of 4us, see table 12-1
+    ADCON1bits.ADCS = 0b111; // use internal oscillator, Frc
     ADCON0bits.ADFM = 1; // right justified, LSB in ADRESL.0
-    ADCON0bits.VCFG = 0b00; // use VSS as voltage reference
+    ADCON0bits.VCFG = 0b00; // use VDD as voltage reference
     ADCON0bits.ADON = 1; // turn on ADC
 
-    LCD_Init();
+    // Current Setup
+    currentGainInit( 200 );
 
-    //*** Main loop
+    // Interrupt Setup
+    //INTCONbits.PEIE = 1; // enable enabled peripherial interrupts
+    //PIE1bits.ADIE = 1; // enable ADC interrupts
+
+    //LCD_Init();
+
+    /***** Initial Check *****/
+
+    G_LED = 0;
+
+    /***** MAIN LOOP *****/
     while(1)
     {
+        R_LED = 1;
 
+        __delay_ms(100);
+
+        R_LED = 0;
+        
+        __delay_ms(100);
+
+        //sampleBatteryCells();
+
+        //displayLCD(1);
     }
 }
 
@@ -114,7 +130,7 @@ void sampleBatteryCells ()
     BT_CLS_EN = 1; // turn on the first three voltage dividers
 
     // sample the bottom cells
-    cellVolt[0] = ( ( cell1RDT + cell1RDB ) / cell1RDB ) * sampleADC( 0 ); // cell 1
+    cellVolt[0] = ( ( cell1RDT + cell1RDB ) / cell1RDB ) * ( float )sampleADC( 0 ); // cell 1
     cellVolt[1] = ( ( cell2RDT + cell2RDB ) / cell2RDB ) * sampleADC( 1 ); // cell 2
     cellVolt[2] = ( ( cell3RDT + cell3RDB ) / cell3RDB ) * sampleADC( 5 ); // cell 3
 
@@ -140,10 +156,10 @@ void sampleReference()
 
     ADCON0bits.CHS = 0b010; // configure module to read AN0
     __delay_us(10); // wait for the ADC to get ready
+    PIR1bits.ADIF = 0; // clear the interrup flag
     ADCON0bits.GO = 1; // start a conversion
 
-    while(ADCON0bits.GO) // bit is cleared when the conversion is complete
-    {}
+    SLEEP(); // sleep until the ADC is done
 
     // turn off the reference voltage divider
     REF_EN = 0;
@@ -164,12 +180,12 @@ uint16_t sampleADC ( uint8_t cell)
 {
     uint16_t temp = 0; // temporary variable to hold the read data
 
-    ADCON0bits.CHS = cell; // configure module to read the specific ADC channel
+    ADCON0bits.CHS = 0b000; // configure module to read the specific ADC channel
     __delay_us(10); // wait for the ADC to get ready
+    PIR1bits.ADIF = 0; // clear the interrup flag
     ADCON0bits.GO = 1; // start a conversion
 
-    while(ADCON0bits.GO) // bit is cleared when the conversion is complete
-    {}
+    SLEEP(); // sleep until the ADC is done
 
     temp = ADRESH; // put the high order acd data in the low order bits of temp
     temp = temp << 8; // shift the data into the high order bits of temp
@@ -184,10 +200,10 @@ void sampleCurrent ()
 
     ADCON0bits.CHS = 0b111; // configure module to read AN7
     __delay_us(10); // wait for the ADC to get ready
+    PIR1bits.ADIF = 0; // clear the interrup flag
     ADCON0bits.GO = 1; // start a conversion
 
-    while(ADCON0bits.GO) // bit is cleared when the conversion is complete
-    {}
+    SLEEP(); // sleep until the ADC is done
 
     temp = ADRESH; // put the high order acd data in the low order bits of temp
     temp = temp << 8; // shift the data into the high order bits of temp
@@ -205,16 +221,29 @@ void sampleCurrent ()
 }
 
 // display data to the LCD screen, input interger 0...3 depending on the data desired to be displayed
-void displayLCD ( uint8_t disp )
+void displayLCD ( int disp )
 {
     char s0[16]; // String for the top line
+
+    // initialize as all nothing
+    for ( uint8_t i = 0; i <= 16; i++ )
+    {
+        s0[i] = ' ';
+    }
+
     char s1[16]; // String for the bottom line
+
+    // initialize as all nothing
+    for ( uint8_t i = 0; i <= 16; i++ )
+    {
+        s1[i] = ' ';
+    }
 
     switch( disp )
     {
         // display the total voltage of the battery and the estimated percentage left
         // along with the current
-        case (0):
+        case 0:
         {
             uint8_t sum = 0;
 
@@ -223,64 +252,105 @@ void displayLCD ( uint8_t disp )
                 sum += cellVolt[i];
             }
 
-            sprintf( s0, 'Voltage:%.3fV', sum )
+            sprintf( s0, "Voltage:%i V", sum );
 
             LCD_Set_Cursor(0x00);
             LCD_Write_String(&s0);
 
-            sprintf( s1, 'Current:%.3fA', current)
+            sprintf( s1, "Current:%.3fA", current);
 
             LCD_Set_Cursor(0x10);
             LCD_Write_String(&s1);
+
+            break;
         }
 
         // display the cell voltages of cells 1 and 2
-        case (1):
+        case 1:
         {
-            sprintf( s0, 'Cell 1:%.2f', cellVolt[0] )
+            sprintf( s0, "Cell 1:%.2f", cellVolt[0] );
 
             LCD_Set_Cursor(0x00);
             LCD_Write_String(&s0);
 
-            sprintf( s1, 'Cell 2:%.2f', cellVolt[1] )
+            sprintf( s1, "Cell 2:%.2f", cellVolt[1] );
 
             LCD_Set_Cursor(0x10);
             LCD_Write_String(&s1);
+
+            break;
         }
 
         // display the cell voltages of cells 3 and 4
-        case (2):
+        case 2:
         {
-            sprintf( s0, 'Cell 3:%.2f', cellVolt[2] )
+            sprintf( s0, "Cell 3:%.2f", cellVolt[2] );
 
             LCD_Set_Cursor(0x00);
             LCD_Write_String(&s0);
 
-            sprintf( s1, 'Cell 4:%.2f', cellVolt[3] )
+            sprintf( s1, "Cell 4:%.2f", cellVolt[3] );
 
             LCD_Set_Cursor(0x10);
             LCD_Write_String(&s1);
+
+            break;
         }
 
         // display the cell voltages of cells 5 and 6
-        case (3):
+        case 3:
         {
-            sprintf( s0, 'Cell 5:%.2f', cellVolt[4] )
+            sprintf( s0, "Cell 5:%.2f", cellVolt[4] );
 
             LCD_Set_Cursor(0x00);
             LCD_Write_String(&s0);
             
-            sprintf( s1, 'Cell 6:%.2f', cellVolt[5] )
+            sprintf( s1, "Cell 6:%.2f", cellVolt[5] );
 
             LCD_Set_Cursor(0x10);
             LCD_Write_String(&s1);
+
+            break;
         }
     }
 }
 
 // sets the gain for the current sense module
 // input a gain of 25, 50, 100 or 200
-void currentInit ( uint8_t gain )
+void currentGainInit ( uint8_t gain )
 {
+    if ( gain >= 100 )
+    {
+        CG_SEL0 = 1;
+
+        if ( gain == 100 )
+        {
+            CG_SEL1 = 0; // sets gain as 100
+            return;
+        }
+        else
+        {
+            CG_SEL1 = 1; // sets gain as 200
+            return;
+        }
+
+    }
+
+    else
+    {
+        CG_SEL0 = 0;
+
+        if ( gain == 25 )
+        {
+            CG_SEL1 = 0; // sets gain as 25
+            return;
+        }
+        else
+        {
+            CG_SEL1 = 1; // sets gain as 50
+            return;
+        }
+
+    }
 
 }

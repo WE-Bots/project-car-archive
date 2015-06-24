@@ -38,7 +38,7 @@ void LCD_Cmd(char a)
 {
 	LCD_Port(a);        // put the data on the output port
         RS = 0;             // RS = 0, send instruction
-        //RW = 0;             // RW = 0, write
+        RW = 0;             // RW = 0, write
         pulse();            // send the lower 4 bits
         a = a<<4;           // shift to access the higher order bytes
 	LCD_Port(a);        // put the data on the output port
@@ -50,7 +50,7 @@ void LCD_Cmd_4bit(char a)
 {
 	LCD_Port(a);        // put the data on the output port
         RS = 0;             // RS = 0, send instruction
-        //RW = 0;             // RW = 0, write
+        RW = 0;             // RW = 0, write
         pulse();            // send the lower 4 bits
 }
 
@@ -76,7 +76,7 @@ void LCD_Write_Char(char a)
 {
     LCD_Port(a);        // put the data on the output port
     RS = 1;             // RS = 0, send data
-    //RW = 0;             // RW = 0, write
+    RW = 0;             // RW = 0, write
     pulse();            // send the lower 4 bits
     a = a<<4;           // shift to access the higher order bytes
     LCD_Port(a);        // put the data on the output port

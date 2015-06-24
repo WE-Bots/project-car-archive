@@ -161,7 +161,7 @@ FOSC =	Oscillator Selection bits
 
 /***** Variables *****/
 
-float cellVolt[6]; // array to hold the voltages of each cell
+float cellVolt[6] = {0, 0, 0, 0, 0, 0}; // array to hold the voltages of each cell
 float supVolt = 4.2; // supply voltage to be set by the sampleReference function
 
 uint16_t refValue = 0; // ADC value of the reference voltage
@@ -195,14 +195,11 @@ const float cell6RDB = 2200; // the value of the resistor at the bottom of the c
 
 /***** Functions *****/
 
-float sampleADC ( uint8_t );
+uint16_t sampleADC ( uint8_t );
 void sampleReference();
 void sampleBatteryCells ();
-void displayLCD ( uint8_t );
-float sampleCurrent ();
-void currentInit ( uint8_t );
-
-
-
+void displayLCD ( int );
+void sampleCurrent ();
+void currentGainInit ( uint8_t );
 
 #endif	/* SETUP_H */
