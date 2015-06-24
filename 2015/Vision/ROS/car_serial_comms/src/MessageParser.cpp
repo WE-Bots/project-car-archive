@@ -2,12 +2,14 @@
  * Insert documentation
  */
 
+#include "car_serial_comms/MessageParser.h"
+
 MessageParser::MessageParser()
 {
   return;
 }
 
-bool MessageParser::parse_message(const uint8_t *buffer, int length)
+bool MessageParser::parse_message(uint8_t *buffer, int length, int8_t &cnt)
 {
   // Get data out of the buffer
   int idx = 0;
@@ -15,36 +17,54 @@ bool MessageParser::parse_message(const uint8_t *buffer, int length)
     idx++;
   if (buffer[idx] != '<')
     return false;
+  if (++idx == (length-1))
+    return false;
 
-  if (next_int(steering,buffer,idx,length)
+  if (next_int(steering,buffer,idx,length))
   {
+    idx++; // Next!
     if (next_int(throttle,buffer,idx,length))
     {
-      if (idx==length || buffer[idx] != '<')
+      if (idx>=length || buffer[idx] != '>')
         return false;
       idx++;
       for (int i=0; i<(length-idx); i++)
         buffer[i] = buffer[i+idx];
+      cnt = cnt - idx; // Next empty slot / new size
       return true;
     }
   }
   return false;
 }
 
+int MessageParser::get_steering()
+{
+  return steering;
+}
+
+int MessageParser::get_throttle()
+{
+  return throttle;
+}
+
 bool MessageParser::next_int(int &retval, uint8_t *buffer, int &idx, int length)
 {
   // Move subsequent chars into parse buffer
-  if (buffer[idx]!='-' && (buffer[idx]<'0' || buffer[idx]>'9'))
+  if (buffer[idx]!='-' && (buffer[idx]<48 || buffer[idx]>57))
     return false;
   int parse_idx=0;
   parse_buffer[parse_idx] = buffer[idx];
   idx++;
 
   // Get the rest of the number
-  while (buffer[idx]>='0' && buffer[idx]<='9' && idx<=(length-1) && parse_idx<4)
+  while ((buffer[idx]>=48) &&
+         (buffer[idx]<=57) &&
+         (idx<=(length-1))  &&
+         (parse_idx<4))
+  {
     parse_buffer[++parse_idx] = buffer[idx++];
-
-  // Check if a valid number (only if "-", otherwise OK)
+  }
+  // Check if a valid number (only invalid if "-", otherwise OK)
   if (parse_idx==0 && parse_buffer[0]=='-')
     return false;
 

@@ -16,9 +16,10 @@
 #include <cstdio>
 #include <unistd.h>
 
-//HAX
-#include "../include/MessageParser.h"
+// Project headers
+#include "car_serial_comms/MessageParser.h"
 
+#define BUFFER_SIZE 20
 /*
  * Main - connect to Arduino on specified comm port.
  */
@@ -29,7 +30,8 @@ int main(int argc, char **argv)
   //
   // Pass args and node name to ROS for processing...
   ros::init(argc, argv, "serial_comms");
-
+  //ros::param::param<std::string>("~port", port, "/dev/ttyUSB0");
+  //ros::param::param<int>("~baud", baud, 115200);
   // NodeHandle is how the ROS communications system is accessed.
   ros::NodeHandle nh;
 
@@ -45,7 +47,7 @@ int main(int argc, char **argv)
   // Initialize serial
   //
   // Open serial port
-  std::string port = "???";
+  std::string port = "/dev/ttyUSB0"; //Eg. "/dev/ttyUSB0"
   unsigned long baud = 115200;
   serial::Serial serial_port(port, baud,serial::Timeout::simpleTimeout(1000));
   if (!serial_port.isOpen())
@@ -55,10 +57,13 @@ int main(int argc, char **argv)
   // For now, we only recieve, and never send.
 
   // Reused variables
-  uint8_t buffer[10];
-  int8_t idx = 0;
+  uint8_t buffer[BUFFER_SIZE];
+  int8_t cnt = 0;
   int steering, throttle;
-  MessageParser mp;
+  MessageParser mp = MessageParser();
+  // Initialize buffer
+  for (int i=0; i<BUFFER_SIZE; ++i)
+    buffer[i] = 0;
   // Main loop
   while (ros::ok())
   {
@@ -66,24 +71,28 @@ int main(int argc, char **argv)
     if (serial_port.available() > 0)
     {
       // Load up the buffer
-      while (serial_port.available() && idx < 9)
+      while (serial_port.available() && cnt < BUFFER_SIZE)
       {
-        serial_port.read(&buffer[idx++]);
+        // Get one char at a time because lazy
+        serial_port.read(&buffer[cnt++], 1);
       }
 
       // Hand over the message and see if new values are produced
-      if (mp.parse_message(buffer,10))
+      if (mp.parse_message(buffer, BUFFER_SIZE, cnt))
       {
-        steering = mp.getSteering();
-        throttle = mp.getThrottle();
+        // Get updated values
+        steering = mp.get_steering();
+        throttle = mp.get_throttle();
 
         // Make message, load with data, then publish
         std_msgs::String msg;
 
+        // Package into crappy message
         std::stringstream ss;
         ss << steering << "," << throttle;
         msg.data = ss.str();
 
+        // This is just a notification for debug - not a ROS message
         ROS_INFO("%s", msg.data.c_str());
 
         // Publish to send out
