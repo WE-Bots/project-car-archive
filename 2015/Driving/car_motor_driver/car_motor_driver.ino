@@ -16,7 +16,7 @@
 #define REMOTE_CONTROL
 #define DEBUG
 
-//uncomment for debugging communications active
+//uncomment for active communications while debugging
 //#define I2C
 //#define USB
 #define BLUETOOTH
@@ -43,17 +43,13 @@ int real_speed = 0;
 int accumulated_speed_error = 0;
 boolean emergency_stop = true;
 unsigned long timer = 0;
-int battery_voltage = 0;
-int battery_current = 0;
+int battery_voltage = 10;
+int battery_current = 50;
 
 
 void setup()
 {
-#ifdef DEBUG
 	Serial.begin(9600);
-	Serial.println("Debugging started.");
-#endif
-
 #ifdef I2C
 	Wire.begin();                 //start I2C
 #endif
@@ -104,7 +100,7 @@ void loop()
 		battery_voltage = Wire.parseInt();
 		battery_current = Wire.parseInt();
 	}
-	Serial1.write(battery_voltage + " " + battery_current);
+	Serial1.write(battery_voltage + "," + battery_current);
 #endif
 
 	//Remote control code
@@ -114,7 +110,13 @@ void loop()
 	{
 		base_speed = (Serial1.parseInt() - 500);
 		steering_angle = (Serial1.parseInt() / 10 - 90);
-		Serial1.println(battery_voltage + " " + battery_current);
+		//Serial.print("Speed: ");
+		//Serial.print(base_speed);
+		//Serial.print("     Angle: ");
+		//Serial.println(steering_angle);
+		Serial1.print(battery_voltage);
+		Serial1.print(",");
+		Serial1.println(battery_current);
 		emergency_stop = false;
 		timer = millis();
 	}
@@ -126,6 +128,12 @@ void loop()
 
 #ifdef USB
 	//put pi communication stuff here
+	//only for getting the training video
+	Serial.print('<');
+	Serial.print(90 - constrain(steering_angle, -30, 40));
+	Serial.print(',');
+	Serial.print(1500 - constrain(base_speed + speed_error, -500, 500));
+	Serial.print('>');
 #endif
 #endif
 
@@ -157,8 +165,8 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
-		steer.write(90 - constrain(steering_angle, -30, 40));
+		motor.writeMicroseconds(1500 + constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
+		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 }
 
