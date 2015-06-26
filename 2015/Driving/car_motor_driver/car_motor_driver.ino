@@ -17,9 +17,9 @@
 #define DEBUG
 
 //uncomment for active communications while debugging
-#define I2C
-#define USB
-//#define BLUETOOTH
+//#define I2C
+//#define USB
+#define BLUETOOTH
 #define MOTORS
 
 #ifndef DEBUG
@@ -122,7 +122,7 @@ void loop()
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
 	{
-		base_speed = (Serial1.parseInt() - 500);
+		base_speed = (Serial1.parseInt()/10 - 50);
 		steering_angle = (Serial1.parseInt() / 10 - 90);
 		//Serial.print("Speed: ");
 		//Serial.print(base_speed);
