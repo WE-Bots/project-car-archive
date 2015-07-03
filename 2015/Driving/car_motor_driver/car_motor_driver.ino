@@ -180,8 +180,8 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 + constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
-		steer.write(90 + constrain(steering_angle, -30, 40));
+		motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
+		steer.write(90 - constrain(steering_angle, -30, 40));
 	}
 #endif
 }
