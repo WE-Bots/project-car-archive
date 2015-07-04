@@ -104,7 +104,7 @@ FOSC =	Oscillator Selection bits
     EXTRCCLK	RC oscillator: CLKOUT function on RA6/OSC2/CLKOUT/T1OSO pin, RC on RA7/OSC1/CLKIN/T1OSI
  */
 
-#pragma config WDTE = OFF, PWRTE = OFF, CP = OFF, BOREN = OFF, DEBUG = OFF, FCMEN = OFF, MCLRE = ON, CPD = OFF, IESO = ON, FOSC = INTOSCIO
+#pragma config WDTE = OFF, PWRTE = OFF, CP = OFF, BOREN = OFF, DEBUG = ON, FCMEN = OFF, MCLRE = ON, CPD = OFF, IESO = ON, FOSC = INTOSCIO
 
 #include <xc.h>
 #include <stdint.h> // allows access to more intuiative interger classes such as uint8_t, int16_t
@@ -121,9 +121,11 @@ FOSC =	Oscillator Selection bits
 #define LCD_PWR_SW RD6
 #define LCD_PB RD5
 
-#define _XTAL_FREQ 4000000  // used for _delay function, specifies a clock frequency of 4MHz
+#define _XTAL_FREQ 8000000  // used for _delay function, specifies a clock frequency of 4MHz
 
 #include "lcd.h" // header file to interface with 16x2 LCD screen
+//#include "timer0.h"
+#include "adc.h"
 
 /***** Cell Measurement Definitions *****/
 
@@ -170,36 +172,84 @@ float current = 0; // current flowing out of the battery
 float shuntRes = 0.01; // the resistance of the current shunt in ohms
 uint8_t currentGain = 200; // gain for the current sense module
 
+uint8_t LCDDisplayMode = 0;
+
 /***** Calibration Variables *****/
 
-const float refVolt = 1.982; // calibration value for the reference voltage
+const float refVolt = 1.122; // calibration value for the reference voltage
 
-const float cell1RDT = 2200; // the value of the resistor at the top of the cell 1 resistor divider (OHM)
-const float cell1RDB = 2200; // the value of the resistor at the bottom of the cell 1 resistor divider (OHM)
+const uint16_t cell1RDT = 2200; // the value of the resistor at the top of the cell 1 resistor divider (OHM)
+const uint16_t cellRDB = 2200; // the value of the resistor at the bottom of the cell 1 resistor divider (OHM)
+                               // all of the rsristor dividers have a 2.2k resistor on the bottom
 
-const float cell2RDT = 4700; // the value of the resistor at the top of the cell 2 resistor divider (OHM)
-const float cell2RDB = 2200; // the value of the resistor at the bottom of the cell 2 resistor divider (OHM)
+const uint16_t cell2RDT = 4700; // the value of the resistor at the top of the cell 2 resistor divider (OHM)
 
-const float cell3RDT = 10000; // the value of the resistor at the top of the cell 3 resistor divider (OHM)
-const float cell3RDB = 2200; // the value of the resistor at the bottom of the cell 3 resistor divider (OHM)
+const uint16_t cell3RDT = 10000; // the value of the resistor at the top of the cell 3 resistor divider (OHM)
 
-const float cell4RDT = 14700; // the value of the resistor at the top of the cell 4 resistor divider (OHM)
-const float cell4RDB = 2200; // the value of the resistor at the bottom of the cell 4 resistor divider (OHM)
+const uint16_t cell4RDT = 14700; // the value of the resistor at the top of the cell 4 resistor divider (OHM)
 
-const float cell5RDT = 20000; // the value of the resistor at the top of the cell 5 resistor divider (OHM)
-const float cell5RDB = 2200; // the value of the resistor at the bottom of the cell 5 resistor divider (OHM)
+const uint16_t cell5RDT = 20000; // the value of the resistor at the top of the cell 5 resistor divider (OHM)
 
-const float cell6RDT = 24700; // the value of the resistor at the top of the cell 6 resistor divider (OHM)
-const float cell6RDB = 2200; // the value of the resistor at the bottom of the cell 6 resistor divider (OHM)
+const uint16_t cell6RDT = 24700; // the value of the resistor at the top of the cell 6 resistor divider (OHM)
 
 
 /***** Functions *****/
 
-uint16_t sampleADC ( uint8_t );
+void initController ();
+void interrupt isr();
 void sampleReference();
 void sampleBatteryCells ();
 void displayLCD ( int );
 void sampleCurrent ();
 void currentGainInit ( uint8_t );
+void handlePB ();
+float batteryVoltage ();
+float sampleVoltage(ADCChannel  chan);
 
+
+
+void initController ()
+{
+    // *** Oscillator Initiliazation
+    OSCCONbits.IRCF = 0b111; // Select 8MHz as clock frequency
+    OSCCONbits.SCS = 0; // Configuration word defines clock source
+
+    // set to 1 for input, 0 for output
+    TRISA = 0b00111111;
+    TRISB = 0b00000000;
+    TRISC = 0b00000000;
+    TRISD = 0b00100000;
+    TRISE = 0b00000111;
+
+    ANSEL = 0xFF; // set all of the analog channels as analog inputs
+
+    PORTA = 0;
+    PORTB = 0;
+    PORTC = 0;
+    PORTD = 0;
+    PORTE = 0;
+    
+    CMCON0bits.CM = 0b111; // disable comparitors
+    LCDCON = 0; // disable LCD Driver
+    LVDCONbits.LVDEN = 0; // disable the low voltage detect
+    CCP1CON = 0; // disable CCP modules
+    CCP2CON = 0;
+    OPTION_REGbits.nRBPU = 1; // weak pullups dissabled
+
+    UC_CGND = 0; // connect the ground for the microcontroller (active low)
+
+    LCD_PWR_SW = 0; // keep LCD on ( active low )
+
+    initADC();
+
+    //timeSetup();
+
+    initLCD();
+
+}
+
+void interrupt isr()
+{
+    //isrTimer0();
+}
 #endif	/* SETUP_H */

@@ -410,11 +410,6 @@ case 'f':
 flag |= 0x400;
 break;
 
-# 697
-case 'd':
-case 'i':
-break;
-
 # 802
 default:
 
@@ -538,27 +533,9 @@ prec--;
 continue;
 }
 
-# 1253
-{
-
-# 1259
-val = (long)(*(int *)__va_arg((*(int **)ap), (int)0));
-
-if((long)val < 0) {
-flag |= 0x03;
-val = -val;
-}
-
-}
-
 # 1290
 if(prec == 0 && val == 0)
 prec++;
-
-# 1305
-for(c = 1 ; c != sizeof dpowers/sizeof dpowers[0] ; c++)
-if(val < dpowers[c])
-break;
 
 # 1339
 if(c < prec)
@@ -574,20 +551,6 @@ if(flag & 0x03)
 ((*sp++ = ('-')));
 
 # 1469
-}
-
-# 1474
-while(prec--) {
-
-# 1478
-{
-
-# 1489
-c = (val / dpowers[prec]) % 10 + '0';
-
-# 1523
-}
-((*sp++ = (c)));
 }
 
 # 1533

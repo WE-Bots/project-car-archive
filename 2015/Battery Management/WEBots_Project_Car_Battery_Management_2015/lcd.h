@@ -1,8 +1,79 @@
-//LCD Functions Developed by electroSome
+
+/************************************************************************
+*                                                                       *
+*   Filename:       lcd.h                                               *
+*   Date:           02/06/2015                                          *
+*   File Version:   1.0                                                 *
+*                                                                       *
+*   Author:         Andrew Cullen                                       *
+*                                                                       *
+*************************************************************************
+*                                                                       *
+*   Architecture:   Mid-range PIC                                       *
+*   Processor:      PIC16F917                                           *
+*   Compiler:       MPLAB XC8 v1.00 (Free mode)                         *
+*                                                                       *
+*************************************************************************
+*                                                                       *
+*   Files required: none                                                *
+*                                                                       *
+*************************************************************************
+*                                                                       *
+*   Description:    This file contains functions to interface with a LCD*
+*************************************************************************
+*                                                                       *
+*   Pin assignments:                                                    *
+*                   Ensure that that the LCD pins have been defined     *
+*                   before including this libary                        *
+*                                                                       *
+************************************************************************/
+
 #include <xc.h>
 #include <stdio.h> // allows access to sprintf
 
-void LCD_Port(char a)
+char topStr[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+char btmStr[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+// ***Function Declarations
+void initLCD();
+void LCDSetBits(char);
+void pulse();
+void LCDcmd(char);
+void LCD4bitCmd(char);
+void LCDSetCursor(char);
+void LCDWriteChar(char);
+void LCDWriteString(char*);
+void clearLCD();
+
+// *** Function Declarations
+void initLCD()
+{
+    RS = 0;             // RS = 0, send instruction
+    RW = 0;             // RW = 0, write
+    LCDSetBits(0x00);
+    __delay_ms(100);        // wait for at least 15ms after power is applied
+    LCDSetBits(0x30);       // wake up
+    __delay_ms(30);
+    pulse();
+    __delay_ms(10);
+    pulse();
+    __delay_ms(10);
+    pulse();
+    __delay_ms(10);
+    LCDSetBits(0x20);      
+    pulse();
+
+    LCDcmd(0x28);       // function set
+    __delay_ms(10);
+    LCDcmd(0x10);       // function set
+    __delay_ms(10);
+    LCDcmd(0x0F);       // display on/off control
+    __delay_ms(10);        
+    LCDcmd(0x06);       // display clear
+    __delay_ms(10);
+}
+
+void LCDSetBits(char a)
 {
 	if(a & 16)
 		D4 = 1;
@@ -34,52 +105,34 @@ void pulse()
 
 // first 4 bit number to be sent is in the high order 4 bits and the
 // second 4 bit number to be sent is in the low order 4 bits
-void LCD_Cmd(char a)
+void LCDcmd(char a)
 {
-	LCD_Port(a);        // put the data on the output port
+	LCDSetBits(a);        // put the data on the output port
         RS = 0;             // RS = 0, send instruction
         RW = 0;             // RW = 0, write
         pulse();            // send the lower 4 bits
         a = a<<4;           // shift to access the higher order bytes
-	LCD_Port(a);        // put the data on the output port
+	LCDSetBits(a);        // put the data on the output port
         pulse();            // send the upper 4 bits
 }
 
 // 4 bit instruction to be sent is in the high order bit of a
-void LCD_Cmd_4bit(char a)
+void LCD4bitCmd(char a)
 {
-	LCD_Port(a);        // put the data on the output port
+	LCDSetBits(a);        // put the data on the output port
         RS = 0;             // RS = 0, send instruction
         RW = 0;             // RW = 0, write
         pulse();            // send the lower 4 bits
 }
 
-void LCD_Init()
+void LCDWriteChar(char a)
 {
-    LCD_Port(0);
-    __delay_ms(100);         // wait for at least 15ms after power is applied
-    LCD_Cmd_4bit(0x30);      // function set
-    __delay_ms(100);
-    LCD_Cmd(0x28);           // function set
-    __delay_ms(100);
-    LCD_Cmd(0x28);           // function set
-    __delay_ms(100);
-    LCD_Cmd(0x0F);           // Display on/off control
-    __delay_ms(100);         // display on, cursor on, blink on
-    LCD_Cmd(0x01);           // Display clear
-    __delay_ms(100);
-    LCD_Cmd(0x06);           // entry mode set
-    __delay_ms(100);
-}
-
-void LCD_Write_Char(char a)
-{
-    LCD_Port(a);        // put the data on the output port
+    LCDSetBits(a);        // put the data on the output port
     RS = 1;             // RS = 0, send data
-    RW = 0;             // RW = 0, write
+    //RW = 0;             // RW = 0, write
     pulse();            // send the lower 4 bits
     a = a<<4;           // shift to access the higher order bytes
-    LCD_Port(a);        // put the data on the output port
+    LCDSetBits(a);        // put the data on the output port
     pulse();            // send the upper 4 bits
 }
 
@@ -87,51 +140,32 @@ void LCD_Write_Char(char a)
 // for first line specify high order bits of a to 0
 // and for second line specify high order bits of a to 1
 // the location along the line is specified by a [0 - F]
-void LCD_Set_Cursor(char a )
+void LCDSetCursor(char a )
 {
     if (a & 16) // second line of LCD
     {
-       LCD_Cmd_4bit(0xC0);
+       LCD4bitCmd(0xC0);
        a = a << 4;
-       LCD_Cmd_4bit(a);
+       LCD4bitCmd(a);
     }
 
     else        // first line of LCD
     {
-       LCD_Cmd_4bit(0x80);
+       LCD4bitCmd(0x80);
        a = a << 4;
-       LCD_Cmd_4bit(a);
+       LCD4bitCmd(a);
     }
 }
 
-void LCD_Write_String(char *a)
+void LCDWriteString(char *a)
 {
     for(int i=0;a[i]!='\0';i++)
     {
-       LCD_Write_Char(a[i]);
+       LCDWriteChar(a[i]);
     }
 }
 
-void LCD_Write_Int(int a)
+void clearLCD()
 {
-    char s[5];
-
-    sprintf(s, "%d", a);
-    
-    LCD_Write_String(&s);
-}
-
-void LCD_Write_Float(float a)
-{
-    char s[5];
-
-    sprintf(s, "%f", a);
-
-    LCD_Write_String(&s);
-}
-
-void LCD_Clear()
-{
-    LCD_Cmd(0x20);
-    LCD_Set_Cursor(0x00);
+    LCDcmd(0x01);
 }
