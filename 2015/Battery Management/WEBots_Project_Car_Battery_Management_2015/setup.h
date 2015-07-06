@@ -124,7 +124,7 @@ FOSC =	Oscillator Selection bits
 #define _XTAL_FREQ 8000000  // used for _delay function, specifies a clock frequency of 4MHz
 
 #include "lcd.h" // header file to interface with 16x2 LCD screen
-//#include "timer0.h"
+#include "timer0.h"
 #include "adc.h"
 
 /***** Cell Measurement Definitions *****/
@@ -240,9 +240,13 @@ void initController ()
 
     LCD_PWR_SW = 0; // keep LCD on ( active low )
 
+    // temporay setup !!!!*****
+    MOTOR_CONTROL = 1;
+
+
     initADC();
 
-    //timeSetup();
+    timeSetup();
 
     initLCD();
 
@@ -250,6 +254,6 @@ void initController ()
 
 void interrupt isr()
 {
-    //isrTimer0();
+    isrTimer0();
 }
 #endif	/* SETUP_H */

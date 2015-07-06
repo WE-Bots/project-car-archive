@@ -69,16 +69,7 @@ void main()
 
     G_LED = 1;
 
-    //currentGainInit(200);
-
-    //stopWatch(0); // start the stopwatch
-
-    sprintf(topStr, "                ");
-    LCDSetCursor(0x00);
-    LCDWriteString (topStr);
-    sprintf(btmStr, "                ");
-    LCDSetCursor(0x10);
-    LCDWriteString (btmStr);
+    currentGainInit(200);
 
     /***** MAIN LOOP *****/
     while(1)
@@ -103,7 +94,7 @@ void sampleBatteryCells ()
     // sample each of the cell voltages
     BT_CLS_EN = 1; // turn on the first three voltage dividers
 
-    __delay_ms(1); // wait for the voltage to level out
+    __delay_ms(5); // wait for the voltage to level out
 
     // sample the bottom cells
     cellVolt[0] = ( ( cell1RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL1); // cell 1
@@ -113,7 +104,7 @@ void sampleBatteryCells ()
     BT_CLS_EN = 0; // turn off the first three voltage dividers
     TP_CLS_EN = 1; // turn on the last three voltage dividers
 
-    __delay_ms(1);
+    __delay_ms(5);
 
     cellVolt[3] = ( ( cell4RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL4); // cell 4
     cellVolt[4] = ( ( cell5RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL5); // cell 5
@@ -133,8 +124,15 @@ void sampleReference()
     OPAMP_CGND = 1;
 
     __delay_ms(5);
+    
+    refValue = 0;
 
-    refValue = analogRead(REFV);
+    for ( int i = 0; i <= 10; i++)
+    {
+        refValue += analogRead(REFV);
+    }
+
+    refValue = refValue / 10;
 
     // turn off the reference voltage divider
     REF_EN = 0;
@@ -146,30 +144,59 @@ void sampleReference()
 
 float sampleVoltage(ADCChannel  chan)
 {
-    __delay_ms(5);
+    uint16_t temp = 0;
+
+    for ( int i = 0; i <= 10; i++)
+    {
+        temp += analogRead(chan);
+    }
+
+    temp = temp / 10;
+
     // convert the digital value into voltage
-    return (analogRead(chan) * supVolt)/1023;
+    return (temp * supVolt)/1023;
 }
 
 void sampleCurrent ()
 {
+    uint16_t temp = 0;
+
+    for ( int i = 0; i <= 10; i++)
+    {
+        temp += analogRead(CURRENT);
+    }
+
+    temp = temp / 10;
+
     // convert the digital value into voltage
     // convert an amplified voltage to a current using the shunt resistance
     // divide by the gain to get the actual voltage and divide by the resistance to get the current
-    current = ((analogRead(CURRENT) * supVolt)/1023) / (shuntRes * currentGain);
+    current = ((temp * supVolt)/1023) / (shuntRes * currentGain);
 
 }
 
 // display data to the LCD screen, input interger 0...3 depending on the data desired to be displayed
 void displayLCD ( int disp )
 {
+    uint8_t itemU;
+    uint8_t itemL;
+    float valueU;
+    float valueL;
+
+
     switch( disp )
     {
         // display the total voltage of the battery and the estimated percentage left
         // along with the current
         case 0:
         {
-            sprintf( topStr, "Voltage:%.3f V      ", batteryVoltage() );
+            itemU = 11;
+            itemL = 12;
+            valueU = cellVolt[5];
+            valueL = current;
+
+            /*
+            sprintf( topStr, "Voltage:%.3f V      ", cellVolt[5] );
 
             LCDSetCursor(0x00);
             LCDWriteString(topStr);
@@ -178,58 +205,84 @@ void displayLCD ( int disp )
 
             LCDSetCursor(0x10);
             LCDWriteString(btmStr);
-
+            */
             break;
         }
 
         // display the cell voltages of cells 1 and 2
         case 1:
         {
+            itemU = 1;
+            itemL = 2;
+            valueU = cellVolt[0];
+            valueL = cellVolt[1] - cellVolt[0];
+            /*
             sprintf( topStr, "Cell 1:%.2f     ", cellVolt[0] );
 
             LCDSetCursor(0x00);
             LCDWriteString(topStr);
 
-            sprintf( btmStr, "Cell 2:%.2f     ", cellVolt[1] );
+            sprintf( btmStr, "Cell 2:%.2f     ", cellVolt[1] - cellVolt[0] );
 
             LCDSetCursor(0x10);
             LCDWriteString(btmStr);
-
+            */
             break;
         }
 
         // display the cell voltages of cells 3 and 4
         case 2:
         {
-            sprintf( topStr, "Cell 3:%.2f     ", cellVolt[2] );
+            itemU = 3;
+            itemL = 4;
+            valueU = cellVolt[2] - cellVolt[1];
+            valueL = cellVolt[3] - cellVolt[2];
+            /*
+            sprintf( topStr, "Cell 3:%.2f     ", cellVolt[2] - cellVolt [1] );
 
             LCDSetCursor(0x00);
             LCDWriteString(topStr);
 
-            sprintf( btmStr, "Cell 4:%.2f     ", cellVolt[3] );
+            sprintf( btmStr, "Cell 4:%.2f     ", cellVolt[3] - cellVolt[2] );
 
             LCDSetCursor(0x10);
             LCDWriteString(btmStr);
-
+            */
             break;
         }
 
         // display the cell voltages of cells 5 and 6
         case 3:
         {
-            sprintf( topStr, "Cell 5:%.2f     ", cellVolt[4] );
+            itemU = 5;
+            itemL = 6;
+            valueU = cellVolt[4] - cellVolt[3];
+            valueL = cellVolt[5] - cellVolt[4];
+            /*
+            sprintf( topStr, "Cell 5:%.2f     ", cellVolt[4] - cellVolt[3] );
 
             LCDSetCursor(0x00);
             LCDWriteString(topStr);
            
-            sprintf( btmStr, "Cell 6:%.2f     ", cellVolt[5] );
+            sprintf( btmStr, "Cell 6:%.2f     ", cellVolt[5] - cellVolt[4] );
 
             LCDSetCursor(0x10);
             LCDWriteString(btmStr);
-
+            */
             break;
         }
     }
+
+    sprintf( topStr, "%u: %.2f         ", itemU, valueU );
+
+    LCDSetCursor(0x00);
+    LCDWriteString(topStr);
+
+    sprintf( btmStr, "%u: %.2f         ", itemL, valueL );
+
+    LCDSetCursor(0x10);
+    LCDWriteString(btmStr);
+
 }
 
 // sets the gain for the current sense module
@@ -282,24 +335,24 @@ void handlePB ()
     if( LCD_PB == 1 )
         return;
 
-    while( LCD_PB == 0 ) {}
+    stopWatch(0);
+    while( LCD_PB == 0 ) 
+    {
+        if(stopWatch(1) >= 1000)
+        {
+            initLCD();
+
+            R_LED = 1;
+            __delay_ms(100);
+            R_LED = 0;
+            return;
+        }
+    }
 
     LCDDisplayMode++;
 
     if (LCDDisplayMode > 3)
         LCDDisplayMode = 0;
-}
-
-float batteryVoltage ()
-{
-    float sum = 0;
-
-    for(uint8_t i = 0; i < 6; i++)
-    {
-    sum += cellVolt[i];
-    }
-
-    return sum;
 }
 
 void checkCurrent ()

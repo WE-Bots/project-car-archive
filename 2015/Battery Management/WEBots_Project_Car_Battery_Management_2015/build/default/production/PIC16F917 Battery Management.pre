@@ -3418,6 +3418,84 @@ void clearLCD()
 LCDcmd(0x01);
 }
 
+# 12 "C:\Program Files (x86)\Microchip\xc8\v1.34\include\stdbool.h"
+typedef unsigned char bool;
+
+# 35 "timer0.h"
+unsigned long time = 0;
+
+
+const float convConst = 0.128;
+
+
+
+void timeSetup();
+void isrTime();
+unsigned long currentTime();
+unsigned long stopWatch (bool);
+
+
+
+void timeSetup()
+{
+OPTION_REGbits.T0CS = 0;
+OPTION_REGbits.T0SE = 1;
+OPTION_REGbits.PSA = 0 ;
+OPTION_REGbits.PS = 0b111;
+
+
+INTCONbits.T0IE = 1;
+INTCONbits.T0IF = 0;
+INTCONbits.PEIE = 1;
+INTCONbits.GIE = 1;
+
+}
+
+void isrTimer0 ()
+{
+if (INTCONbits.T0IF == 1 && INTCONbits.T0IE == 1)
+{
+
+
+time = time + 255;
+
+INTCONbits.T0IF = 0;
+}
+}
+
+unsigned long currentTime ()
+{
+return convConst * ( time + TMR0 );
+}
+
+unsigned long stopWatch (bool mode)
+{
+static unsigned long startTime = 0;
+
+unsigned long temp = 0;
+
+switch (mode)
+{
+case(0):
+{
+startTime = time + TMR0;
+
+return 1;
+}
+
+case (1):
+{
+temp = time + TMR0 - startTime;
+
+temp = convConst * temp;
+
+return temp;
+}
+}
+
+return 0;
+}
+
 # 36 "adc.h"
 typedef enum
 {
@@ -3553,9 +3631,13 @@ RD2 = 0;
 
 RD6 = 0;
 
+
+RC0 = 1;
+
+
 initADC();
 
-
+timeSetup();
 
 initLCD();
 
@@ -3563,7 +3645,7 @@ initLCD();
 
 void interrupt isr()
 {
-
+isrTimer0();
 }
 
 # 64 "PIC16F917 Battery Management.c"
@@ -3575,13 +3657,7 @@ initController();
 
 RD4 = 1;
 
-# 76
-sprintf(topStr, "                ");
-LCDSetCursor(0x00);
-LCDWriteString (topStr);
-sprintf(btmStr, "                ");
-LCDSetCursor(0x10);
-LCDWriteString (btmStr);
+currentGainInit(200);
 
 
 while(1)
@@ -3606,7 +3682,7 @@ RC2 = 1;
 
 RD0 = 1;
 
-_delay((unsigned long)((1)*(8000000/4000.0)));
+_delay((unsigned long)((5)*(8000000/4000.0)));
 
 
 cellVolt[0] = ( ( cell1RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL1);
@@ -3616,7 +3692,7 @@ cellVolt[2] = ( ( cell3RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL3);
 RD0 = 0;
 RC3 = 1;
 
-_delay((unsigned long)((1)*(8000000/4000.0)));
+_delay((unsigned long)((5)*(8000000/4000.0)));
 
 cellVolt[3] = ( ( cell4RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL4);
 cellVolt[4] = ( ( cell5RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL5);
@@ -3637,7 +3713,14 @@ RC2 = 1;
 
 _delay((unsigned long)((5)*(8000000/4000.0)));
 
-refValue = analogRead(REFV);
+refValue = 0;
+
+for ( int i = 0; i <= 10; i++)
+{
+refValue += analogRead(REFV);
+}
+
+refValue = refValue / 10;
 
 
 RD1 = 0;
@@ -3649,90 +3732,108 @@ supVolt = (refVolt * 1023)/refValue;
 
 float sampleVoltage(ADCChannel chan)
 {
-_delay((unsigned long)((5)*(8000000/4000.0)));
+uint16_t temp = 0;
 
-return (analogRead(chan) * supVolt)/1023;
+for ( int i = 0; i <= 10; i++)
+{
+temp += analogRead(chan);
+}
+
+temp = temp / 10;
+
+
+return (temp * supVolt)/1023;
 }
 
 void sampleCurrent ()
 {
+uint16_t temp = 0;
+
+for ( int i = 0; i <= 10; i++)
+{
+temp += analogRead(CURRENT);
+}
+
+temp = temp / 10;
 
 
 
-current = ((analogRead(CURRENT) * supVolt)/1023) / (shuntRes * currentGain);
+
+current = ((temp * supVolt)/1023) / (shuntRes * currentGain);
 
 }
 
 
 void displayLCD ( int disp )
 {
+uint8_t itemU;
+uint8_t itemL;
+float valueU;
+float valueL;
+
+
 switch( disp )
 {
 
 
 case 0:
 {
-sprintf( topStr, "Voltage:%.3f V      ", batteryVoltage() );
+itemU = 11;
+itemL = 12;
+valueU = cellVolt[5];
+valueL = current;
 
-LCDSetCursor(0x00);
-LCDWriteString(topStr);
-
-sprintf( btmStr, "Current:%.3fA      ", current);
-
-LCDSetCursor(0x10);
-LCDWriteString(btmStr);
-
+# 209
 break;
 }
 
 
 case 1:
 {
-sprintf( topStr, "Cell 1:%.2f     ", cellVolt[0] );
+itemU = 1;
+itemL = 2;
+valueU = cellVolt[0];
+valueL = cellVolt[1] - cellVolt[0];
 
-LCDSetCursor(0x00);
-LCDWriteString(topStr);
-
-sprintf( btmStr, "Cell 2:%.2f     ", cellVolt[1] );
-
-LCDSetCursor(0x10);
-LCDWriteString(btmStr);
-
+# 230
 break;
 }
 
 
 case 2:
 {
-sprintf( topStr, "Cell 3:%.2f     ", cellVolt[2] );
+itemU = 3;
+itemL = 4;
+valueU = cellVolt[2] - cellVolt[1];
+valueL = cellVolt[3] - cellVolt[2];
 
-LCDSetCursor(0x00);
-LCDWriteString(topStr);
-
-sprintf( btmStr, "Cell 4:%.2f     ", cellVolt[3] );
-
-LCDSetCursor(0x10);
-LCDWriteString(btmStr);
-
+# 251
 break;
 }
 
 
 case 3:
 {
-sprintf( topStr, "Cell 5:%.2f     ", cellVolt[4] );
+itemU = 5;
+itemL = 6;
+valueU = cellVolt[4] - cellVolt[3];
+valueL = cellVolt[5] - cellVolt[4];
+
+# 272
+break;
+}
+}
+
+sprintf( topStr, "%u: %.2f         ", itemU, valueU );
 
 LCDSetCursor(0x00);
 LCDWriteString(topStr);
 
-sprintf( btmStr, "Cell 6:%.2f     ", cellVolt[5] );
+sprintf( btmStr, "%u: %.2f         ", itemL, valueL );
 
 LCDSetCursor(0x10);
 LCDWriteString(btmStr);
 
-break;
-}
-}
 }
 
 
@@ -3785,24 +3886,24 @@ _delay((unsigned long)((50)*(8000000/4000.0)));
 if( RD5 == 1 )
 return;
 
-while( RD5 == 0 ) {}
+stopWatch(0);
+while( RD5 == 0 )
+{
+if(stopWatch(1) >= 1000)
+{
+initLCD();
+
+RC1 = 1;
+_delay((unsigned long)((100)*(8000000/4000.0)));
+RC1 = 0;
+return;
+}
+}
 
 LCDDisplayMode++;
 
 if (LCDDisplayMode > 3)
 LCDDisplayMode = 0;
-}
-
-float batteryVoltage ()
-{
-float sum = 0;
-
-for(uint8_t i = 0; i < 6; i++)
-{
-sum += cellVolt[i];
-}
-
-return sum;
 }
 
 void checkCurrent ()
