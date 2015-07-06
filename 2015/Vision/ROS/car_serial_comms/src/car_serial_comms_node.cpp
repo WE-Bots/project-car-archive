@@ -19,6 +19,9 @@
 // Project headers
 #include "car_serial_comms/MessageParser.h"
 
+// Custom message type
+#include "car_serial_comms/ThrottleAndSteering.h"
+
 #define BUFFER_SIZE 20
 /*
  * Main - connect to Arduino on specified comm port.
@@ -36,7 +39,7 @@ int main(int argc, char **argv)
   ros::NodeHandle nh;
 
   // Advertise topic for outputting messages from the Arduino (name, buf_size)
-  ros::Publisher serial_comms_pub = nh.advertise<std_msgs::String>("arduino_comms",100);
+  ros::Publisher serial_comms_pub = nh.advertise<car_serial_comms::ThrottleAndSteering>("arduino_comms",100);
 
   // Run at 60 Hz - twice that of the camera
   // This basically means no lag from the camera's perspective.
@@ -85,15 +88,19 @@ int main(int argc, char **argv)
         throttle = mp.get_throttle();
 
         // Make message, load with data, then publish
-        std_msgs::String msg;
+        car_serial_comms::ThrottleAndSteering msg;
+        msg.header.stamp = ros::Time::now();
+        msg.header.frame_id = "/world";
+        msg.steering = steering;
+        msg.throttle = throttle;
 
-        // Package into crappy message
-        std::stringstream ss;
-        ss << steering << "," << throttle;
-        msg.data = ss.str();
+        // // Package into crappy message
+        // std::stringstream ss;
+        // ss << steering << "," << throttle;
+        // msg.data = ss.str();
 
-        // This is just a notification for debug - not a ROS message
-        ROS_INFO("%s", msg.data.c_str());
+        // // This is just a notification for debug - not a ROS message
+        // ROS_INFO("%s", msg.data.c_str());
 
         // Publish to send out
         serial_comms_pub.publish(msg);
