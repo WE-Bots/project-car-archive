@@ -3356,7 +3356,6 @@ void clearLCD()
 LCDcmd(0x01);
 }
 
-
 void uint8ToASCII ( char* returnVal, uint8_t num )
 {
 uint8_t divisor = 100;
@@ -3374,6 +3373,7 @@ do
 {
 
 
+
 returnVal[i] = ( num - prevSum ) / divisor;
 
 prevSum += returnVal[i]*divisor;
@@ -3394,6 +3394,9 @@ i++;
 
 } while ( divisor > 0);
 
+
+
+
 i--;
 
 for ( uint8_t k = 0; k <= i ; k++ )
@@ -3403,24 +3406,15 @@ for ( uint8_t k = 0; k <= i ; k++ )
 returnVal[k] = returnVal[k] | 0x30;
 }
 }
-
 
 void uint16ToASCII ( char* returnVal, uint16_t num )
 {
 uint16_t divisor = 10000;
 uint16_t prevSum = 0;
 
-bool leading = 1;
-uint8_t i = 0;
-
-
-for (int j = 0; j <= 5; j++)
+for (int i = 0; i <= 5; i++)
 {
-returnVal[j] = 0x00;
-}
 
-do
-{
 
 
 returnVal[i] = ( num - prevSum ) / divisor;
@@ -3428,44 +3422,26 @@ returnVal[i] = ( num - prevSum ) / divisor;
 prevSum += returnVal[i]*divisor;
 
 divisor = divisor/10;
-
-if (leading == 1)
-{
-if ( returnVal[i] != 0 )
-{
-
-i++;
-leading = 0;
 }
-}
-else
-i++;
 
-} while ( divisor > 0);
-
-i--;
-
-for ( uint8_t k = 0; k <= i ; k++ )
+for (int i = 0; i <= 5; i++)
 {
 
 
-returnVal[k] = returnVal[k] | 0x30;
-}
+returnVal[i] = returnVal[i] & 0x3F;
 }
 
+
+returnVal[6] = '\0';
+}
 
 void floatToASCII ( char* returnVal, float num, uint8_t precision )
 {
-uint32_t scaler = 100;
+uint32_t scaler = 10000;
 uint32_t prevSum = 0;
 bool leading = 1;
 uint8_t i = 0;
 
-
-for (int j = 0; j <= 6; j++)
-{
-returnVal[j] = 0x00;
-}
 
 
 do
@@ -3493,6 +3469,8 @@ else
 i++;
 
 } while ( scaler > 0 );
+
+i++;
 
 returnVal[i] = 0x3E;
 
@@ -3866,8 +3844,8 @@ current = ((temp * supVolt)/1023) / (shuntRes * currentGain);
 
 void displayLCD ( int disp )
 {
-char temp1[8] = {0,0,0,0,0,0,0,0};
-char temp2[8] = {0,0,0,0,0,0,0,0};
+char temp1[4] = {0,0,0,0};
+char temp2[4] = {0,0,0,0};
 
 switch( disp )
 {
@@ -3875,17 +3853,17 @@ switch( disp )
 
 case 0:
 {
-floatToASCII( temp1, 12.345, 3);
+uint8ToASCII( temp1, 250);
 LCDSetCursor(0x00);
 LCDWriteString("Voltage:");
 LCDWriteString(temp1);
 LCDWriteString(" V      ");
 
-floatToASCII( temp2, 543.210, 3);
+uint8ToASCII( temp2, 12);
 LCDSetCursor(0x10);
 LCDWriteString("Current:");
 LCDWriteString(temp2);
-LCDWriteString(" A       ");
+LCDWriteString("A       ");
 
 break;
 }

@@ -29,7 +29,7 @@
 ************************************************************************/
 
 #include <xc.h>
-#include <stdio.h> // allows access to sprintf
+#include <stdbool.h>
 
 char topStr[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 char btmStr[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -42,8 +42,11 @@ void LCDcmd(char);
 void LCD4bitCmd(char);
 void LCDSetCursor(char);
 void LCDWriteChar(char);
-void LCDWriteString(char*);
+void LCDWriteString(const char*);
 void clearLCD();
+void uint8ToASCII ( char*, uint8_t );
+void uint16ToASCII ( char*, uint16_t );
+void floatToASCII ( char* , float , uint8_t );
 
 // *** Function Declarations
 void initLCD()
@@ -157,7 +160,7 @@ void LCDSetCursor(char a )
     }
 }
 
-void LCDWriteString(char *a)
+void LCDWriteString(const char *a)
 {
     for(int i=0;a[i]!='\0';i++)
     {
@@ -168,4 +171,169 @@ void LCDWriteString(char *a)
 void clearLCD()
 {
     LCDcmd(0x01);
+}
+
+// ensure that the array is at least 4 elements long
+void uint8ToASCII ( char* returnVal, uint8_t num )
+{
+    uint8_t divisor = 100;
+    uint8_t prevSum = 0;
+    bool leading = 1; // variable for tracking leading zeroes
+    uint8_t i = 0; // loop counter
+
+    // zero the array
+    for (int j = 0; j <= 2; j++)
+    {
+        returnVal[j] = 0x00;
+    }
+
+    do
+    {
+        // divide and subtract
+
+        returnVal[i] = ( num - prevSum ) / divisor;
+
+        prevSum += returnVal[i]*divisor;
+
+        divisor = divisor/10;
+
+        if (leading == 1)
+        {
+            if ( returnVal[i] != 0 )
+            {
+                // found the first digit of the number, start recording it in the array and stop checking for leading zeroes
+                i++;
+                leading = 0;
+            }
+        }
+        else
+            i++;
+
+    } while ( divisor > 0);
+
+    i--;
+
+    for ( uint8_t k = 0; k <= i ; k++ )
+    {
+        // for ASCII numbers the MSB is 0x3
+        // make the MSB while masking the LSB
+        returnVal[k] = returnVal[k] | 0x30;
+    }
+}
+
+// ensure that the array is at least 7 elements long
+void uint16ToASCII ( char* returnVal, uint16_t num )
+{
+    uint16_t divisor = 10000;
+    uint16_t prevSum = 0;
+
+    bool leading = 1; // variable for tracking leading zeroes
+    uint8_t i = 0; // loop counter
+
+    // zero the array
+    for (int j = 0; j <= 5; j++)
+    {
+        returnVal[j] = 0x00;
+    }
+
+    do
+    {
+        // divide and subtract
+
+        returnVal[i] = ( num - prevSum ) / divisor;
+
+        prevSum += returnVal[i]*divisor;
+
+        divisor = divisor/10;
+
+        if (leading == 1)
+        {
+            if ( returnVal[i] != 0 )
+            {
+                // found the first digit of the number, start recording it in the array and stop checking for leading zeroes
+                i++;
+                leading = 0;
+            }
+        }
+        else
+            i++;
+
+    } while ( divisor > 0);
+
+    i--;
+
+    for ( uint8_t k = 0; k <= i ; k++ )
+    {
+        // for ASCII numbers the MSB is 0x3
+        // make the MSB while masking the LSB
+        returnVal[k] = returnVal[k] | 0x30;
+    }
+}
+
+// ensure that the array is at least 8 elements long
+void floatToASCII ( char* returnVal, float num, uint8_t precision )
+{
+    uint32_t scaler = 100;
+    uint32_t prevSum = 0;
+    bool leading = 1; // variable for tracking leading zeroes
+    uint8_t i = 0; // loop counter
+
+    // zero the array
+    for (int j = 0; j <= 6; j++)
+    {
+        returnVal[j] = 0x00;
+    }
+
+    // interger part
+    do
+    {
+        // divide and subtract
+        // assuming a max of a 999 interger number
+        // leading zeroes are removed
+
+        returnVal[i] = ( num - prevSum ) / scaler;
+
+        prevSum += returnVal[i]*scaler;
+
+        scaler = scaler/10;
+
+        if (leading == 1)
+        {
+            if ( returnVal[i] != 0 )
+            {
+                // found the first digit of the number, start recording it in the array and stop checking for leading zeroes
+                i++;
+                leading = 0;
+            }
+        }
+        else
+            i++;
+
+    } while ( scaler > 0 );
+
+    returnVal[i] = 0x3E; // add a decimal point
+
+    // fractional part
+
+    scaler = 10;
+
+    for (uint8_t j = i; i - j <= precision ; i++)
+    {
+        prevSum = prevSum * 10;
+        returnVal[i] = num * scaler - prevSum;
+
+        scaler = scaler * 10;
+
+        prevSum += returnVal[i];
+    }
+
+    for (; i > 0; i--)
+    {
+        // for ASCII numbers the MSB is 0x3
+        // make the MSB while masking the LSB
+        returnVal[i] = returnVal[i] & 0x3F;
+    }
+
+    // add the NULL terminator
+    returnVal[++i] = '\0';
 }

@@ -178,11 +178,8 @@ void sampleCurrent ()
 // display data to the LCD screen, input interger 0...3 depending on the data desired to be displayed
 void displayLCD ( int disp )
 {
-    uint8_t itemU;
-    uint8_t itemL;
-    float valueU;
-    float valueL;
-
+    char temp1[8] = {0,0,0,0,0,0,0,0};
+    char temp2[8] = {0,0,0,0,0,0,0,0};
 
     switch( disp )
     {
@@ -190,32 +187,24 @@ void displayLCD ( int disp )
         // along with the current
         case 0:
         {
-            itemU = 11;
-            itemL = 12;
-            valueU = cellVolt[5];
-            valueL = current;
-
-            /*
-            sprintf( topStr, "Voltage:%.3f V      ", cellVolt[5] );
-
+            floatToASCII( temp1, 12.345, 3);
             LCDSetCursor(0x00);
-            LCDWriteString(topStr);
+            LCDWriteString("Voltage:");
+            LCDWriteString(temp1);
+            LCDWriteString(" V      ");
 
-            sprintf( btmStr, "Current:%.3fA      ", current);
-
+            floatToASCII( temp2, 543.210, 3);
             LCDSetCursor(0x10);
-            LCDWriteString(btmStr);
-            */
+            LCDWriteString("Current:");
+            LCDWriteString(temp2);
+            LCDWriteString(" A       ");
+            
             break;
         }
 
         // display the cell voltages of cells 1 and 2
         case 1:
         {
-            itemU = 1;
-            itemL = 2;
-            valueU = cellVolt[0];
-            valueL = cellVolt[1] - cellVolt[0];
             /*
             sprintf( topStr, "Cell 1:%.2f     ", cellVolt[0] );
 
@@ -233,10 +222,6 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 3 and 4
         case 2:
         {
-            itemU = 3;
-            itemL = 4;
-            valueU = cellVolt[2] - cellVolt[1];
-            valueL = cellVolt[3] - cellVolt[2];
             /*
             sprintf( topStr, "Cell 3:%.2f     ", cellVolt[2] - cellVolt [1] );
 
@@ -254,10 +239,6 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 5 and 6
         case 3:
         {
-            itemU = 5;
-            itemL = 6;
-            valueU = cellVolt[4] - cellVolt[3];
-            valueL = cellVolt[5] - cellVolt[4];
             /*
             sprintf( topStr, "Cell 5:%.2f     ", cellVolt[4] - cellVolt[3] );
 
@@ -272,17 +253,6 @@ void displayLCD ( int disp )
             break;
         }
     }
-
-    sprintf( topStr, "%u: %.2f         ", itemU, valueU );
-
-    LCDSetCursor(0x00);
-    LCDWriteString(topStr);
-
-    sprintf( btmStr, "%u: %.2f         ", itemL, valueL );
-
-    LCDSetCursor(0x10);
-    LCDWriteString(btmStr);
-
 }
 
 // sets the gain for the current sense module
