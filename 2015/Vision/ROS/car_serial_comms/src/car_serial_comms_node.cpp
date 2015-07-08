@@ -102,9 +102,6 @@ public:
         msg.steering = steering;
         msg.throttle = throttle;
 
-        // // This is just a notification for debug - not a ROS message
-        // ROS_INFO("%s", msg.data.c_str());
-
         // Publish to send out
         comms_pub_.publish(msg);
       }
@@ -125,9 +122,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "serial_comms");
   //ros::param::param<std::string>("~port", port, "/dev/ttyUSB0");
   //ros::param::param<int>("~baud", baud, 115200);
-  // Run at 60 Hz - twice that of the camera
-  // This basically means no lag from the camera's perspective.
-  ros::Rate loop_rate(60);
   //****************************************************************************
 
   //****************************************************************************
@@ -140,6 +134,9 @@ int main(int argc, char **argv)
   //****************************************************************************
 
   // Main loop
+  // Run at 60 Hz - twice that of the camera
+  // This basically means no lag from the camera's perspective.
+  ros::Rate loop_rate(60);
   while (ros::ok())
   {
     // Check for new data

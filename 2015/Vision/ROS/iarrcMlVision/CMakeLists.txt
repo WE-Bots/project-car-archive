@@ -6,9 +6,9 @@ project(iarrcMlVision)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
-  cv_bridge
+  # cv_bridge
   car_serial_comms
-  image_transport
+  # image_transport
   compressed_image_transport
   roscpp
   std_msgs
@@ -89,7 +89,12 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES iarrcMlVision
-#  CATKIN_DEPENDS camera_info_manager car_serial_comms compressed_image_transport roscpp std_msgs
+  CATKIN_DEPENDS
+  compressed_image_transport
+  roscpp
+  std_msgs
+  sensor_msgs
+  car_serial_comms
 #  DEPENDS system_lib
 )
 
@@ -101,6 +106,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 

@@ -5,5 +5,5 @@
        module and SSHing into the Pi to do this. -->
   <node pkg="car_serial_comms" name="car_comms" type="car_serial_comms_node"/>
   <node pkg="raspicam" name="pi_cam" type="raspicam_node"/>
-  <node pkg="iarrcMlVision" type="iarrcMlVision_node" name="vision_controller"/> -->
+  <node pkg="iarrcMlVision" type="iarrcMlVision_node" name="vision_controller"/>
 </launch>
