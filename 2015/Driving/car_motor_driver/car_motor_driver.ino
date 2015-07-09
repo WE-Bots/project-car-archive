@@ -18,7 +18,7 @@
 
 //uncomment for active communications while debugging
 //#define I2C
-//#define USB
+#define USB
 #define BLUETOOTH
 #define MOTORS
 
@@ -52,13 +52,12 @@ int battery_current = 50;
 
 void setup()
 {
-	Serial.begin(9600);
 #ifdef I2C
 	Wire.begin();                 //start I2C
 #endif
 
 #ifdef USB
-	Serial.begin(9600);			//Start serial communications 
+	Serial.begin(115200);			//Start serial communications 
 #endif
 
 #ifdef BLUETOOTH
