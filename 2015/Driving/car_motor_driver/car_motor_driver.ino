@@ -129,7 +129,9 @@ void loop()
 		//Serial.println(steering_angle);
 		Serial1.print(battery_voltage);
 		Serial1.print(",");
-		Serial1.println(battery_current);
+		Serial1.print(battery_current);
+		Serial1.print(",");
+		Serial1.println(real_speed);
 		emergency_stop = false;
 		timer = millis();
 	}
@@ -143,9 +145,9 @@ void loop()
 	//put pi communication stuff here
 	//only for getting the training video
 	Serial.print('<');
-	Serial.print(90 - constrain(steering_angle, -30, 40));
+	Serial.print(90 + constrain(steering_angle, -30, 40));
 	Serial.print(',');
-	Serial.print(1500 - constrain(base_speed + speed_error, -500, 500));
+	Serial.print(1500 + constrain(base_speed + speed_error, -500, 500));
 	Serial.print('>');
 #endif
 #endif
@@ -156,6 +158,11 @@ void loop()
 	if (Serial1.available() > 0)
 	{
 		emergency_stop = Serial1.parseInt();    // test this is still working.
+		Serial1.print(battery_voltage);
+		Serial1.print(",");
+		Serial1.print(battery_current);
+		Serial1.print(",");
+		Serial1.println(real_speed);
 		timer = millis();
 	}
 	if ((millis() - timer) >= 700)
@@ -179,8 +186,8 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 - constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
-		steer.write(90 - constrain(steering_angle, -30, 40));
+		motor.writeMicroseconds(1500 + constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
+		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif
 }
