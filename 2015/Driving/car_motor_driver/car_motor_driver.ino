@@ -49,6 +49,8 @@ boolean emergency_stop = true;
 unsigned long timer = 0;
 int battery_voltage = 10;
 int battery_current = 50;
+int avg_encoder_distance = 0;
+int distance = 0;
 
 void setup()
 {
@@ -84,14 +86,18 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
+	avg_encoder_distance=0;
 	for (int i = 0; i < 4; i++)
 	{
-		int16_t encoder_period = 0;
-		uint8_t id = 0;
-		while (!wire_get_value(id, encoder_period, encoders[i])){}
+		int encoder_period = 0;
+		int encoder_distance=0;
+		while (!wire_get_value(encoder_period, encoder_distance, encoders[i])){}
 		real_speed += encoder_period;
+		avg_encoder_distance+=encoder_distance;
 	}
 	real_speed /= 4;
+	avg_encoder_distance/=4;
+
 	if (!emergency_stop)
 	{
 		accumulated_speed_error += base_speed - real_speed;
@@ -99,18 +105,7 @@ void loop()
 	speed_error = constrain(0.5*(base_speed - real_speed) + 0.5*accumulated_speed_error, -100, 100);
 
 	//get data from power board
-	uint8_t id = 0;
-	int16_t value = 0;
-	do
-	{
-		wire_send_value(1, 0, power_board);
-	} while (!wire_get_value(id, value, power_board) && id != 1);
-	battery_voltage = value;
-	do
-	{
-		wire_send_value(2, 0, power_board);
-	} while (!wire_get_value(id, value, power_board) && id != 2);
-	battery_current = value;
+	while(!wire_get_value(battery_voltage,battery_current,power_board)){}
 #ifdef BLUETOOTH
 	Serial1.write(battery_voltage + "," + battery_current);
 #endif
@@ -119,9 +114,9 @@ void loop()
 	//Remote control code
 #ifndef AUTONOMOUS
 #ifdef BLUETOOTH
-	if (Serial1.available() > 0)
+	if (Serial1.available() > 1)
 	{
-		base_speed = (Serial1.parseInt()/10 - 50);
+		base_speed = (Serial1.parseInt() / 5 - 100);
 		steering_angle = (Serial1.parseInt() / 10 - 90);
 		//Serial.print("Speed: ");
 		//Serial.print(base_speed);
@@ -135,7 +130,7 @@ void loop()
 		emergency_stop = false;
 		timer = millis();
 	}
-	if ((millis() - timer) >= 700)
+	if ((millis() - timer) >= 300)
 	{
 		emergency_stop = true;
 	}
@@ -144,11 +139,7 @@ void loop()
 #ifdef USB
 	//put pi communication stuff here
 	//only for getting the training video
-	Serial.print('<');
-	Serial.print(90 + constrain(steering_angle, -30, 40));
-	Serial.print(',');
-	Serial.print(1500 + constrain(base_speed + speed_error, -500, 500));
-	Serial.print('>');
+	serial_send_value(constrain(steering_angle, -30, 40), real_speed);
 #endif
 #endif
 
@@ -165,7 +156,7 @@ void loop()
 		Serial1.println(real_speed);
 		timer = millis();
 	}
-	if ((millis() - timer) >= 700)
+	if ((millis() - timer) >= 300)
 	{
 		emergency_stop = true;
 	}
@@ -306,23 +297,21 @@ static boolean serial_get_value(uint8_t &id, int16_t &value) {
 /*
 function serial_send_value
 /brief
--Sends an id-value pair over serial in our format.
+-Sends steering angle and real speed over serial in our format.
 -Always returns true because I can't think of a failure mechanism.
 
 /params
--uint8_t id: The id to send.
--int16_t value: The value to send.
+-int angle: The steering angle
+-int speed: The real speed.
 
 /return
 -bool: True if transmission was successful. Always true.
 */
-static boolean serial_send_value(uint8_t id, int16_t value) {
+static boolean serial_send_value(int angle, int speed) {
 	Serial.print('<');
-	Serial.print(id);
+	Serial.print(angle);
 	Serial.print(',');
-	Serial.print(value);
-	Serial.print(',');
-	Serial.print(id + value);
+	Serial.print(speed);
 	Serial.print('>');
 	return true;
 }
@@ -332,100 +321,38 @@ static boolean serial_send_value(uint8_t id, int16_t value) {
 /*
 function wire_get_value
 /brief
--Attempts to read an id and value using our comms protocol.
+-Attempts to read a uint16_t and a uint8_t using our comms protocol.
 -Reference arguments are only updated if a new package is completed -
 they will be unmodified if a complete, valid entry is not obtained.
 
 /params
--uint8_t &id: Reference to id variable to read into
--int16_t &value: Reference to value variable to read into
+-int &first: Reference to uint16_t variable to read into
+-int &second: Reference to uint8_t variable to read into
 
 /return
--bool: True if a id-value pair was obtained. False otherwise.
+-bool: True if a packet was obtained. False otherwise.
 */
-static boolean wire_get_value(uint8_t &id, int16_t &value, int address) {
-	Wire.requestFrom(address, 9);
+static boolean wire_get_value(int &first, int &second, int address) {
+	if (Wire.requestFrom(address, 4)!=4)
+		return false; //didn't receive the correct number of bytes
+
 	// Static variables remain between calls
-	static char buffer[3][7]; // Three parameters, length 6 + '\0' each
-	static unsigned int charIdx[3] = { 0, 0, 0 }; // Index for each char container
-	static unsigned int buffIdx = 0; // Current container receiving data
-	static boolean started = false;
-	// Read chars until there is no data in the buffer or we find a terminator
-	while (Wire.available() > 0) {
-		// Check for start of package
-		if (Wire.peek() == '<') {
-			Wire.read(); // Eat the byte
-			started = true;
-			buffIdx = 0;
-			for (int i = 0; i < 3; ++i)
-				charIdx[i] = 0;
-		}
-		else if (!started) {
-			// Skip this char, go to next until a packet opener is found.
-			Wire.read(); // Eat byte.
-			continue;
-		}
-		else if (Wire.peek() == ',') {
-			Wire.read(); // Eat the byte
-			if ((charIdx[buffIdx] == 0) || (buffIdx >= 2)) {
-				// Current is still empty or encountered a seventh char - bad.
-				started = false; // Throw away this packet
-				continue;
-			}
-			buffer[buffIdx][charIdx[buffIdx]++] = '\0'; // Add null terminator
-			buffIdx++;
-		}
-		else if (Wire.peek() == '>') {
-			if (!started || charIdx[0] == 0 || charIdx[1] == 0 || charIdx[2] == 0) {
-				// No valid beginning of package was found, or a buffer
-				// is still empty.
-				// Buffers likely contain garbage. Toss the packet.
-				Wire.read(); // Eat char
-				started = false;
-				continue;
-			}
-			// Don't eat the byte - leave it for a check outside of the loop
-			buffer[buffIdx][charIdx[buffIdx]++] = '\0'; // Add null terminator
-			break;
-		}
-		else // Must be a digit. Maybe check just in case?
-			if (charIdx[buffIdx] == 5) {
-				// Too long to be an int16_t integer.
-				Wire.read(); // Eat char
-				started = false; // Packet is invalid
-				continue;
-			}
-		buffer[buffIdx][charIdx[buffIdx]++] = Wire.read();
-	}
+	static byte[3] buf16={0,0,'\0'}; //2 bytes +'\0'
+	static byte buf8=0;
+	static byte bufXOR=0;
 
-	// Check if buffer was emptied (ALWAYS check before peeking)
-	if (Wire.available() == 0)
-		return false; // Processed whole buffer without receiving complete packet
+	// Read data
+	Wire.readBytes(buf16,2);
+	buf8=Wire.read();
+	bufXOR=Wire.read();
 
-	// Check if terminator was reached
-	if (Wire.peek() != '>')
-		return false; // Not sure how you could even get here.
-	// Maybe came in after the check in the loop.
+	//check XOR
+	if (bufXOR!=buf16[0]^buf16[1]^buf8)
+		return false;	//invalid XOR
 
-	// Reserve return value
-	uint8_t retid;
-	int16_t retval;
-	int16_t chksum;
-
-	// Get id TODO: verify that they're all valid integers (atoi does not)
-	retid = atoi(buffer[0]);
-	// Get value
-	retval = atoi(buffer[1]);
-	// Get checksum
-	chksum = atoi(buffer[2]);
-
-	// Compare checksum
-	if ((id + retval) != chksum)
-		return false;
-
-	// Checksum was valid, pass the variables back to the caller, return true
-	id = retid;
-	value = retval;
+	// XOR was valid, pass the variables back to the caller, return true
+	first = atoi(buf16);
+	second=buf8;
 	return true;
 }
 
@@ -442,6 +369,7 @@ function wire_send_value
 /return
 -bool: True if transmission was successful.
 */
+/*
 static boolean wire_send_value(uint8_t id, int16_t value, int address) {
 	Wire.beginTransmission(address);
 	Wire.print('<');
@@ -452,6 +380,6 @@ static boolean wire_send_value(uint8_t id, int16_t value, int address) {
 	Wire.print(id + value);
 	Wire.print('>');
 	return !Wire.endTransmission();
-}
+}*/
 #endif
 //};
