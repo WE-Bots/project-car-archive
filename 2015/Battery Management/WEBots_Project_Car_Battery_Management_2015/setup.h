@@ -109,6 +109,8 @@ FOSC =	Oscillator Selection bits
 #include <xc.h>
 #include <stdint.h> // allows access to more intuiative interger classes such as uint8_t, int16_t
 
+#define SHUT_DOWN_TEST
+
 /***** LCD Definitions *****/
 
 #define D7 RB5
@@ -176,22 +178,23 @@ uint8_t LCDDisplayMode = 0;
 
 /***** Calibration Variables *****/
 
-const float refVolt = 1.122; // calibration value for the reference voltage
+const float refVolt = 1.128; // calibration value for the reference voltage
 
-const uint16_t cell1RDT = 2200; // the value of the resistor at the top of the cell 1 resistor divider (OHM)
-const uint16_t cellRDB = 2200; // the value of the resistor at the bottom of the cell 1 resistor divider (OHM)
-                               // all of the rsristor dividers have a 2.2k resistor on the bottom
+const float cellVoltL = 3.2; // minimum cell voltage
 
-const uint16_t cell2RDT = 4700; // the value of the resistor at the top of the cell 2 resistor divider (OHM)
+const float cell1RR = 0.98751; // the resistor ratio of the cell 1 resistor divider, TopRes / BtmRes (OHM)
 
-const uint16_t cell3RDT = 10000; // the value of the resistor at the top of the cell 3 resistor divider (OHM)
+const float cell2RR = 2.11635; // the resistor ratio of the cell 2 resistor divider, TopRes / BtmRes (OHM)
 
-const uint16_t cell4RDT = 14700; // the value of the resistor at the top of the cell 4 resistor divider (OHM)
+const float cell3RR = 4.52138; // the resistor ratio of the cell 3 resistor divider, TopRes / BtmRes (OHM)
 
-const uint16_t cell5RDT = 20000; // the value of the resistor at the top of the cell 5 resistor divider (OHM)
+const float cell4RR = 6.63700; // the resistor ratio of the cell 4 resistor divider, TopRes / BtmRes (OHM)
 
-const uint16_t cell6RDT = 24700; // the value of the resistor at the top of the cell 6 resistor divider (OHM)
+const float cell5RR = 9.03161; // the resistor ratio of the cell 5 resistor divider, TopRes / BtmRes (OHM)
 
+const float cell6RR = 11.1326; // the resistor ratio of the cell 6 resistor divider, TopRes / BtmRes (OHM)
+
+const uint8_t sampleNum = 10; // the number of ADC samples to be averaged
 
 /***** Functions *****/
 
@@ -218,7 +221,7 @@ void initController ()
     TRISA = 0b00111111;
     TRISB = 0b00000000;
     TRISC = 0b00000000;
-    TRISD = 0b00100000;
+    TRISD = 0b01100000;
     TRISE = 0b00000111;
 
     ANSEL = 0xFF; // set all of the analog channels as analog inputs
@@ -238,7 +241,7 @@ void initController ()
 
     UC_CGND = 0; // connect the ground for the microcontroller (active low)
 
-    LCD_PWR_SW = 0; // keep LCD on ( active low )
+    //LCD_PWR_SW = 1; // keep LCD off ( active low )
 
     // temporay setup !!!!*****
     MOTOR_CONTROL = 1;

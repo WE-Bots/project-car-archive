@@ -277,7 +277,8 @@ void floatToASCII ( char* returnVal, float num, uint8_t precision )
     uint32_t prevSum = 0;
     bool leading = 1; // variable for tracking leading zeroes
     uint8_t i = 0; // loop counter
-
+    uint8_t decPoint = 0; // tracks the element in the array to put the decimal point
+    
     // zero the array
     for (int j = 0; j <= 6; j++)
     {
@@ -311,7 +312,9 @@ void floatToASCII ( char* returnVal, float num, uint8_t precision )
 
     } while ( scaler > 0 );
 
-    returnVal[i] = 0x3E; // add a decimal point
+    
+    decPoint = i; // store the location of the decimal point
+    i++;
 
     // fractional part
 
@@ -320,20 +323,24 @@ void floatToASCII ( char* returnVal, float num, uint8_t precision )
     for (uint8_t j = i; i - j <= precision ; i++)
     {
         prevSum = prevSum * 10;
-        returnVal[i] = num * scaler - prevSum;
+        returnVal[i] = (char)( num * scaler - prevSum );
 
         scaler = scaler * 10;
 
         prevSum += returnVal[i];
     }
 
-    for (; i > 0; i--)
+    i--;
+
+    for ( uint8_t k = 0; k <= i ; k++ )
     {
         // for ASCII numbers the MSB is 0x3
         // make the MSB while masking the LSB
-        returnVal[i] = returnVal[i] & 0x3F;
+        returnVal[k] = returnVal[k] | 0x30;
     }
 
+    returnVal[decPoint] = 0x2E; // add a decimal point
+
     // add the NULL terminator
-    returnVal[++i] = '\0';
+    returnVal[i] = '\0';
 }

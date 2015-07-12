@@ -97,18 +97,19 @@ void sampleBatteryCells ()
     __delay_ms(5); // wait for the voltage to level out
 
     // sample the bottom cells
-    cellVolt[0] = ( ( cell1RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL1); // cell 1
-    cellVolt[1] = ( ( cell2RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL2); // cell 2
-    cellVolt[2] = ( ( cell3RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL3); // cell 3
+    // also implements an IIR running average function
+    cellVolt[0] = 0.1 * ( cell1RR + 1 ) * sampleVoltage(CELL1) + 0.9 * cellVolt[0]; // cell 1
+    cellVolt[1] = 0.1 * ( cell2RR + 1 ) * sampleVoltage(CELL2) + 0.9 * cellVolt[1]; // cell 2
+    cellVolt[2] = 0.1 * ( cell3RR + 1 ) * sampleVoltage(CELL3) + 0.9 * cellVolt[2]; // cell 3
 
     BT_CLS_EN = 0; // turn off the first three voltage dividers
     TP_CLS_EN = 1; // turn on the last three voltage dividers
 
     __delay_ms(5);
 
-    cellVolt[3] = ( ( cell4RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL4); // cell 4
-    cellVolt[4] = ( ( cell5RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL5); // cell 5
-    cellVolt[5] = ( ( cell6RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL6); // cell 6
+    cellVolt[3] = 0.1 * ( cell4RR + 1 ) * sampleVoltage(CELL4) + 0.9 * cellVolt[3]; // cell 4
+    cellVolt[4] = 0.1 * ( cell5RR + 1 ) * sampleVoltage(CELL5) + 0.9 * cellVolt[4]; // cell 5
+    cellVolt[5] = 0.1 * ( cell6RR + 1 ) * sampleVoltage(CELL6) + 0.9 * cellVolt[5]; // cell 6
 
     TP_CLS_EN = 0; // turn off the last three voltage dividers
 
@@ -123,16 +124,18 @@ void sampleReference()
     // Turn on the unity feedback op amps
     OPAMP_CGND = 1;
 
-    __delay_ms(5);
+    __delay_ms(2); // wait for the opamp to stabalize
+
+    analogRead(REFV); // do a sample and dont record the result, helps to remove residual voltage from the previous sample
     
     refValue = 0;
 
-    for ( int i = 0; i <= 10; i++)
+    for ( int i = 0; i <= sampleNum; i++)
     {
         refValue += analogRead(REFV);
     }
 
-    refValue = refValue / 10;
+    refValue = refValue / sampleNum;
 
     // turn off the reference voltage divider
     REF_EN = 0;
@@ -146,12 +149,14 @@ float sampleVoltage(ADCChannel  chan)
 {
     uint16_t temp = 0;
 
-    for ( int i = 0; i <= 10; i++)
+    analogRead(chan); // do a sample and dont record the result, helps to remove residual voltage from the previous sample 
+
+    for ( int i = 0; i <= sampleNum; i++)
     {
         temp += analogRead(chan);
     }
 
-    temp = temp / 10;
+    temp = temp / sampleNum;
 
     // convert the digital value into voltage
     return (temp * supVolt)/1023;
@@ -161,12 +166,12 @@ void sampleCurrent ()
 {
     uint16_t temp = 0;
 
-    for ( int i = 0; i <= 10; i++)
+    for ( int i = 0; i <= sampleNum; i++)
     {
         temp += analogRead(CURRENT);
     }
 
-    temp = temp / 10;
+    temp = temp / sampleNum;
 
     // convert the digital value into voltage
     // convert an amplified voltage to a current using the shunt resistance
@@ -187,13 +192,13 @@ void displayLCD ( int disp )
         // along with the current
         case 0:
         {
-            floatToASCII( temp1, 12.345, 3);
+            floatToASCII( temp1, cellVolt[5], 2);
             LCDSetCursor(0x00);
             LCDWriteString("Voltage:");
             LCDWriteString(temp1);
             LCDWriteString(" V      ");
 
-            floatToASCII( temp2, 543.210, 3);
+            floatToASCII( temp2, current, 2);
             LCDSetCursor(0x10);
             LCDWriteString("Current:");
             LCDWriteString(temp2);
@@ -205,51 +210,60 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 1 and 2
         case 1:
         {
-            /*
-            sprintf( topStr, "Cell 1:%.2f     ", cellVolt[0] );
 
+            floatToASCII( temp1, cellVolt[0], 2);
             LCDSetCursor(0x00);
-            LCDWriteString(topStr);
+            LCDWriteString("Cell 1:");
+            LCDWriteString(temp1);
+            LCDWriteString(" V      ");
 
-            sprintf( btmStr, "Cell 2:%.2f     ", cellVolt[1] - cellVolt[0] );
-
+            //floatToASCII( temp2, cellVolt[1] - cellVolt[0], 2);
+            floatToASCII( temp2, cellVolt[1], 2);
             LCDSetCursor(0x10);
-            LCDWriteString(btmStr);
-            */
+            LCDWriteString("Cell 2:");
+            LCDWriteString(temp2);
+            LCDWriteString(" V       ");
+
             break;
         }
 
         // display the cell voltages of cells 3 and 4
         case 2:
         {
-            /*
-            sprintf( topStr, "Cell 3:%.2f     ", cellVolt[2] - cellVolt [1] );
-
+            //floatToASCII( temp1, cellVolt[2] - cellVolt [1], 2);
+            floatToASCII( temp1, cellVolt[2], 2);
             LCDSetCursor(0x00);
-            LCDWriteString(topStr);
+            LCDWriteString("Cell 3:");
+            LCDWriteString(temp1);
+            LCDWriteString(" V      ");
 
-            sprintf( btmStr, "Cell 4:%.2f     ", cellVolt[3] - cellVolt[2] );
-
+            //floatToASCII( temp2, cellVolt[3] - cellVolt[2], 2);
+            floatToASCII( temp2, cellVolt[3], 2);
             LCDSetCursor(0x10);
-            LCDWriteString(btmStr);
-            */
+            LCDWriteString("Cell 4:");
+            LCDWriteString(temp2);
+            LCDWriteString(" V       ");
+
             break;
         }
 
         // display the cell voltages of cells 5 and 6
         case 3:
         {
-            /*
-            sprintf( topStr, "Cell 5:%.2f     ", cellVolt[4] - cellVolt[3] );
-
+            //floatToASCII( temp1, cellVolt[4] - cellVolt [3], 2);
+            floatToASCII( temp1, cellVolt[4], 2);
             LCDSetCursor(0x00);
-            LCDWriteString(topStr);
-           
-            sprintf( btmStr, "Cell 6:%.2f     ", cellVolt[5] - cellVolt[4] );
+            LCDWriteString("Cell 5:");
+            LCDWriteString(temp1);
+            LCDWriteString(" V      ");
 
+            //floatToASCII( temp2, cellVolt[5] - cellVolt[4], 2);
+            floatToASCII( temp2, cellVolt[5], 2);
             LCDSetCursor(0x10);
-            LCDWriteString(btmStr);
-            */
+            LCDWriteString("Cell 6:");
+            LCDWriteString(temp2);
+            LCDWriteString(" V       ");
+
             break;
         }
     }
@@ -341,4 +355,23 @@ void checkCurrent ()
             MOTOR_CONTROL = 0;
         }
     }
+}
+
+// if system check is sucessful the function will return 0
+// if a cell is out of range it will return the cell number
+// if current is out of range it will return 7
+uint8_t systemCheck ()
+{
+    sampleReference();
+    sampleCurrent();
+    sampleBatteryCells();
+
+    // check cell 1 voltage
+    if ( cellVolt[0] < cellVoltL )
+    {
+        // cell 1 voltage is out of range
+        return 1;
+    }
+
+    return 0;
 }

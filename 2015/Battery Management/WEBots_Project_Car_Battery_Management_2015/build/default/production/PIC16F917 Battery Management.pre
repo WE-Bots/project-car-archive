@@ -3460,6 +3460,7 @@ uint32_t scaler = 100;
 uint32_t prevSum = 0;
 bool leading = 1;
 uint8_t i = 0;
+uint8_t decPoint = 0;
 
 
 for (int j = 0; j <= 6; j++)
@@ -3494,7 +3495,9 @@ i++;
 
 } while ( scaler > 0 );
 
-returnVal[i] = 0x3E;
+
+decPoint = i;
+i++;
 
 
 
@@ -3503,22 +3506,26 @@ scaler = 10;
 for (uint8_t j = i; i - j <= precision ; i++)
 {
 prevSum = prevSum * 10;
-returnVal[i] = num * scaler - prevSum;
+returnVal[i] = (char)( num * scaler - prevSum );
 
 scaler = scaler * 10;
 
 prevSum += returnVal[i];
 }
 
-for (; i > 0; i--)
+i--;
+
+for ( uint8_t k = 0; k <= i ; k++ )
 {
 
 
-returnVal[i] = returnVal[i] & 0x3F;
+returnVal[k] = returnVal[k] | 0x30;
 }
 
+returnVal[decPoint] = 0x2E;
 
-returnVal[++i] = '\0';
+
+returnVal[i] = '\0';
 }
 
 # 35 "timer0.h"
@@ -3653,7 +3660,7 @@ returnVal = returnVal | ADRESL;
 return returnVal;
 }
 
-# 166 "setup.h"
+# 168 "setup.h"
 float cellVolt[6] = {0, 0, 0, 0, 0, 0};
 float supVolt = 4.2;
 
@@ -3667,22 +3674,23 @@ uint8_t LCDDisplayMode = 0;
 
 
 
-const float refVolt = 1.122;
+const float refVolt = 1.128;
 
-const uint16_t cell1RDT = 2200;
-const uint16_t cellRDB = 2200;
+const float cellVoltL = 3.2;
 
+const float cell1RR = 0.98751;
 
-const uint16_t cell2RDT = 4700;
+const float cell2RR = 2.11635;
 
-const uint16_t cell3RDT = 10000;
+const float cell3RR = 4.52138;
 
-const uint16_t cell4RDT = 14700;
+const float cell4RR = 6.63700;
 
-const uint16_t cell5RDT = 20000;
+const float cell5RR = 9.03161;
 
-const uint16_t cell6RDT = 24700;
+const float cell6RR = 11.1326;
 
+const uint8_t sampleNum = 10;
 
 
 
@@ -3709,7 +3717,7 @@ OSCCONbits.SCS = 0;
 TRISA = 0b00111111;
 TRISB = 0b00000000;
 TRISC = 0b00000000;
-TRISD = 0b00100000;
+TRISD = 0b01100000;
 TRISE = 0b00000111;
 
 ANSEL = 0xFF;
@@ -3729,7 +3737,7 @@ OPTION_REGbits.nRBPU = 1;
 
 RD2 = 0;
 
-RD6 = 0;
+
 
 
 RC0 = 1;
@@ -3785,18 +3793,19 @@ RD0 = 1;
 _delay((unsigned long)((5)*(8000000/4000.0)));
 
 
-cellVolt[0] = ( ( cell1RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL1);
-cellVolt[1] = ( ( cell2RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL2);
-cellVolt[2] = ( ( cell3RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL3);
+
+cellVolt[0] = 0.1 * ( cell1RR + 1 ) * sampleVoltage(CELL1) + 0.9 * cellVolt[0];
+cellVolt[1] = 0.1 * ( cell2RR + 1 ) * sampleVoltage(CELL2) + 0.9 * cellVolt[1];
+cellVolt[2] = 0.1 * ( cell3RR + 1 ) * sampleVoltage(CELL3) + 0.9 * cellVolt[2];
 
 RD0 = 0;
 RC3 = 1;
 
 _delay((unsigned long)((5)*(8000000/4000.0)));
 
-cellVolt[3] = ( ( cell4RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL4);
-cellVolt[4] = ( ( cell5RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL5);
-cellVolt[5] = ( ( cell6RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL6);
+cellVolt[3] = 0.1 * ( cell4RR + 1 ) * sampleVoltage(CELL4) + 0.9 * cellVolt[3];
+cellVolt[4] = 0.1 * ( cell5RR + 1 ) * sampleVoltage(CELL5) + 0.9 * cellVolt[4];
+cellVolt[5] = 0.1 * ( cell6RR + 1 ) * sampleVoltage(CELL6) + 0.9 * cellVolt[5];
 
 RC3 = 0;
 
@@ -3811,16 +3820,18 @@ RD1 = 1;
 
 RC2 = 1;
 
-_delay((unsigned long)((5)*(8000000/4000.0)));
+_delay((unsigned long)((2)*(8000000/4000.0)));
+
+analogRead(REFV);
 
 refValue = 0;
 
-for ( int i = 0; i <= 10; i++)
+for ( int i = 0; i <= sampleNum; i++)
 {
 refValue += analogRead(REFV);
 }
 
-refValue = refValue / 10;
+refValue = refValue / sampleNum;
 
 
 RD1 = 0;
@@ -3834,12 +3845,14 @@ float sampleVoltage(ADCChannel chan)
 {
 uint16_t temp = 0;
 
-for ( int i = 0; i <= 10; i++)
+analogRead(chan);
+
+for ( int i = 0; i <= sampleNum; i++)
 {
 temp += analogRead(chan);
 }
 
-temp = temp / 10;
+temp = temp / sampleNum;
 
 
 return (temp * supVolt)/1023;
@@ -3849,12 +3862,12 @@ void sampleCurrent ()
 {
 uint16_t temp = 0;
 
-for ( int i = 0; i <= 10; i++)
+for ( int i = 0; i <= sampleNum; i++)
 {
 temp += analogRead(CURRENT);
 }
 
-temp = temp / 10;
+temp = temp / sampleNum;
 
 
 
@@ -3875,13 +3888,13 @@ switch( disp )
 
 case 0:
 {
-floatToASCII( temp1, 12.345, 3);
+floatToASCII( temp1, cellVolt[5], 2);
 LCDSetCursor(0x00);
 LCDWriteString("Voltage:");
 LCDWriteString(temp1);
 LCDWriteString(" V      ");
 
-floatToASCII( temp2, 543.210, 3);
+floatToASCII( temp2, current, 2);
 LCDSetCursor(0x10);
 LCDWriteString("Current:");
 LCDWriteString(temp2);
@@ -3894,7 +3907,19 @@ break;
 case 1:
 {
 
-# 219
+floatToASCII( temp1, cellVolt[0], 2);
+LCDSetCursor(0x00);
+LCDWriteString("Cell 1:");
+LCDWriteString(temp1);
+LCDWriteString(" V      ");
+
+
+floatToASCII( temp2, cellVolt[1], 2);
+LCDSetCursor(0x10);
+LCDWriteString("Cell 2:");
+LCDWriteString(temp2);
+LCDWriteString(" V       ");
+
 break;
 }
 
@@ -3902,7 +3927,19 @@ break;
 case 2:
 {
 
-# 236
+floatToASCII( temp1, cellVolt[2], 2);
+LCDSetCursor(0x00);
+LCDWriteString("Cell 3:");
+LCDWriteString(temp1);
+LCDWriteString(" V      ");
+
+
+floatToASCII( temp2, cellVolt[3], 2);
+LCDSetCursor(0x10);
+LCDWriteString("Cell 4:");
+LCDWriteString(temp2);
+LCDWriteString(" V       ");
+
 break;
 }
 
@@ -3910,7 +3947,19 @@ break;
 case 3:
 {
 
-# 253
+floatToASCII( temp1, cellVolt[4], 2);
+LCDSetCursor(0x00);
+LCDWriteString("Cell 5:");
+LCDWriteString(temp1);
+LCDWriteString(" V      ");
+
+
+floatToASCII( temp2, cellVolt[5], 2);
+LCDSetCursor(0x10);
+LCDWriteString("Cell 6:");
+LCDWriteString(temp2);
+LCDWriteString(" V       ");
+
 break;
 }
 }
@@ -4002,4 +4051,23 @@ if (current > 100)
 RC0 = 0;
 }
 }
+}
+
+
+
+
+uint8_t systemCheck ()
+{
+sampleReference();
+sampleCurrent();
+sampleBatteryCells();
+
+
+if ( cellVolt[0] < cellVoltL )
+{
+
+return 1;
+}
+
+return 0;
 }

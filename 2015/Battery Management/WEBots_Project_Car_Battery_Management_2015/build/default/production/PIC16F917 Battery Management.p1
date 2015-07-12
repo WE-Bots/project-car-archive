@@ -135,34 +135,32 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _CCP2CON `Vuc ~T0 @X0 0 e@29 ]
 "6325
 [v _RD2 `Vb ~T0 @X0 0 e@66 ]
-"6333
-[v _RD6 `Vb ~T0 @X0 0 e@70 ]
 "6293
 [v _RC0 `Vb ~T0 @X0 0 e@56 ]
 [p mainexit ]
 "6329
 [v _RD4 `Vb ~T0 @X0 0 e@68 ]
-"204 setup.h
+"207 setup.h
 [v _currentGainInit `(v ~T0 @X0 0 ef1`uc ]
-"200
-[v _sampleReference `(v ~T0 @X0 0 ef ]
 "203
+[v _sampleReference `(v ~T0 @X0 0 ef ]
+"206
 [v _sampleCurrent `(v ~T0 @X0 0 ef ]
-"201
+"204
 [v _sampleBatteryCells `(v ~T0 @X0 0 ef ]
-"205
+"208
 [v _handlePB `(v ~T0 @X0 0 ef ]
-"202
+"205
 [v _displayLCD `(v ~T0 @X0 0 ef1`i ]
 "6297 C:\Program Files (x86)\Microchip\xc8\v1.34\include\pic16f917.h
 [v _RC2 `Vb ~T0 @X0 0 e@58 ]
 "6321
 [v _RD0 `Vb ~T0 @X0 0 e@64 ]
-"100 PIC16F917 Battery Management.c
-[c E2718 0 1 2 3 4 5 6 7 .. ]
-[n E2718 . CELL1 CELL2 REFV CELL5 CELL6 CELL3 CELL4 CURRENT  ]
-"207 setup.h
-[v _sampleVoltage `(f ~T0 @X0 0 ef1`E2718 ]
+"101 PIC16F917 Battery Management.c
+[c E2721 0 1 2 3 4 5 6 7 .. ]
+[n E2721 . CELL1 CELL2 REFV CELL5 CELL6 CELL3 CELL4 CURRENT  ]
+"210 setup.h
+[v _sampleVoltage `(f ~T0 @X0 0 ef1`E2721 ]
 "6299 C:\Program Files (x86)\Microchip\xc8\v1.34\include\pic16f917.h
 [v _RC3 `Vb ~T0 @X0 0 e@59 ]
 "6323
@@ -3209,146 +3207,161 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _i `uc ~T0 @X0 1 a ]
 [; ;lcd.h: 279: uint8_t i = 0;
 [e = _i -> -> 0 `i `uc ]
-[; ;lcd.h: 282: for (int j = 0; j <= 6; j++)
-"282
+"280
+[v _decPoint `uc ~T0 @X0 1 a ]
+[; ;lcd.h: 280: uint8_t decPoint = 0;
+[e = _decPoint -> -> 0 `i `uc ]
+[; ;lcd.h: 283: for (int j = 0; j <= 6; j++)
+"283
 {
 [v _j `i ~T0 @X0 1 a ]
 [e = _j -> 0 `i ]
 [e $ <= _j -> 6 `i 261  ]
 [e $U 262  ]
-"283
-[e :U 261 ]
-[; ;lcd.h: 283: {
-{
-[; ;lcd.h: 284: returnVal[j] = 0x00;
 "284
-[e = *U + _returnVal * -> _j `x -> -> # *U _returnVal `i `x -> -> 0 `i `uc ]
+[e :U 261 ]
+[; ;lcd.h: 284: {
+{
+[; ;lcd.h: 285: returnVal[j] = 0x00;
 "285
+[e = *U + _returnVal * -> _j `x -> -> # *U _returnVal `i `x -> -> 0 `i `uc ]
+"286
 }
-"282
+"283
 [e ++ _j -> 1 `i ]
 [e $ <= _j -> 6 `i 261  ]
 [e :U 262 ]
-"285
+"286
 }
-[; ;lcd.h: 285: }
-[; ;lcd.h: 288: do
-"288
-[e :U 266 ]
-[; ;lcd.h: 289: {
+[; ;lcd.h: 286: }
+[; ;lcd.h: 289: do
 "289
+[e :U 266 ]
+[; ;lcd.h: 290: {
+"290
 {
-[; ;lcd.h: 294: returnVal[i] = ( num - prevSum ) / scaler;
-"294
+[; ;lcd.h: 295: returnVal[i] = ( num - prevSum ) / scaler;
+"295
 [e = *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux -> / - _num -> _prevSum `f -> _scaler `f `uc ]
-[; ;lcd.h: 296: prevSum += returnVal[i]*scaler;
-"296
+[; ;lcd.h: 297: prevSum += returnVal[i]*scaler;
+"297
 [e =+ _prevSum * -> *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux `ul _scaler ]
-[; ;lcd.h: 298: scaler = scaler/10;
-"298
+[; ;lcd.h: 299: scaler = scaler/10;
+"299
 [e = _scaler / _scaler -> -> -> 10 `i `l `ul ]
-[; ;lcd.h: 300: if (leading == 1)
-"300
-[e $ ! == -> _leading `i -> 1 `i 267  ]
-[; ;lcd.h: 301: {
+[; ;lcd.h: 301: if (leading == 1)
 "301
-{
-[; ;lcd.h: 302: if ( returnVal[i] != 0 )
+[e $ ! == -> _leading `i -> 1 `i 267  ]
+[; ;lcd.h: 302: {
 "302
-[e $ ! != -> *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux `i -> 0 `i 268  ]
-[; ;lcd.h: 303: {
-"303
 {
-[; ;lcd.h: 305: i++;
-"305
-[e ++ _i -> -> 1 `i `uc ]
-[; ;lcd.h: 306: leading = 0;
+[; ;lcd.h: 303: if ( returnVal[i] != 0 )
+"303
+[e $ ! != -> *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux `i -> 0 `i 268  ]
+[; ;lcd.h: 304: {
+"304
+{
+[; ;lcd.h: 306: i++;
 "306
-[e = _leading -> -> 0 `i `uc ]
+[e ++ _i -> -> 1 `i `uc ]
+[; ;lcd.h: 307: leading = 0;
 "307
-}
-[e :U 268 ]
+[e = _leading -> -> 0 `i `uc ]
 "308
 }
-[; ;lcd.h: 307: }
-[; ;lcd.h: 308: }
-[e $U 269  ]
+[e :U 268 ]
 "309
-[e :U 267 ]
-[; ;lcd.h: 309: else
-[; ;lcd.h: 310: i++;
+}
+[; ;lcd.h: 308: }
+[; ;lcd.h: 309: }
+[e $U 269  ]
 "310
+[e :U 267 ]
+[; ;lcd.h: 310: else
+[; ;lcd.h: 311: i++;
+"311
 [e ++ _i -> -> 1 `i `uc ]
 [e :U 269 ]
-"312
+"313
 }
-[; ;lcd.h: 312: } while ( scaler > 0 );
+[; ;lcd.h: 313: } while ( scaler > 0 );
 [e $ > _scaler -> -> -> 0 `i `l `ul 266  ]
 [e :U 265 ]
-[; ;lcd.h: 314: returnVal[i] = 0x3E;
-"314
-[e = *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux -> -> 62 `i `uc ]
-[; ;lcd.h: 318: scaler = 10;
-"318
+[; ;lcd.h: 316: decPoint = i;
+"316
+[e = _decPoint _i ]
+[; ;lcd.h: 317: i++;
+"317
+[e ++ _i -> -> 1 `i `uc ]
+[; ;lcd.h: 321: scaler = 10;
+"321
 [e = _scaler -> -> -> 10 `i `l `ul ]
-[; ;lcd.h: 320: for (uint8_t j = i; i - j <= precision ; i++)
-"320
+[; ;lcd.h: 323: for (uint8_t j = i; i - j <= precision ; i++)
+"323
 {
 [v _j `uc ~T0 @X0 1 a ]
 [e = _j _i ]
 [e $U 273  ]
-"321
+"324
 [e :U 270 ]
-[; ;lcd.h: 321: {
+[; ;lcd.h: 324: {
 {
-[; ;lcd.h: 322: prevSum = prevSum * 10;
-"322
-[e = _prevSum * _prevSum -> -> -> 10 `i `l `ul ]
-[; ;lcd.h: 323: returnVal[i] = num * scaler - prevSum;
-"323
-[e = *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux -> - * _num -> _scaler `f -> _prevSum `f `uc ]
-[; ;lcd.h: 325: scaler = scaler * 10;
+[; ;lcd.h: 325: prevSum = prevSum * 10;
 "325
-[e = _scaler * _scaler -> -> -> 10 `i `l `ul ]
-[; ;lcd.h: 327: prevSum += returnVal[i];
-"327
-[e =+ _prevSum -> *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux `ul ]
+[e = _prevSum * _prevSum -> -> -> 10 `i `l `ul ]
+[; ;lcd.h: 326: returnVal[i] = (char)( num * scaler - prevSum );
+"326
+[e = *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux -> - * _num -> _scaler `f -> _prevSum `f `uc ]
+[; ;lcd.h: 328: scaler = scaler * 10;
 "328
+[e = _scaler * _scaler -> -> -> 10 `i `l `ul ]
+[; ;lcd.h: 330: prevSum += returnVal[i];
+"330
+[e =+ _prevSum -> *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux `ul ]
+"331
 }
-"320
+"323
 [e ++ _i -> -> 1 `i `uc ]
 [e :U 273 ]
 [e $ <= - -> _i `i -> _j `i -> _precision `i 270  ]
 [e :U 271 ]
-"328
-}
-[; ;lcd.h: 328: }
-[; ;lcd.h: 330: for (; i > 0; i--)
-"330
-{
-[e $ > -> _i `i -> 0 `i 274  ]
-[e $U 275  ]
 "331
-[e :U 274 ]
-[; ;lcd.h: 331: {
-{
-[; ;lcd.h: 334: returnVal[i] = returnVal[i] & 0x3F;
-"334
-[e = *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux -> & -> *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux `i -> 63 `i `uc ]
-"335
 }
-"330
+[; ;lcd.h: 331: }
+[; ;lcd.h: 333: i--;
+"333
 [e -- _i -> -> 1 `i `uc ]
-[e $ > -> _i `i -> 0 `i 274  ]
-[e :U 275 ]
+[; ;lcd.h: 335: for ( uint8_t k = 0; k <= i ; k++ )
 "335
-}
-[; ;lcd.h: 335: }
-[; ;lcd.h: 338: returnVal[++i] = '\0';
-"338
-[e = *U + _returnVal * -> =+ _i -> -> 1 `i `uc `ux -> -> # *U _returnVal `ui `ux -> -> 0 `ui `uc ]
-[; ;lcd.h: 339: }
+{
+[v _k `uc ~T0 @X0 1 a ]
+[e = _k -> -> 0 `i `uc ]
+[e $U 277  ]
+"336
+[e :U 274 ]
+[; ;lcd.h: 336: {
+{
+[; ;lcd.h: 339: returnVal[k] = returnVal[k] | 0x30;
 "339
+[e = *U + _returnVal * -> _k `ux -> -> # *U _returnVal `ui `ux -> | -> *U + _returnVal * -> _k `ux -> -> # *U _returnVal `ui `ux `i -> 48 `i `uc ]
+"340
+}
+"335
+[e ++ _k -> -> 1 `i `uc ]
+[e :U 277 ]
+[e $ <= -> _k `i -> _i `i 274  ]
+[e :U 275 ]
+"340
+}
+[; ;lcd.h: 340: }
+[; ;lcd.h: 342: returnVal[decPoint] = 0x2E;
+"342
+[e = *U + _returnVal * -> _decPoint `ux -> -> # *U _returnVal `ui `ux -> -> 46 `i `uc ]
+[; ;lcd.h: 345: returnVal[i] = '\0';
+"345
+[e = *U + _returnVal * -> _i `ux -> -> # *U _returnVal `ui `ux -> -> 0 `ui `uc ]
+[; ;lcd.h: 346: }
+"346
 [e :UE 260 ]
 }
 "35 timer0.h
@@ -3401,7 +3414,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e = . . _INTCONbits 0 7 -> -> 1 `i `uc ]
 [; ;timer0.h: 62: }
 "62
-[e :UE 277 ]
+[e :UE 278 ]
 }
 "64
 [v _isrTimer0 `(v ~T0 @X0 1 ef ]
@@ -3413,7 +3426,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [f ]
 [; ;timer0.h: 66: if (INTCONbits.T0IF == 1 && INTCONbits.T0IE == 1)
 "66
-[e $ ! && == -> . . _INTCONbits 1 1 `i -> 1 `i == -> . . _INTCONbits 1 3 `i -> 1 `i 279  ]
+[e $ ! && == -> . . _INTCONbits 1 1 `i -> 1 `i == -> . . _INTCONbits 1 3 `i -> 1 `i 280  ]
 [; ;timer0.h: 67: {
 "67
 {
@@ -3425,11 +3438,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e = . . _INTCONbits 1 1 -> -> 0 `i `uc ]
 "73
 }
-[e :U 279 ]
+[e :U 280 ]
 [; ;timer0.h: 73: }
 [; ;timer0.h: 74: }
 "74
-[e :UE 278 ]
+[e :UE 279 ]
 }
 "76
 [v _currentTime `(ul ~T0 @X0 1 ef ]
@@ -3442,10 +3455,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;timer0.h: 78: return convConst * ( time + TMR0 );
 "78
 [e ) -> * _convConst -> + _time -> _TMR0 `ul `f `ul ]
-[e $UE 280  ]
+[e $UE 281  ]
 [; ;timer0.h: 79: }
 "79
-[e :UE 280 ]
+[e :UE 281 ]
 }
 "81
 [v _stopWatch `(ul ~T0 @X0 1 ef1`uc ]
@@ -3459,8 +3472,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 "82
 [f ]
 "83
-[v F2716 `ul ~T0 @X0 1 s startTime ]
-[i F2716
+[v F2719 `ul ~T0 @X0 1 s startTime ]
+[i F2719
 -> -> -> 0 `i `l `ul
 ]
 "85
@@ -3470,63 +3483,63 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e = _temp -> -> -> 0 `i `l `ul ]
 [; ;timer0.h: 87: switch (mode)
 "87
-[e $U 283  ]
+[e $U 284  ]
 [; ;timer0.h: 88: {
 "88
 {
 [; ;timer0.h: 89: case(0):
 "89
-[e :U 284 ]
+[e :U 285 ]
 [; ;timer0.h: 90: {
 "90
 {
 [; ;timer0.h: 91: startTime = time + TMR0;
 "91
-[e = F2716 + _time -> _TMR0 `ul ]
+[e = F2719 + _time -> _TMR0 `ul ]
 [; ;timer0.h: 93: return 1;
 "93
 [e ) -> -> -> 1 `i `l `ul ]
-[e $UE 281  ]
+[e $UE 282  ]
 "94
 }
 [; ;timer0.h: 94: }
 [; ;timer0.h: 96: case (1):
 "96
-[e :U 285 ]
+[e :U 286 ]
 [; ;timer0.h: 97: {
 "97
 {
 [; ;timer0.h: 98: temp = time + TMR0 - startTime;
 "98
-[e = _temp - + _time -> _TMR0 `ul F2716 ]
+[e = _temp - + _time -> _TMR0 `ul F2719 ]
 [; ;timer0.h: 100: temp = convConst * temp;
 "100
 [e = _temp -> * _convConst -> _temp `f `ul ]
 [; ;timer0.h: 102: return temp;
 "102
 [e ) _temp ]
-[e $UE 281  ]
+[e $UE 282  ]
 "103
 }
 "104
 }
 [; ;timer0.h: 103: }
 [; ;timer0.h: 104: }
-[e $U 282  ]
+[e $U 283  ]
 "87
-[e :U 283 ]
-[e [\ _mode , $ -> -> 0 `i `uc 284
- , $ -> -> 1 `i `uc 285
- 282 ]
+[e :U 284 ]
+[e [\ _mode , $ -> -> 0 `i `uc 285
+ , $ -> -> 1 `i `uc 286
+ 283 ]
 "104
-[e :U 282 ]
+[e :U 283 ]
 [; ;timer0.h: 106: return 0;
 "106
 [e ) -> -> -> 0 `i `l `ul ]
-[e $UE 281  ]
+[e $UE 282  ]
 [; ;timer0.h: 107: }
 "107
-[e :UE 281 ]
+[e :UE 282 ]
 }
 [; ;adc.h: 36: typedef enum
 [; ;adc.h: 37: {
@@ -3564,7 +3577,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e = _ADRESL -> -> 0 `i `uc ]
 [; ;adc.h: 71: }
 "71
-[e :UE 286 ]
+[e :UE 287 ]
 }
 "73
 [v _analogRead `(ui ~T0 @X0 1 ef1`uc ]
@@ -3595,13 +3608,13 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e = _returnVal -> -> 0 `i `ui ]
 [; ;adc.h: 85: while (ADCON0bits.GO == 1) {}
 "85
-[e $U 288  ]
-[e :U 289 ]
+[e $U 289  ]
+[e :U 290 ]
 {
 }
-[e :U 288 ]
-[e $ == -> . . _ADCON0bits 3 1 `i -> 1 `i 289  ]
-[e :U 290 ]
+[e :U 289 ]
+[e $ == -> . . _ADCON0bits 3 1 `i -> 1 `i 290  ]
+[e :U 291 ]
 [; ;adc.h: 89: returnVal = ADRESH;
 "89
 [e = _returnVal -> _ADRESH `ui ]
@@ -3614,12 +3627,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adc.h: 93: return returnVal;
 "93
 [e ) _returnVal ]
-[e $UE 287  ]
+[e $UE 288  ]
 [; ;adc.h: 94: }
 "94
-[e :UE 287 ]
+[e :UE 288 ]
 }
-"166 setup.h
+"168 setup.h
 [v _cellVolt `f ~T0 @X0 -> 6 `i e ]
 [i _cellVolt
 :U ..
@@ -3631,203 +3644,206 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `f
 ..
 ]
-[; ;setup.h: 166: float cellVolt[6] = {0, 0, 0, 0, 0, 0};
-"167
+[; ;setup.h: 168: float cellVolt[6] = {0, 0, 0, 0, 0, 0};
+"169
 [v _supVolt `f ~T0 @X0 1 e ]
 [i _supVolt
 -> .4.2 `f
 ]
-[; ;setup.h: 167: float supVolt = 4.2;
-"169
+[; ;setup.h: 169: float supVolt = 4.2;
+"171
 [v _refValue `ui ~T0 @X0 1 e ]
 [i _refValue
 -> -> 0 `i `ui
 ]
-[; ;setup.h: 169: uint16_t refValue = 0;
-"171
+[; ;setup.h: 171: uint16_t refValue = 0;
+"173
 [v _current `f ~T0 @X0 1 e ]
 [i _current
 -> -> 0 `i `f
 ]
-[; ;setup.h: 171: float current = 0;
-"172
+[; ;setup.h: 173: float current = 0;
+"174
 [v _shuntRes `f ~T0 @X0 1 e ]
 [i _shuntRes
 -> .0.01 `f
 ]
-[; ;setup.h: 172: float shuntRes = 0.01;
-"173
+[; ;setup.h: 174: float shuntRes = 0.01;
+"175
 [v _currentGain `uc ~T0 @X0 1 e ]
 [i _currentGain
 -> -> 200 `i `uc
 ]
-[; ;setup.h: 173: uint8_t currentGain = 200;
-"175
+[; ;setup.h: 175: uint8_t currentGain = 200;
+"177
 [v _LCDDisplayMode `uc ~T0 @X0 1 e ]
 [i _LCDDisplayMode
 -> -> 0 `i `uc
 ]
-[; ;setup.h: 175: uint8_t LCDDisplayMode = 0;
-"179
+[; ;setup.h: 177: uint8_t LCDDisplayMode = 0;
+"181
 [v _refVolt `Cf ~T0 @X0 1 e ]
 [i _refVolt
--> .1.122 `f
+-> .1.128 `f
 ]
-[; ;setup.h: 179: const float refVolt = 1.122;
-"181
-[v _cell1RDT `Cui ~T0 @X0 1 e ]
-[i _cell1RDT
--> -> 2200 `i `ui
+[; ;setup.h: 181: const float refVolt = 1.128;
+"183
+[v _cellVoltL `Cf ~T0 @X0 1 e ]
+[i _cellVoltL
+-> .3.2 `f
 ]
-[; ;setup.h: 181: const uint16_t cell1RDT = 2200;
-"182
-[v _cellRDB `Cui ~T0 @X0 1 e ]
-[i _cellRDB
--> -> 2200 `i `ui
-]
-[; ;setup.h: 182: const uint16_t cellRDB = 2200;
+[; ;setup.h: 183: const float cellVoltL = 3.2;
 "185
-[v _cell2RDT `Cui ~T0 @X0 1 e ]
-[i _cell2RDT
--> -> 4700 `i `ui
+[v _cell1RR `Cf ~T0 @X0 1 e ]
+[i _cell1RR
+-> .0.98751 `f
 ]
-[; ;setup.h: 185: const uint16_t cell2RDT = 4700;
+[; ;setup.h: 185: const float cell1RR = 0.98751;
 "187
-[v _cell3RDT `Cui ~T0 @X0 1 e ]
-[i _cell3RDT
--> -> 10000 `i `ui
+[v _cell2RR `Cf ~T0 @X0 1 e ]
+[i _cell2RR
+-> .2.11635 `f
 ]
-[; ;setup.h: 187: const uint16_t cell3RDT = 10000;
+[; ;setup.h: 187: const float cell2RR = 2.11635;
 "189
-[v _cell4RDT `Cui ~T0 @X0 1 e ]
-[i _cell4RDT
--> -> 14700 `i `ui
+[v _cell3RR `Cf ~T0 @X0 1 e ]
+[i _cell3RR
+-> .4.52138 `f
 ]
-[; ;setup.h: 189: const uint16_t cell4RDT = 14700;
+[; ;setup.h: 189: const float cell3RR = 4.52138;
 "191
-[v _cell5RDT `Cui ~T0 @X0 1 e ]
-[i _cell5RDT
--> -> 20000 `i `ui
+[v _cell4RR `Cf ~T0 @X0 1 e ]
+[i _cell4RR
+-> .6.63700 `f
 ]
-[; ;setup.h: 191: const uint16_t cell5RDT = 20000;
+[; ;setup.h: 191: const float cell4RR = 6.63700;
 "193
-[v _cell6RDT `Cui ~T0 @X0 1 e ]
-[i _cell6RDT
--> -> 24700 `i `ui
+[v _cell5RR `Cf ~T0 @X0 1 e ]
+[i _cell5RR
+-> .9.03161 `f
 ]
-[; ;setup.h: 193: const uint16_t cell6RDT = 24700;
-[; ;setup.h: 198: void initController ();
-[; ;setup.h: 199: void interrupt isr();
-[; ;setup.h: 200: void sampleReference();
-[; ;setup.h: 201: void sampleBatteryCells ();
-[; ;setup.h: 202: void displayLCD ( int );
-[; ;setup.h: 203: void sampleCurrent ();
-[; ;setup.h: 204: void currentGainInit ( uint8_t );
-[; ;setup.h: 205: void handlePB ();
-[; ;setup.h: 206: float batteryVoltage ();
-[; ;setup.h: 207: float sampleVoltage(ADCChannel chan);
-"211
+[; ;setup.h: 193: const float cell5RR = 9.03161;
+"195
+[v _cell6RR `Cf ~T0 @X0 1 e ]
+[i _cell6RR
+-> .11.1326 `f
+]
+[; ;setup.h: 195: const float cell6RR = 11.1326;
+"197
+[v _sampleNum `Cuc ~T0 @X0 1 e ]
+[i _sampleNum
+-> -> 10 `i `uc
+]
+[; ;setup.h: 197: const uint8_t sampleNum = 10;
+[; ;setup.h: 201: void initController ();
+[; ;setup.h: 202: void interrupt isr();
+[; ;setup.h: 203: void sampleReference();
+[; ;setup.h: 204: void sampleBatteryCells ();
+[; ;setup.h: 205: void displayLCD ( int );
+[; ;setup.h: 206: void sampleCurrent ();
+[; ;setup.h: 207: void currentGainInit ( uint8_t );
+[; ;setup.h: 208: void handlePB ();
+[; ;setup.h: 209: float batteryVoltage ();
+[; ;setup.h: 210: float sampleVoltage(ADCChannel chan);
+"214
 [v _initController `(v ~T0 @X0 1 ef ]
-"212
+"215
 {
-[; ;setup.h: 211: void initController ()
-[; ;setup.h: 212: {
+[; ;setup.h: 214: void initController ()
+[; ;setup.h: 215: {
 [e :U _initController ]
 [f ]
-[; ;setup.h: 214: OSCCONbits.IRCF = 0b111;
-"214
+[; ;setup.h: 217: OSCCONbits.IRCF = 0b111;
+"217
 [e = . . _OSCCONbits 0 4 -> -> 7 `i `uc ]
-[; ;setup.h: 215: OSCCONbits.SCS = 0;
-"215
-[e = . . _OSCCONbits 0 0 -> -> 0 `i `uc ]
-[; ;setup.h: 218: TRISA = 0b00111111;
+[; ;setup.h: 218: OSCCONbits.SCS = 0;
 "218
-[e = _TRISA -> -> 63 `i `uc ]
-[; ;setup.h: 219: TRISB = 0b00000000;
-"219
-[e = _TRISB -> -> 0 `i `uc ]
-[; ;setup.h: 220: TRISC = 0b00000000;
-"220
-[e = _TRISC -> -> 0 `i `uc ]
-[; ;setup.h: 221: TRISD = 0b00100000;
+[e = . . _OSCCONbits 0 0 -> -> 0 `i `uc ]
+[; ;setup.h: 221: TRISA = 0b00111111;
 "221
-[e = _TRISD -> -> 32 `i `uc ]
-[; ;setup.h: 222: TRISE = 0b00000111;
+[e = _TRISA -> -> 63 `i `uc ]
+[; ;setup.h: 222: TRISB = 0b00000000;
 "222
-[e = _TRISE -> -> 7 `i `uc ]
-[; ;setup.h: 224: ANSEL = 0xFF;
+[e = _TRISB -> -> 0 `i `uc ]
+[; ;setup.h: 223: TRISC = 0b00000000;
+"223
+[e = _TRISC -> -> 0 `i `uc ]
+[; ;setup.h: 224: TRISD = 0b01100000;
 "224
-[e = _ANSEL -> -> 255 `i `uc ]
-[; ;setup.h: 226: PORTA = 0;
-"226
-[e = _PORTA -> -> 0 `i `uc ]
-[; ;setup.h: 227: PORTB = 0;
+[e = _TRISD -> -> 96 `i `uc ]
+[; ;setup.h: 225: TRISE = 0b00000111;
+"225
+[e = _TRISE -> -> 7 `i `uc ]
+[; ;setup.h: 227: ANSEL = 0xFF;
 "227
-[e = _PORTB -> -> 0 `i `uc ]
-[; ;setup.h: 228: PORTC = 0;
-"228
-[e = _PORTC -> -> 0 `i `uc ]
-[; ;setup.h: 229: PORTD = 0;
+[e = _ANSEL -> -> 255 `i `uc ]
+[; ;setup.h: 229: PORTA = 0;
 "229
-[e = _PORTD -> -> 0 `i `uc ]
-[; ;setup.h: 230: PORTE = 0;
+[e = _PORTA -> -> 0 `i `uc ]
+[; ;setup.h: 230: PORTB = 0;
 "230
-[e = _PORTE -> -> 0 `i `uc ]
-[; ;setup.h: 232: CMCON0bits.CM = 0b111;
+[e = _PORTB -> -> 0 `i `uc ]
+[; ;setup.h: 231: PORTC = 0;
+"231
+[e = _PORTC -> -> 0 `i `uc ]
+[; ;setup.h: 232: PORTD = 0;
 "232
-[e = . . _CMCON0bits 0 0 -> -> 7 `i `uc ]
-[; ;setup.h: 233: LCDCON = 0;
+[e = _PORTD -> -> 0 `i `uc ]
+[; ;setup.h: 233: PORTE = 0;
 "233
-[e = _LCDCON -> -> 0 `i `uc ]
-[; ;setup.h: 234: LVDCONbits.LVDEN = 0;
-"234
-[e = . . _LVDCONbits 0 2 -> -> 0 `i `uc ]
-[; ;setup.h: 235: CCP1CON = 0;
+[e = _PORTE -> -> 0 `i `uc ]
+[; ;setup.h: 235: CMCON0bits.CM = 0b111;
 "235
-[e = _CCP1CON -> -> 0 `i `uc ]
-[; ;setup.h: 236: CCP2CON = 0;
+[e = . . _CMCON0bits 0 0 -> -> 7 `i `uc ]
+[; ;setup.h: 236: LCDCON = 0;
 "236
-[e = _CCP2CON -> -> 0 `i `uc ]
-[; ;setup.h: 237: OPTION_REGbits.nRBPU = 1;
+[e = _LCDCON -> -> 0 `i `uc ]
+[; ;setup.h: 237: LVDCONbits.LVDEN = 0;
 "237
-[e = . . _OPTION_REGbits 0 5 -> -> 1 `i `uc ]
-[; ;setup.h: 239: RD2 = 0;
+[e = . . _LVDCONbits 0 2 -> -> 0 `i `uc ]
+[; ;setup.h: 238: CCP1CON = 0;
+"238
+[e = _CCP1CON -> -> 0 `i `uc ]
+[; ;setup.h: 239: CCP2CON = 0;
 "239
+[e = _CCP2CON -> -> 0 `i `uc ]
+[; ;setup.h: 240: OPTION_REGbits.nRBPU = 1;
+"240
+[e = . . _OPTION_REGbits 0 5 -> -> 1 `i `uc ]
+[; ;setup.h: 242: RD2 = 0;
+"242
 [e = _RD2 -> -> 0 `i `b ]
-[; ;setup.h: 241: RD6 = 0;
-"241
-[e = _RD6 -> -> 0 `i `b ]
-[; ;setup.h: 244: RC0 = 1;
-"244
-[e = _RC0 -> -> 1 `i `b ]
-[; ;setup.h: 247: initADC();
+[; ;setup.h: 247: RC0 = 1;
 "247
+[e = _RC0 -> -> 1 `i `b ]
+[; ;setup.h: 250: initADC();
+"250
 [e ( _initADC ..  ]
-[; ;setup.h: 249: timeSetup();
-"249
+[; ;setup.h: 252: timeSetup();
+"252
 [e ( _timeSetup ..  ]
-[; ;setup.h: 251: initLCD();
-"251
+[; ;setup.h: 254: initLCD();
+"254
 [e ( _initLCD ..  ]
-[; ;setup.h: 253: }
-"253
-[e :UE 291 ]
-}
-[v F2752 `(v ~T0 @X0 1 tf ]
-"255
-[v _isr `IF2752 ~T0 @X0 1 e ]
+[; ;setup.h: 256: }
 "256
+[e :UE 292 ]
+}
+[v F2756 `(v ~T0 @X0 1 tf ]
+"258
+[v _isr `IF2756 ~T0 @X0 1 e ]
+"259
 {
-[; ;setup.h: 255: void interrupt isr()
-[; ;setup.h: 256: {
+[; ;setup.h: 258: void interrupt isr()
+[; ;setup.h: 259: {
 [e :U _isr ]
 [f ]
-[; ;setup.h: 257: isrTimer0();
-"257
+[; ;setup.h: 260: isrTimer0();
+"260
 [e ( _isrTimer0 ..  ]
-[; ;setup.h: 258: }
-"258
-[e :UE 292 ]
+[; ;setup.h: 261: }
+"261
+[e :UE 293 ]
 }
 "64 PIC16F917 Battery Management.c
 [v _main `(v ~T0 @X0 1 ef ]
@@ -3848,7 +3864,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e ( _currentGainInit (1 -> -> 200 `i `uc ]
 [; ;PIC16F917 Battery Management.c: 75: while(1)
 "75
-[e :U 295 ]
+[e :U 296 ]
 [; ;PIC16F917 Battery Management.c: 76: {
 "76
 {
@@ -3869,14 +3885,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e ( _displayLCD (1 -> _LCDDisplayMode `i ]
 "84
 }
-[e :U 294 ]
+[e :U 295 ]
 "75
-[e $U 295  ]
-[e :U 296 ]
+[e $U 296  ]
+[e :U 297 ]
 [; ;PIC16F917 Battery Management.c: 84: }
 [; ;PIC16F917 Battery Management.c: 85: }
 "85
-[e :UE 293 ]
+[e :UE 294 ]
 }
 "89
 [v _sampleBatteryCells `(v ~T0 @X0 1 ef ]
@@ -3895,211 +3911,217 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;PIC16F917 Battery Management.c: 97: _delay((unsigned long)((5)*(8000000/4000.0)));
 "97
 [e ( __delay (1 -> * -> -> 5 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
-[; ;PIC16F917 Battery Management.c: 100: cellVolt[0] = ( ( cell1RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL1);
-"100
-[e = *U + &U _cellVolt * -> -> -> 0 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux * -> / + _cell1RDT _cellRDB _cellRDB `f ( _sampleVoltage (1 . `E2718 0 ]
-[; ;PIC16F917 Battery Management.c: 101: cellVolt[1] = ( ( cell2RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL2);
+[; ;PIC16F917 Battery Management.c: 101: cellVolt[0] = 0.1 * ( cell1RR + 1 ) * sampleVoltage(CELL1) + 0.9 * cellVolt[0];
 "101
-[e = *U + &U _cellVolt * -> -> -> 1 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux * -> / + _cell2RDT _cellRDB _cellRDB `f ( _sampleVoltage (1 . `E2718 1 ]
-[; ;PIC16F917 Battery Management.c: 102: cellVolt[2] = ( ( cell3RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL3);
+[e = *U + &U _cellVolt * -> -> -> 0 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> + * * .0.1 -> + _cell1RR -> -> 1 `i `f `d -> ( _sampleVoltage (1 . `E2721 0 `d * .0.9 -> *U + &U _cellVolt * -> -> -> 0 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux `d `f ]
+[; ;PIC16F917 Battery Management.c: 102: cellVolt[1] = 0.1 * ( cell2RR + 1 ) * sampleVoltage(CELL2) + 0.9 * cellVolt[1];
 "102
-[e = *U + &U _cellVolt * -> -> -> 2 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux * -> / + _cell3RDT _cellRDB _cellRDB `f ( _sampleVoltage (1 . `E2718 5 ]
-[; ;PIC16F917 Battery Management.c: 104: RD0 = 0;
-"104
-[e = _RD0 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 105: RC3 = 1;
+[e = *U + &U _cellVolt * -> -> -> 1 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> + * * .0.1 -> + _cell2RR -> -> 1 `i `f `d -> ( _sampleVoltage (1 . `E2721 1 `d * .0.9 -> *U + &U _cellVolt * -> -> -> 1 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux `d `f ]
+[; ;PIC16F917 Battery Management.c: 103: cellVolt[2] = 0.1 * ( cell3RR + 1 ) * sampleVoltage(CELL3) + 0.9 * cellVolt[2];
+"103
+[e = *U + &U _cellVolt * -> -> -> 2 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> + * * .0.1 -> + _cell3RR -> -> 1 `i `f `d -> ( _sampleVoltage (1 . `E2721 5 `d * .0.9 -> *U + &U _cellVolt * -> -> -> 2 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux `d `f ]
+[; ;PIC16F917 Battery Management.c: 105: RD0 = 0;
 "105
+[e = _RD0 -> -> 0 `i `b ]
+[; ;PIC16F917 Battery Management.c: 106: RC3 = 1;
+"106
 [e = _RC3 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 107: _delay((unsigned long)((5)*(8000000/4000.0)));
-"107
+[; ;PIC16F917 Battery Management.c: 108: _delay((unsigned long)((5)*(8000000/4000.0)));
+"108
 [e ( __delay (1 -> * -> -> 5 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
-[; ;PIC16F917 Battery Management.c: 109: cellVolt[3] = ( ( cell4RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL4);
-"109
-[e = *U + &U _cellVolt * -> -> -> 3 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux * -> / + _cell4RDT _cellRDB _cellRDB `f ( _sampleVoltage (1 . `E2718 6 ]
-[; ;PIC16F917 Battery Management.c: 110: cellVolt[4] = ( ( cell5RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL5);
+[; ;PIC16F917 Battery Management.c: 110: cellVolt[3] = 0.1 * ( cell4RR + 1 ) * sampleVoltage(CELL4) + 0.9 * cellVolt[3];
 "110
-[e = *U + &U _cellVolt * -> -> -> 4 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux * -> / + _cell5RDT _cellRDB _cellRDB `f ( _sampleVoltage (1 . `E2718 3 ]
-[; ;PIC16F917 Battery Management.c: 111: cellVolt[5] = ( ( cell6RDT + cellRDB ) / cellRDB ) * sampleVoltage(CELL6);
+[e = *U + &U _cellVolt * -> -> -> 3 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> + * * .0.1 -> + _cell4RR -> -> 1 `i `f `d -> ( _sampleVoltage (1 . `E2721 6 `d * .0.9 -> *U + &U _cellVolt * -> -> -> 3 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux `d `f ]
+[; ;PIC16F917 Battery Management.c: 111: cellVolt[4] = 0.1 * ( cell5RR + 1 ) * sampleVoltage(CELL5) + 0.9 * cellVolt[4];
 "111
-[e = *U + &U _cellVolt * -> -> -> 5 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux * -> / + _cell6RDT _cellRDB _cellRDB `f ( _sampleVoltage (1 . `E2718 4 ]
-[; ;PIC16F917 Battery Management.c: 113: RC3 = 0;
-"113
+[e = *U + &U _cellVolt * -> -> -> 4 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> + * * .0.1 -> + _cell5RR -> -> 1 `i `f `d -> ( _sampleVoltage (1 . `E2721 3 `d * .0.9 -> *U + &U _cellVolt * -> -> -> 4 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux `d `f ]
+[; ;PIC16F917 Battery Management.c: 112: cellVolt[5] = 0.1 * ( cell6RR + 1 ) * sampleVoltage(CELL6) + 0.9 * cellVolt[5];
+"112
+[e = *U + &U _cellVolt * -> -> -> 5 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> + * * .0.1 -> + _cell6RR -> -> 1 `i `f `d -> ( _sampleVoltage (1 . `E2721 4 `d * .0.9 -> *U + &U _cellVolt * -> -> -> 5 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux `d `f ]
+[; ;PIC16F917 Battery Management.c: 114: RC3 = 0;
+"114
 [e = _RC3 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 115: RC2 = 0;
-"115
+[; ;PIC16F917 Battery Management.c: 116: RC2 = 0;
+"116
 [e = _RC2 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 117: }
-"117
-[e :UE 297 ]
-}
-"119
-[v _sampleReference `(v ~T0 @X0 1 ef ]
-"120
-{
-[; ;PIC16F917 Battery Management.c: 119: void sampleReference()
-[; ;PIC16F917 Battery Management.c: 120: {
-[e :U _sampleReference ]
-[f ]
-[; ;PIC16F917 Battery Management.c: 122: RD1 = 1;
-"122
-[e = _RD1 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 124: RC2 = 1;
-"124
-[e = _RC2 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 126: _delay((unsigned long)((5)*(8000000/4000.0)));
-"126
-[e ( __delay (1 -> * -> -> 5 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
-[; ;PIC16F917 Battery Management.c: 128: refValue = 0;
-"128
-[e = _refValue -> -> 0 `i `ui ]
-[; ;PIC16F917 Battery Management.c: 130: for ( int i = 0; i <= 10; i++)
-"130
-{
-[v _i `i ~T0 @X0 1 a ]
-[e = _i -> 0 `i ]
-[e $ <= _i -> 10 `i 299  ]
-[e $U 300  ]
-"131
-[e :U 299 ]
-[; ;PIC16F917 Battery Management.c: 131: {
-{
-[; ;PIC16F917 Battery Management.c: 132: refValue += analogRead(REFV);
-"132
-[e =+ _refValue ( _analogRead (1 -> . `E2718 2 `uc ]
-"133
-}
-"130
-[e ++ _i -> 1 `i ]
-[e $ <= _i -> 10 `i 299  ]
-[e :U 300 ]
-"133
-}
-[; ;PIC16F917 Battery Management.c: 133: }
-[; ;PIC16F917 Battery Management.c: 135: refValue = refValue / 10;
-"135
-[e = _refValue / _refValue -> -> 10 `i `ui ]
-[; ;PIC16F917 Battery Management.c: 138: RD1 = 0;
-"138
-[e = _RD1 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 140: RC2 = 0;
-"140
-[e = _RC2 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 142: supVolt = (refVolt * 1023)/refValue;
-"142
-[e = _supVolt / * _refVolt -> -> 1023 `i `f -> _refValue `f ]
-[; ;PIC16F917 Battery Management.c: 143: }
-"143
+[; ;PIC16F917 Battery Management.c: 118: }
+"118
 [e :UE 298 ]
 }
-"145
-[v _sampleVoltage `(f ~T0 @X0 1 ef1`E2718 ]
-"146
+"120
+[v _sampleReference `(v ~T0 @X0 1 ef ]
+"121
 {
-[; ;PIC16F917 Battery Management.c: 145: float sampleVoltage(ADCChannel chan)
-[; ;PIC16F917 Battery Management.c: 146: {
-[e :U _sampleVoltage ]
-"145
-[v _chan `E2718 ~T0 @X0 1 r1 ]
-"146
+[; ;PIC16F917 Battery Management.c: 120: void sampleReference()
+[; ;PIC16F917 Battery Management.c: 121: {
+[e :U _sampleReference ]
 [f ]
-"147
-[v _temp `ui ~T0 @X0 1 a ]
-[; ;PIC16F917 Battery Management.c: 147: uint16_t temp = 0;
-[e = _temp -> -> 0 `i `ui ]
-[; ;PIC16F917 Battery Management.c: 149: for ( int i = 0; i <= 10; i++)
-"149
+[; ;PIC16F917 Battery Management.c: 123: RD1 = 1;
+"123
+[e = _RD1 -> -> 1 `i `b ]
+[; ;PIC16F917 Battery Management.c: 125: RC2 = 1;
+"125
+[e = _RC2 -> -> 1 `i `b ]
+[; ;PIC16F917 Battery Management.c: 127: _delay((unsigned long)((2)*(8000000/4000.0)));
+"127
+[e ( __delay (1 -> * -> -> 2 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
+[; ;PIC16F917 Battery Management.c: 129: analogRead(REFV);
+"129
+[e ( _analogRead (1 -> . `E2721 2 `uc ]
+[; ;PIC16F917 Battery Management.c: 131: refValue = 0;
+"131
+[e = _refValue -> -> 0 `i `ui ]
+[; ;PIC16F917 Battery Management.c: 133: for ( int i = 0; i <= sampleNum; i++)
+"133
 {
 [v _i `i ~T0 @X0 1 a ]
 [e = _i -> 0 `i ]
-[e $ <= _i -> 10 `i 303  ]
-[e $U 304  ]
-"150
-[e :U 303 ]
-[; ;PIC16F917 Battery Management.c: 150: {
+[e $ <= _i -> _sampleNum `i 300  ]
+[e $U 301  ]
+"134
+[e :U 300 ]
+[; ;PIC16F917 Battery Management.c: 134: {
 {
-[; ;PIC16F917 Battery Management.c: 151: temp += analogRead(chan);
-"151
-[e =+ _temp ( _analogRead (1 -> _chan `uc ]
-"152
+[; ;PIC16F917 Battery Management.c: 135: refValue += analogRead(REFV);
+"135
+[e =+ _refValue ( _analogRead (1 -> . `E2721 2 `uc ]
+"136
 }
-"149
+"133
 [e ++ _i -> 1 `i ]
-[e $ <= _i -> 10 `i 303  ]
-[e :U 304 ]
-"152
+[e $ <= _i -> _sampleNum `i 300  ]
+[e :U 301 ]
+"136
 }
-[; ;PIC16F917 Battery Management.c: 152: }
-[; ;PIC16F917 Battery Management.c: 154: temp = temp / 10;
-"154
-[e = _temp / _temp -> -> 10 `i `ui ]
-[; ;PIC16F917 Battery Management.c: 157: return (temp * supVolt)/1023;
-"157
-[e ) / * -> _temp `f _supVolt -> -> 1023 `i `f ]
-[e $UE 302  ]
-[; ;PIC16F917 Battery Management.c: 158: }
-"158
-[e :UE 302 ]
+[; ;PIC16F917 Battery Management.c: 136: }
+[; ;PIC16F917 Battery Management.c: 138: refValue = refValue / sampleNum;
+"138
+[e = _refValue / _refValue -> _sampleNum `ui ]
+[; ;PIC16F917 Battery Management.c: 141: RD1 = 0;
+"141
+[e = _RD1 -> -> 0 `i `b ]
+[; ;PIC16F917 Battery Management.c: 143: RC2 = 0;
+"143
+[e = _RC2 -> -> 0 `i `b ]
+[; ;PIC16F917 Battery Management.c: 145: supVolt = (refVolt * 1023)/refValue;
+"145
+[e = _supVolt / * _refVolt -> -> 1023 `i `f -> _refValue `f ]
+[; ;PIC16F917 Battery Management.c: 146: }
+"146
+[e :UE 299 ]
 }
-"160
-[v _sampleCurrent `(v ~T0 @X0 1 ef ]
-"161
+"148
+[v _sampleVoltage `(f ~T0 @X0 1 ef1`E2721 ]
+"149
 {
-[; ;PIC16F917 Battery Management.c: 160: void sampleCurrent ()
-[; ;PIC16F917 Battery Management.c: 161: {
+[; ;PIC16F917 Battery Management.c: 148: float sampleVoltage(ADCChannel chan)
+[; ;PIC16F917 Battery Management.c: 149: {
+[e :U _sampleVoltage ]
+"148
+[v _chan `E2721 ~T0 @X0 1 r1 ]
+"149
+[f ]
+"150
+[v _temp `ui ~T0 @X0 1 a ]
+[; ;PIC16F917 Battery Management.c: 150: uint16_t temp = 0;
+[e = _temp -> -> 0 `i `ui ]
+[; ;PIC16F917 Battery Management.c: 152: analogRead(chan);
+"152
+[e ( _analogRead (1 -> _chan `uc ]
+[; ;PIC16F917 Battery Management.c: 154: for ( int i = 0; i <= sampleNum; i++)
+"154
+{
+[v _i `i ~T0 @X0 1 a ]
+[e = _i -> 0 `i ]
+[e $ <= _i -> _sampleNum `i 304  ]
+[e $U 305  ]
+"155
+[e :U 304 ]
+[; ;PIC16F917 Battery Management.c: 155: {
+{
+[; ;PIC16F917 Battery Management.c: 156: temp += analogRead(chan);
+"156
+[e =+ _temp ( _analogRead (1 -> _chan `uc ]
+"157
+}
+"154
+[e ++ _i -> 1 `i ]
+[e $ <= _i -> _sampleNum `i 304  ]
+[e :U 305 ]
+"157
+}
+[; ;PIC16F917 Battery Management.c: 157: }
+[; ;PIC16F917 Battery Management.c: 159: temp = temp / sampleNum;
+"159
+[e = _temp / _temp -> _sampleNum `ui ]
+[; ;PIC16F917 Battery Management.c: 162: return (temp * supVolt)/1023;
+"162
+[e ) / * -> _temp `f _supVolt -> -> 1023 `i `f ]
+[e $UE 303  ]
+[; ;PIC16F917 Battery Management.c: 163: }
+"163
+[e :UE 303 ]
+}
+"165
+[v _sampleCurrent `(v ~T0 @X0 1 ef ]
+"166
+{
+[; ;PIC16F917 Battery Management.c: 165: void sampleCurrent ()
+[; ;PIC16F917 Battery Management.c: 166: {
 [e :U _sampleCurrent ]
 [f ]
-"162
+"167
 [v _temp `ui ~T0 @X0 1 a ]
-[; ;PIC16F917 Battery Management.c: 162: uint16_t temp = 0;
+[; ;PIC16F917 Battery Management.c: 167: uint16_t temp = 0;
 [e = _temp -> -> 0 `i `ui ]
-[; ;PIC16F917 Battery Management.c: 164: for ( int i = 0; i <= 10; i++)
-"164
+[; ;PIC16F917 Battery Management.c: 169: for ( int i = 0; i <= sampleNum; i++)
+"169
 {
 [v _i `i ~T0 @X0 1 a ]
 [e = _i -> 0 `i ]
-[e $ <= _i -> 10 `i 307  ]
-[e $U 308  ]
-"165
-[e :U 307 ]
-[; ;PIC16F917 Battery Management.c: 165: {
-{
-[; ;PIC16F917 Battery Management.c: 166: temp += analogRead(CURRENT);
-"166
-[e =+ _temp ( _analogRead (1 -> . `E2718 7 `uc ]
-"167
-}
-"164
-[e ++ _i -> 1 `i ]
-[e $ <= _i -> 10 `i 307  ]
+[e $ <= _i -> _sampleNum `i 308  ]
+[e $U 309  ]
+"170
 [e :U 308 ]
-"167
-}
-[; ;PIC16F917 Battery Management.c: 167: }
-[; ;PIC16F917 Battery Management.c: 169: temp = temp / 10;
-"169
-[e = _temp / _temp -> -> 10 `i `ui ]
-[; ;PIC16F917 Battery Management.c: 174: current = ((temp * supVolt)/1023) / (shuntRes * currentGain);
-"174
-[e = _current / / * -> _temp `f _supVolt -> -> 1023 `i `f * _shuntRes -> _currentGain `f ]
-[; ;PIC16F917 Battery Management.c: 176: }
-"176
-[e :UE 306 ]
-}
-"179
-[v _displayLCD `(v ~T0 @X0 1 ef1`i ]
-"180
+[; ;PIC16F917 Battery Management.c: 170: {
 {
-[; ;PIC16F917 Battery Management.c: 179: void displayLCD ( int disp )
-[; ;PIC16F917 Battery Management.c: 180: {
-[e :U _displayLCD ]
+[; ;PIC16F917 Battery Management.c: 171: temp += analogRead(CURRENT);
+"171
+[e =+ _temp ( _analogRead (1 -> . `E2721 7 `uc ]
+"172
+}
+"169
+[e ++ _i -> 1 `i ]
+[e $ <= _i -> _sampleNum `i 308  ]
+[e :U 309 ]
+"172
+}
+[; ;PIC16F917 Battery Management.c: 172: }
+[; ;PIC16F917 Battery Management.c: 174: temp = temp / sampleNum;
+"174
+[e = _temp / _temp -> _sampleNum `ui ]
+[; ;PIC16F917 Battery Management.c: 179: current = ((temp * supVolt)/1023) / (shuntRes * currentGain);
 "179
-[v _disp `i ~T0 @X0 1 r1 ]
-"180
-[f ]
-[v F2777 `uc ~T0 @X0 -> 8 `i s ]
-[i F2777
-:U ..
+[e = _current / / * -> _temp `f _supVolt -> -> 1023 `i `f * _shuntRes -> _currentGain `f ]
+[; ;PIC16F917 Battery Management.c: 181: }
 "181
+[e :UE 307 ]
+}
+"184
+[v _displayLCD `(v ~T0 @X0 1 ef1`i ]
+"185
+{
+[; ;PIC16F917 Battery Management.c: 184: void displayLCD ( int disp )
+[; ;PIC16F917 Battery Management.c: 185: {
+[e :U _displayLCD ]
+"184
+[v _disp `i ~T0 @X0 1 r1 ]
+"185
+[f ]
+[v F2781 `uc ~T0 @X0 -> 8 `i s ]
+[i F2781
+:U ..
+"186
 -> -> 0 `i `uc
 -> -> 0 `i `uc
 -> -> 0 `i `uc
@@ -4111,12 +4133,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 ..
 ]
 [v _temp1 `uc ~T0 @X0 -> 8 `i a ]
-[; ;PIC16F917 Battery Management.c: 181: char temp1[8] = {0,0,0,0,0,0,0,0};
-[e = _temp1 F2777 ]
-[v F2779 `uc ~T0 @X0 -> 8 `i s ]
-[i F2779
+[; ;PIC16F917 Battery Management.c: 186: char temp1[8] = {0,0,0,0,0,0,0,0};
+[e = _temp1 F2781 ]
+[v F2783 `uc ~T0 @X0 -> 8 `i s ]
+[i F2783
 :U ..
-"182
+"187
 -> -> 0 `i `uc
 -> -> 0 `i `uc
 -> -> 0 `i `uc
@@ -4128,340 +4150,481 @@ Version 3.2 HI-TECH Software Intermediate Code
 ..
 ]
 [v _temp2 `uc ~T0 @X0 -> 8 `i a ]
-[; ;PIC16F917 Battery Management.c: 182: char temp2[8] = {0,0,0,0,0,0,0,0};
-[e = _temp2 F2779 ]
-[; ;PIC16F917 Battery Management.c: 184: switch( disp )
-"184
-[e $U 312  ]
-[; ;PIC16F917 Battery Management.c: 185: {
-"185
-{
-[; ;PIC16F917 Battery Management.c: 188: case 0:
-"188
-[e :U 313 ]
-[; ;PIC16F917 Battery Management.c: 189: {
+[; ;PIC16F917 Battery Management.c: 187: char temp2[8] = {0,0,0,0,0,0,0,0};
+[e = _temp2 F2783 ]
+[; ;PIC16F917 Battery Management.c: 189: switch( disp )
 "189
-{
-[; ;PIC16F917 Battery Management.c: 190: floatToASCII( temp1, 12.345, 3);
+[e $U 313  ]
+[; ;PIC16F917 Battery Management.c: 190: {
 "190
-[e ( _floatToASCII (3 , , &U _temp1 -> .12.345 `f -> -> 3 `i `uc ]
-[; ;PIC16F917 Battery Management.c: 191: LCDSetCursor(0x00);
-"191
-[e ( _LCDSetCursor (1 -> -> 0 `i `uc ]
-[; ;PIC16F917 Battery Management.c: 192: LCDWriteString("Voltage:");
-"192
-[e ( _LCDWriteString (1 :s 1C ]
-[; ;PIC16F917 Battery Management.c: 193: LCDWriteString(temp1);
+{
+[; ;PIC16F917 Battery Management.c: 193: case 0:
 "193
-[e ( _LCDWriteString (1 -> &U _temp1 `*Cuc ]
-[; ;PIC16F917 Battery Management.c: 194: LCDWriteString(" V      ");
-"194
-[e ( _LCDWriteString (1 :s 2C ]
-[; ;PIC16F917 Battery Management.c: 196: floatToASCII( temp2, 543.210, 3);
-"196
-[e ( _floatToASCII (3 , , &U _temp2 -> .543.210 `f -> -> 3 `i `uc ]
-[; ;PIC16F917 Battery Management.c: 197: LCDSetCursor(0x10);
-"197
-[e ( _LCDSetCursor (1 -> -> 16 `i `uc ]
-[; ;PIC16F917 Battery Management.c: 198: LCDWriteString("Current:");
-"198
-[e ( _LCDWriteString (1 :s 3C ]
-[; ;PIC16F917 Battery Management.c: 199: LCDWriteString(temp2);
-"199
-[e ( _LCDWriteString (1 -> &U _temp2 `*Cuc ]
-[; ;PIC16F917 Battery Management.c: 200: LCDWriteString(" A       ");
-"200
-[e ( _LCDWriteString (1 :s 4C ]
-[; ;PIC16F917 Battery Management.c: 202: break;
-"202
-[e $U 311  ]
-"203
-}
-[; ;PIC16F917 Battery Management.c: 203: }
-[; ;PIC16F917 Battery Management.c: 206: case 1:
-"206
 [e :U 314 ]
-[; ;PIC16F917 Battery Management.c: 207: {
+[; ;PIC16F917 Battery Management.c: 194: {
+"194
+{
+[; ;PIC16F917 Battery Management.c: 195: floatToASCII( temp1, cellVolt[5], 2);
+"195
+[e ( _floatToASCII (3 , , &U _temp1 *U + &U _cellVolt * -> -> -> 5 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 196: LCDSetCursor(0x00);
+"196
+[e ( _LCDSetCursor (1 -> -> 0 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 197: LCDWriteString("Voltage:");
+"197
+[e ( _LCDWriteString (1 :s 1C ]
+[; ;PIC16F917 Battery Management.c: 198: LCDWriteString(temp1);
+"198
+[e ( _LCDWriteString (1 -> &U _temp1 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 199: LCDWriteString(" V      ");
+"199
+[e ( _LCDWriteString (1 :s 2C ]
+[; ;PIC16F917 Battery Management.c: 201: floatToASCII( temp2, current, 2);
+"201
+[e ( _floatToASCII (3 , , &U _temp2 _current -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 202: LCDSetCursor(0x10);
+"202
+[e ( _LCDSetCursor (1 -> -> 16 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 203: LCDWriteString("Current:");
+"203
+[e ( _LCDWriteString (1 :s 3C ]
+[; ;PIC16F917 Battery Management.c: 204: LCDWriteString(temp2);
+"204
+[e ( _LCDWriteString (1 -> &U _temp2 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 205: LCDWriteString(" A       ");
+"205
+[e ( _LCDWriteString (1 :s 4C ]
+[; ;PIC16F917 Battery Management.c: 207: break;
 "207
-{
-[; ;PIC16F917 Battery Management.c: 219: break;
-"219
-[e $U 311  ]
-"220
+[e $U 312  ]
+"208
 }
-[; ;PIC16F917 Battery Management.c: 220: }
-[; ;PIC16F917 Battery Management.c: 223: case 2:
-"223
+[; ;PIC16F917 Battery Management.c: 208: }
+[; ;PIC16F917 Battery Management.c: 211: case 1:
+"211
 [e :U 315 ]
-[; ;PIC16F917 Battery Management.c: 224: {
+[; ;PIC16F917 Battery Management.c: 212: {
+"212
+{
+[; ;PIC16F917 Battery Management.c: 214: floatToASCII( temp1, cellVolt[0], 2);
+"214
+[e ( _floatToASCII (3 , , &U _temp1 *U + &U _cellVolt * -> -> -> 0 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 215: LCDSetCursor(0x00);
+"215
+[e ( _LCDSetCursor (1 -> -> 0 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 216: LCDWriteString("Cell 1:");
+"216
+[e ( _LCDWriteString (1 :s 5C ]
+[; ;PIC16F917 Battery Management.c: 217: LCDWriteString(temp1);
+"217
+[e ( _LCDWriteString (1 -> &U _temp1 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 218: LCDWriteString(" V      ");
+"218
+[e ( _LCDWriteString (1 :s 6C ]
+[; ;PIC16F917 Battery Management.c: 221: floatToASCII( temp2, cellVolt[1], 2);
+"221
+[e ( _floatToASCII (3 , , &U _temp2 *U + &U _cellVolt * -> -> -> 1 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 222: LCDSetCursor(0x10);
+"222
+[e ( _LCDSetCursor (1 -> -> 16 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 223: LCDWriteString("Cell 2:");
+"223
+[e ( _LCDWriteString (1 :s 7C ]
+[; ;PIC16F917 Battery Management.c: 224: LCDWriteString(temp2);
 "224
-{
-[; ;PIC16F917 Battery Management.c: 236: break;
-"236
-[e $U 311  ]
-"237
+[e ( _LCDWriteString (1 -> &U _temp2 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 225: LCDWriteString(" V       ");
+"225
+[e ( _LCDWriteString (1 :s 8C ]
+[; ;PIC16F917 Battery Management.c: 227: break;
+"227
+[e $U 312  ]
+"228
 }
-[; ;PIC16F917 Battery Management.c: 237: }
-[; ;PIC16F917 Battery Management.c: 240: case 3:
-"240
+[; ;PIC16F917 Battery Management.c: 228: }
+[; ;PIC16F917 Battery Management.c: 231: case 2:
+"231
 [e :U 316 ]
-[; ;PIC16F917 Battery Management.c: 241: {
+[; ;PIC16F917 Battery Management.c: 232: {
+"232
+{
+[; ;PIC16F917 Battery Management.c: 234: floatToASCII( temp1, cellVolt[2], 2);
+"234
+[e ( _floatToASCII (3 , , &U _temp1 *U + &U _cellVolt * -> -> -> 2 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 235: LCDSetCursor(0x00);
+"235
+[e ( _LCDSetCursor (1 -> -> 0 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 236: LCDWriteString("Cell 3:");
+"236
+[e ( _LCDWriteString (1 :s 9C ]
+[; ;PIC16F917 Battery Management.c: 237: LCDWriteString(temp1);
+"237
+[e ( _LCDWriteString (1 -> &U _temp1 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 238: LCDWriteString(" V      ");
+"238
+[e ( _LCDWriteString (1 :s 10C ]
+[; ;PIC16F917 Battery Management.c: 241: floatToASCII( temp2, cellVolt[3], 2);
 "241
+[e ( _floatToASCII (3 , , &U _temp2 *U + &U _cellVolt * -> -> -> 3 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 242: LCDSetCursor(0x10);
+"242
+[e ( _LCDSetCursor (1 -> -> 16 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 243: LCDWriteString("Cell 4:");
+"243
+[e ( _LCDWriteString (1 :s 11C ]
+[; ;PIC16F917 Battery Management.c: 244: LCDWriteString(temp2);
+"244
+[e ( _LCDWriteString (1 -> &U _temp2 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 245: LCDWriteString(" V       ");
+"245
+[e ( _LCDWriteString (1 :s 12C ]
+[; ;PIC16F917 Battery Management.c: 247: break;
+"247
+[e $U 312  ]
+"248
+}
+[; ;PIC16F917 Battery Management.c: 248: }
+[; ;PIC16F917 Battery Management.c: 251: case 3:
+"251
+[e :U 317 ]
+[; ;PIC16F917 Battery Management.c: 252: {
+"252
 {
-[; ;PIC16F917 Battery Management.c: 253: break;
-"253
-[e $U 311  ]
+[; ;PIC16F917 Battery Management.c: 254: floatToASCII( temp1, cellVolt[4], 2);
 "254
-}
+[e ( _floatToASCII (3 , , &U _temp1 *U + &U _cellVolt * -> -> -> 4 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 255: LCDSetCursor(0x00);
 "255
-}
-[; ;PIC16F917 Battery Management.c: 254: }
-[; ;PIC16F917 Battery Management.c: 255: }
-[e $U 311  ]
-"184
-[e :U 312 ]
-[e [\ _disp , $ -> 0 `i 313
- , $ -> 1 `i 314
- , $ -> 2 `i 315
- , $ -> 3 `i 316
- 311 ]
-"255
-[e :U 311 ]
-[; ;PIC16F917 Battery Management.c: 256: }
+[e ( _LCDSetCursor (1 -> -> 0 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 256: LCDWriteString("Cell 5:");
 "256
-[e :UE 310 ]
-}
-"260
-[v _currentGainInit `(v ~T0 @X0 1 ef1`uc ]
+[e ( _LCDWriteString (1 :s 13C ]
+[; ;PIC16F917 Battery Management.c: 257: LCDWriteString(temp1);
+"257
+[e ( _LCDWriteString (1 -> &U _temp1 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 258: LCDWriteString(" V      ");
+"258
+[e ( _LCDWriteString (1 :s 14C ]
+[; ;PIC16F917 Battery Management.c: 261: floatToASCII( temp2, cellVolt[5], 2);
 "261
-{
-[; ;PIC16F917 Battery Management.c: 260: void currentGainInit ( uint8_t gain )
-[; ;PIC16F917 Battery Management.c: 261: {
-[e :U _currentGainInit ]
-"260
-[v _gain `uc ~T0 @X0 1 r1 ]
-"261
-[f ]
-[; ;PIC16F917 Battery Management.c: 262: if ( gain >= 100 )
+[e ( _floatToASCII (3 , , &U _temp2 *U + &U _cellVolt * -> -> -> 5 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux -> -> 2 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 262: LCDSetCursor(0x10);
 "262
-[e $ ! >= -> _gain `i -> 100 `i 318  ]
-[; ;PIC16F917 Battery Management.c: 263: {
+[e ( _LCDSetCursor (1 -> -> 16 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 263: LCDWriteString("Cell 6:");
 "263
-{
-[; ;PIC16F917 Battery Management.c: 264: RA6 = 1;
+[e ( _LCDWriteString (1 :s 15C ]
+[; ;PIC16F917 Battery Management.c: 264: LCDWriteString(temp2);
 "264
-[e = _RA6 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 266: if ( gain == 100 )
-"266
-[e $ ! == -> _gain `i -> 100 `i 319  ]
-[; ;PIC16F917 Battery Management.c: 267: {
+[e ( _LCDWriteString (1 -> &U _temp2 `*Cuc ]
+[; ;PIC16F917 Battery Management.c: 265: LCDWriteString(" V       ");
+"265
+[e ( _LCDWriteString (1 :s 16C ]
+[; ;PIC16F917 Battery Management.c: 267: break;
 "267
-{
-[; ;PIC16F917 Battery Management.c: 268: RA7 = 0;
+[e $U 312  ]
 "268
-[e = _RA7 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 269: return;
+}
 "269
-[e $UE 317  ]
-"270
 }
+[; ;PIC16F917 Battery Management.c: 268: }
+[; ;PIC16F917 Battery Management.c: 269: }
+[e $U 312  ]
+"189
+[e :U 313 ]
+[e [\ _disp , $ -> 0 `i 314
+ , $ -> 1 `i 315
+ , $ -> 2 `i 316
+ , $ -> 3 `i 317
+ 312 ]
+"269
+[e :U 312 ]
 [; ;PIC16F917 Battery Management.c: 270: }
-[e $U 320  ]
-"271
-[e :U 319 ]
-[; ;PIC16F917 Battery Management.c: 271: else
-[; ;PIC16F917 Battery Management.c: 272: {
-"272
-{
-[; ;PIC16F917 Battery Management.c: 273: RA7 = 1;
-"273
-[e = _RA7 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 274: return;
+"270
+[e :UE 311 ]
+}
 "274
-[e $UE 317  ]
+[v _currentGainInit `(v ~T0 @X0 1 ef1`uc ]
 "275
-}
-[e :U 320 ]
+{
+[; ;PIC16F917 Battery Management.c: 274: void currentGainInit ( uint8_t gain )
+[; ;PIC16F917 Battery Management.c: 275: {
+[e :U _currentGainInit ]
+"274
+[v _gain `uc ~T0 @X0 1 r1 ]
+"275
+[f ]
+[; ;PIC16F917 Battery Management.c: 276: if ( gain >= 100 )
+"276
+[e $ ! >= -> _gain `i -> 100 `i 319  ]
+[; ;PIC16F917 Battery Management.c: 277: {
 "277
-}
-[; ;PIC16F917 Battery Management.c: 275: }
-[; ;PIC16F917 Battery Management.c: 277: }
-[e $U 321  ]
-"279
-[e :U 318 ]
-[; ;PIC16F917 Battery Management.c: 279: else
-[; ;PIC16F917 Battery Management.c: 280: {
+{
+[; ;PIC16F917 Battery Management.c: 278: RA6 = 1;
+"278
+[e = _RA6 -> -> 1 `i `b ]
+[; ;PIC16F917 Battery Management.c: 280: if ( gain == 100 )
 "280
-{
-[; ;PIC16F917 Battery Management.c: 281: RA6 = 0;
+[e $ ! == -> _gain `i -> 100 `i 320  ]
+[; ;PIC16F917 Battery Management.c: 281: {
 "281
-[e = _RA6 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 283: if ( gain == 25 )
-"283
-[e $ ! == -> _gain `i -> 25 `i 322  ]
-[; ;PIC16F917 Battery Management.c: 284: {
-"284
 {
-[; ;PIC16F917 Battery Management.c: 285: RA7 = 0;
-"285
+[; ;PIC16F917 Battery Management.c: 282: RA7 = 0;
+"282
 [e = _RA7 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 286: return;
+[; ;PIC16F917 Battery Management.c: 283: return;
+"283
+[e $UE 318  ]
+"284
+}
+[; ;PIC16F917 Battery Management.c: 284: }
+[e $U 321  ]
+"285
+[e :U 320 ]
+[; ;PIC16F917 Battery Management.c: 285: else
+[; ;PIC16F917 Battery Management.c: 286: {
 "286
-[e $UE 317  ]
-"287
-}
-[; ;PIC16F917 Battery Management.c: 287: }
-[e $U 323  ]
-"288
-[e :U 322 ]
-[; ;PIC16F917 Battery Management.c: 288: else
-[; ;PIC16F917 Battery Management.c: 289: {
-"289
 {
-[; ;PIC16F917 Battery Management.c: 290: RA7 = 1;
-"290
+[; ;PIC16F917 Battery Management.c: 287: RA7 = 1;
+"287
 [e = _RA7 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 291: return;
-"291
-[e $UE 317  ]
-"292
-}
-[e :U 323 ]
-"294
+[; ;PIC16F917 Battery Management.c: 288: return;
+"288
+[e $UE 318  ]
+"289
 }
 [e :U 321 ]
-[; ;PIC16F917 Battery Management.c: 292: }
-[; ;PIC16F917 Battery Management.c: 294: }
-[; ;PIC16F917 Battery Management.c: 296: }
-"296
-[e :UE 317 ]
+"291
 }
-"298
-[v _handlePB `(v ~T0 @X0 1 ef ]
-"299
+[; ;PIC16F917 Battery Management.c: 289: }
+[; ;PIC16F917 Battery Management.c: 291: }
+[e $U 322  ]
+"293
+[e :U 319 ]
+[; ;PIC16F917 Battery Management.c: 293: else
+[; ;PIC16F917 Battery Management.c: 294: {
+"294
 {
-[; ;PIC16F917 Battery Management.c: 298: void handlePB ()
-[; ;PIC16F917 Battery Management.c: 299: {
+[; ;PIC16F917 Battery Management.c: 295: RA6 = 0;
+"295
+[e = _RA6 -> -> 0 `i `b ]
+[; ;PIC16F917 Battery Management.c: 297: if ( gain == 25 )
+"297
+[e $ ! == -> _gain `i -> 25 `i 323  ]
+[; ;PIC16F917 Battery Management.c: 298: {
+"298
+{
+[; ;PIC16F917 Battery Management.c: 299: RA7 = 0;
+"299
+[e = _RA7 -> -> 0 `i `b ]
+[; ;PIC16F917 Battery Management.c: 300: return;
+"300
+[e $UE 318  ]
+"301
+}
+[; ;PIC16F917 Battery Management.c: 301: }
+[e $U 324  ]
+"302
+[e :U 323 ]
+[; ;PIC16F917 Battery Management.c: 302: else
+[; ;PIC16F917 Battery Management.c: 303: {
+"303
+{
+[; ;PIC16F917 Battery Management.c: 304: RA7 = 1;
+"304
+[e = _RA7 -> -> 1 `i `b ]
+[; ;PIC16F917 Battery Management.c: 305: return;
+"305
+[e $UE 318  ]
+"306
+}
+[e :U 324 ]
+"308
+}
+[e :U 322 ]
+[; ;PIC16F917 Battery Management.c: 306: }
+[; ;PIC16F917 Battery Management.c: 308: }
+[; ;PIC16F917 Battery Management.c: 310: }
+"310
+[e :UE 318 ]
+}
+"312
+[v _handlePB `(v ~T0 @X0 1 ef ]
+"313
+{
+[; ;PIC16F917 Battery Management.c: 312: void handlePB ()
+[; ;PIC16F917 Battery Management.c: 313: {
 [e :U _handlePB ]
 [f ]
-[; ;PIC16F917 Battery Management.c: 300: if( RD5 == 1 )
-"300
-[e $ ! == -> _RD5 `i -> 1 `i 325  ]
-[; ;PIC16F917 Battery Management.c: 301: return;
-"301
-[e $UE 324  ]
-[e :U 325 ]
-[; ;PIC16F917 Battery Management.c: 303: _delay((unsigned long)((50)*(8000000/4000.0)));
-"303
-[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
-[; ;PIC16F917 Battery Management.c: 305: if( RD5 == 1 )
-"305
+[; ;PIC16F917 Battery Management.c: 314: if( RD5 == 1 )
+"314
 [e $ ! == -> _RD5 `i -> 1 `i 326  ]
-[; ;PIC16F917 Battery Management.c: 306: return;
-"306
-[e $UE 324  ]
-[e :U 326 ]
-[; ;PIC16F917 Battery Management.c: 308: stopWatch(0);
-"308
-[e ( _stopWatch (1 -> -> 0 `i `uc ]
-[; ;PIC16F917 Battery Management.c: 309: while( RD5 == 0 )
-"309
-[e $U 327  ]
-[e :U 328 ]
-[; ;PIC16F917 Battery Management.c: 310: {
-"310
-{
-[; ;PIC16F917 Battery Management.c: 311: if(stopWatch(1) >= 1000)
-"311
-[e $ ! >= ( _stopWatch (1 -> -> 1 `i `uc -> -> -> 1000 `i `l `ul 330  ]
-[; ;PIC16F917 Battery Management.c: 312: {
-"312
-{
-[; ;PIC16F917 Battery Management.c: 313: initLCD();
-"313
-[e ( _initLCD ..  ]
-[; ;PIC16F917 Battery Management.c: 315: RC1 = 1;
+[; ;PIC16F917 Battery Management.c: 315: return;
 "315
-[e = _RC1 -> -> 1 `i `b ]
-[; ;PIC16F917 Battery Management.c: 316: _delay((unsigned long)((100)*(8000000/4000.0)));
-"316
-[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
-[; ;PIC16F917 Battery Management.c: 317: RC1 = 0;
+[e $UE 325  ]
+[e :U 326 ]
+[; ;PIC16F917 Battery Management.c: 317: _delay((unsigned long)((50)*(8000000/4000.0)));
 "317
-[e = _RC1 -> -> 0 `i `b ]
-[; ;PIC16F917 Battery Management.c: 318: return;
-"318
-[e $UE 324  ]
+[e ( __delay (1 -> * -> -> 50 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
+[; ;PIC16F917 Battery Management.c: 319: if( RD5 == 1 )
 "319
-}
-[e :U 330 ]
+[e $ ! == -> _RD5 `i -> 1 `i 327  ]
+[; ;PIC16F917 Battery Management.c: 320: return;
 "320
-}
+[e $UE 325  ]
 [e :U 327 ]
-"309
-[e $ == -> _RD5 `i -> 0 `i 328  ]
-[e :U 329 ]
-[; ;PIC16F917 Battery Management.c: 319: }
-[; ;PIC16F917 Battery Management.c: 320: }
-[; ;PIC16F917 Battery Management.c: 322: LCDDisplayMode++;
+[; ;PIC16F917 Battery Management.c: 322: stopWatch(0);
 "322
-[e ++ _LCDDisplayMode -> -> 1 `i `uc ]
-[; ;PIC16F917 Battery Management.c: 324: if (LCDDisplayMode > 3)
+[e ( _stopWatch (1 -> -> 0 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 323: while( RD5 == 0 )
+"323
+[e $U 328  ]
+[e :U 329 ]
+[; ;PIC16F917 Battery Management.c: 324: {
 "324
-[e $ ! > -> _LCDDisplayMode `i -> 3 `i 331  ]
-[; ;PIC16F917 Battery Management.c: 325: LCDDisplayMode = 0;
-"325
-[e = _LCDDisplayMode -> -> 0 `i `uc ]
-[e :U 331 ]
-[; ;PIC16F917 Battery Management.c: 326: }
-"326
-[e :UE 324 ]
-}
-"328
-[v _checkCurrent `(v ~T0 @X0 1 ef ]
-"329
 {
-[; ;PIC16F917 Battery Management.c: 328: void checkCurrent ()
-[; ;PIC16F917 Battery Management.c: 329: {
+[; ;PIC16F917 Battery Management.c: 325: if(stopWatch(1) >= 1000)
+"325
+[e $ ! >= ( _stopWatch (1 -> -> 1 `i `uc -> -> -> 1000 `i `l `ul 331  ]
+[; ;PIC16F917 Battery Management.c: 326: {
+"326
+{
+[; ;PIC16F917 Battery Management.c: 327: initLCD();
+"327
+[e ( _initLCD ..  ]
+[; ;PIC16F917 Battery Management.c: 329: RC1 = 1;
+"329
+[e = _RC1 -> -> 1 `i `b ]
+[; ;PIC16F917 Battery Management.c: 330: _delay((unsigned long)((100)*(8000000/4000.0)));
+"330
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
+[; ;PIC16F917 Battery Management.c: 331: RC1 = 0;
+"331
+[e = _RC1 -> -> 0 `i `b ]
+[; ;PIC16F917 Battery Management.c: 332: return;
+"332
+[e $UE 325  ]
+"333
+}
+[e :U 331 ]
+"334
+}
+[e :U 328 ]
+"323
+[e $ == -> _RD5 `i -> 0 `i 329  ]
+[e :U 330 ]
+[; ;PIC16F917 Battery Management.c: 333: }
+[; ;PIC16F917 Battery Management.c: 334: }
+[; ;PIC16F917 Battery Management.c: 336: LCDDisplayMode++;
+"336
+[e ++ _LCDDisplayMode -> -> 1 `i `uc ]
+[; ;PIC16F917 Battery Management.c: 338: if (LCDDisplayMode > 3)
+"338
+[e $ ! > -> _LCDDisplayMode `i -> 3 `i 332  ]
+[; ;PIC16F917 Battery Management.c: 339: LCDDisplayMode = 0;
+"339
+[e = _LCDDisplayMode -> -> 0 `i `uc ]
+[e :U 332 ]
+[; ;PIC16F917 Battery Management.c: 340: }
+"340
+[e :UE 325 ]
+}
+"342
+[v _checkCurrent `(v ~T0 @X0 1 ef ]
+"343
+{
+[; ;PIC16F917 Battery Management.c: 342: void checkCurrent ()
+[; ;PIC16F917 Battery Management.c: 343: {
 [e :U _checkCurrent ]
 [f ]
-[; ;PIC16F917 Battery Management.c: 330: if ( current > 100)
-"330
-[e $ ! > _current -> -> 100 `i `f 333  ]
-[; ;PIC16F917 Battery Management.c: 331: {
-"331
-{
-[; ;PIC16F917 Battery Management.c: 333: _delay((unsigned long)((500)*(8000000/4000.0)));
-"333
-[e ( __delay (1 -> * -> -> 500 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
-[; ;PIC16F917 Battery Management.c: 335: sampleReference();
-"335
-[e ( _sampleReference ..  ]
-[; ;PIC16F917 Battery Management.c: 336: sampleCurrent();
-"336
-[e ( _sampleCurrent ..  ]
-[; ;PIC16F917 Battery Management.c: 338: if (current > 100)
-"338
+[; ;PIC16F917 Battery Management.c: 344: if ( current > 100)
+"344
 [e $ ! > _current -> -> 100 `i `f 334  ]
-[; ;PIC16F917 Battery Management.c: 339: {
-"339
+[; ;PIC16F917 Battery Management.c: 345: {
+"345
 {
-[; ;PIC16F917 Battery Management.c: 341: RC0 = 0;
-"341
+[; ;PIC16F917 Battery Management.c: 347: _delay((unsigned long)((500)*(8000000/4000.0)));
+"347
+[e ( __delay (1 -> * -> -> 500 `i `d / -> -> 8000000 `l `d .4000.0 `ul ]
+[; ;PIC16F917 Battery Management.c: 349: sampleReference();
+"349
+[e ( _sampleReference ..  ]
+[; ;PIC16F917 Battery Management.c: 350: sampleCurrent();
+"350
+[e ( _sampleCurrent ..  ]
+[; ;PIC16F917 Battery Management.c: 352: if (current > 100)
+"352
+[e $ ! > _current -> -> 100 `i `f 335  ]
+[; ;PIC16F917 Battery Management.c: 353: {
+"353
+{
+[; ;PIC16F917 Battery Management.c: 355: RC0 = 0;
+"355
 [e = _RC0 -> -> 0 `i `b ]
-"342
+"356
+}
+[e :U 335 ]
+"357
 }
 [e :U 334 ]
-"343
+[; ;PIC16F917 Battery Management.c: 356: }
+[; ;PIC16F917 Battery Management.c: 357: }
+[; ;PIC16F917 Battery Management.c: 358: }
+"358
+[e :UE 333 ]
 }
-[e :U 333 ]
-[; ;PIC16F917 Battery Management.c: 342: }
-[; ;PIC16F917 Battery Management.c: 343: }
-[; ;PIC16F917 Battery Management.c: 344: }
-"344
-[e :UE 332 ]
+"363
+[v _systemCheck `(uc ~T0 @X0 1 ef ]
+"364
+{
+[; ;PIC16F917 Battery Management.c: 363: uint8_t systemCheck ()
+[; ;PIC16F917 Battery Management.c: 364: {
+[e :U _systemCheck ]
+[f ]
+[; ;PIC16F917 Battery Management.c: 365: sampleReference();
+"365
+[e ( _sampleReference ..  ]
+[; ;PIC16F917 Battery Management.c: 366: sampleCurrent();
+"366
+[e ( _sampleCurrent ..  ]
+[; ;PIC16F917 Battery Management.c: 367: sampleBatteryCells();
+"367
+[e ( _sampleBatteryCells ..  ]
+[; ;PIC16F917 Battery Management.c: 370: if ( cellVolt[0] < cellVoltL )
+"370
+[e $ ! < *U + &U _cellVolt * -> -> -> 0 `i `ui `ux -> -> # *U &U _cellVolt `ui `ux _cellVoltL 337  ]
+[; ;PIC16F917 Battery Management.c: 371: {
+"371
+{
+[; ;PIC16F917 Battery Management.c: 373: return 1;
+"373
+[e ) -> -> 1 `i `uc ]
+[e $UE 336  ]
+"374
+}
+[e :U 337 ]
+[; ;PIC16F917 Battery Management.c: 374: }
+[; ;PIC16F917 Battery Management.c: 376: return 0;
+"376
+[e ) -> -> 0 `i `uc ]
+[e $UE 336  ]
+[; ;PIC16F917 Battery Management.c: 377: }
+"377
+[e :UE 336 ]
 }
 [a 3C 67 117 114 114 101 110 116 58 0 ]
 [a 1C 86 111 108 116 97 103 101 58 0 ]
+[a 15C 67 101 108 108 32 54 58 0 ]
+[a 13C 67 101 108 108 32 53 58 0 ]
+[a 11C 67 101 108 108 32 52 58 0 ]
+[a 9C 67 101 108 108 32 51 58 0 ]
+[a 7C 67 101 108 108 32 50 58 0 ]
+[a 5C 67 101 108 108 32 49 58 0 ]
 [a 2C 32 86 32 32 32 32 32 32 0 ]
+[a 6C 32 86 32 32 32 32 32 32 0 ]
+[a 10C 32 86 32 32 32 32 32 32 0 ]
+[a 14C 32 86 32 32 32 32 32 32 0 ]
+[a 8C 32 86 32 32 32 32 32 32 32 0 ]
+[a 12C 32 86 32 32 32 32 32 32 32 0 ]
+[a 16C 32 86 32 32 32 32 32 32 32 0 ]
 [a 4C 32 65 32 32 32 32 32 32 32 0 ]

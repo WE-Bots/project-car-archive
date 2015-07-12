@@ -3,8 +3,8 @@
 [d edition pro ]
 [d chip 16F917 ]
 [d frameptr 6 ]
-"100 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
-[e E2718 . `uc
+"101 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+[e E2721 . `uc
 CELL1 0
 CELL2 1
 REFV 2
@@ -76,21 +76,21 @@ CURRENT 7
 [v _main main `(v  1 e 0 0 ]
 "89
 [v _sampleBatteryCells sampleBatteryCells `(v  1 e 0 0 ]
-"119
+"120
 [v _sampleReference sampleReference `(v  1 e 0 0 ]
-"145
+"148
 [v _sampleVoltage sampleVoltage `(f  1 e 3 0 ]
-"160
+"165
 [v _sampleCurrent sampleCurrent `(v  1 e 0 0 ]
-"179
+"184
 [v _displayLCD displayLCD `(v  1 e 0 0 ]
-"260
+"274
 [v _currentGainInit currentGainInit `(v  1 e 0 0 ]
-"298
+"312
 [v _handlePB handlePB `(v  1 e 0 0 ]
-"211 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
+"214 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _initController initController `(v  1 e 0 0 ]
-"255
+"258
 [v _isr isr `II(v  1 e 0 0 ]
 "49 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _timeSetup timeSetup `(v  1 e 0 0 ]
@@ -264,40 +264,40 @@ CURRENT 7
 [v _RD4 RD4 `VEb  1 e 0 @68 ]
 "6331
 [v _RD5 RD5 `VEb  1 e 0 @69 ]
-"6333
-[v _RD6 RD6 `VEb  1 e 0 @70 ]
 "6335
 [v _RD7 RD7 `VEb  1 e 0 @71 ]
-"166 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
+"168 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _cellVolt cellVolt `[6]f  1 e 18 0 ]
-"167
-[v _supVolt supVolt `f  1 e 3 0 ]
 "169
-[v _refValue refValue `ui  1 e 2 0 ]
+[v _supVolt supVolt `f  1 e 3 0 ]
 "171
-[v _current current `f  1 e 3 0 ]
-"172
-[v _shuntRes shuntRes `f  1 e 3 0 ]
+[v _refValue refValue `ui  1 e 2 0 ]
 "173
-[v _currentGain currentGain `uc  1 e 1 0 ]
+[v _current current `f  1 e 3 0 ]
+"174
+[v _shuntRes shuntRes `f  1 e 3 0 ]
 "175
+[v _currentGain currentGain `uc  1 e 1 0 ]
+"177
 [v _LCDDisplayMode LCDDisplayMode `uc  1 e 1 0 ]
-"179
-[v _refVolt refVolt `DCCf  1 e 3 0 ]
 "181
-[v _cell1RDT cell1RDT `DCCui  1 e 2 0 ]
-"182
-[v _cellRDB cellRDB `DCCui  1 e 2 0 ]
+[v _refVolt refVolt `DCCf  1 e 3 0 ]
+"183
+[v _cellVoltL cellVoltL `DCCf  1 e 3 0 ]
 "185
-[v _cell2RDT cell2RDT `DCCui  1 e 2 0 ]
+[v _cell1RR cell1RR `DCCf  1 e 3 0 ]
 "187
-[v _cell3RDT cell3RDT `DCCui  1 e 2 0 ]
+[v _cell2RR cell2RR `DCCf  1 e 3 0 ]
 "189
-[v _cell4RDT cell4RDT `DCCui  1 e 2 0 ]
+[v _cell3RR cell3RR `DCCf  1 e 3 0 ]
 "191
-[v _cell5RDT cell5RDT `DCCui  1 e 2 0 ]
+[v _cell4RR cell4RR `DCCf  1 e 3 0 ]
 "193
-[v _cell6RDT cell6RDT `DCCui  1 e 2 0 ]
+[v _cell5RR cell5RR `DCCf  1 e 3 0 ]
+"195
+[v _cell6RR cell6RR `DCCf  1 e 3 0 ]
+"197
+[v _sampleNum sampleNum `DCCuc  1 e 1 0 ]
 "35 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _time time `ul  1 e 4 0 ]
 "38
@@ -307,21 +307,21 @@ CURRENT 7
 {
 "85
 } 0
-"119
+"120
 [v _sampleReference sampleReference `(v  1 e 0 0 ]
 {
-"130
-[v sampleReference@i i `i  1 a 2 63 ]
-"143
+"133
+[v sampleReference@i i `i  1 a 2 64 ]
+"146
 } 0
-"160
+"165
 [v _sampleCurrent sampleCurrent `(v  1 e 0 0 ]
 {
-"164
-[v sampleCurrent@i i `i  1 a 2 64 ]
-"162
-[v sampleCurrent@temp temp `ui  1 a 2 66 ]
-"176
+"169
+[v sampleCurrent@i i `i  1 a 2 67 ]
+"167
+[v sampleCurrent@temp temp `ui  1 a 2 69 ]
+"181
 } 0
 "27 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\lbtoft.c
 [v ___lbtoft __lbtoft `(f  1 e 3 0 ]
@@ -335,21 +335,21 @@ CURRENT 7
 "89 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _sampleBatteryCells sampleBatteryCells `(v  1 e 0 0 ]
 {
-"117
+"118
 } 0
-"145
+"148
 [v _sampleVoltage sampleVoltage `(f  1 e 3 0 ]
 {
-[v sampleVoltage@chan chan `E2718  1 a 1 wreg ]
-"149
-[v sampleVoltage@i i `i  1 a 2 66 ]
-"147
-[v sampleVoltage@temp temp `ui  1 a 2 68 ]
-"145
-[v sampleVoltage@chan chan `E2718  1 a 1 wreg ]
-"147
-[v sampleVoltage@chan chan `E2718  1 a 1 65 ]
-"158
+[v sampleVoltage@chan chan `E2721  1 a 1 wreg ]
+"154
+[v sampleVoltage@i i `i  1 a 2 68 ]
+"150
+[v sampleVoltage@temp temp `ui  1 a 2 70 ]
+"148
+[v sampleVoltage@chan chan `E2721  1 a 1 wreg ]
+"150
+[v sampleVoltage@chan chan `E2721  1 a 1 67 ]
+"163
 } 0
 "73 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\adc.h
 [v _analogRead analogRead `(ui  1 e 2 0 ]
@@ -381,10 +381,10 @@ CURRENT 7
 [v ___lwdiv@dividend dividend `ui  1 p 2 2 ]
 "31
 } 0
-"211 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
+"214 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _initController initController `(v  1 e 0 0 ]
 {
-"253
+"256
 } 0
 "49 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _timeSetup timeSetup `(v  1 e 0 0 ]
@@ -396,10 +396,10 @@ CURRENT 7
 {
 "71
 } 0
-"298 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"312 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _handlePB handlePB `(v  1 e 0 0 ]
 {
-"326
+"340
 } 0
 "81 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _stopWatch stopWatch `(ul  1 e 4 0 ]
@@ -429,44 +429,48 @@ CURRENT 7
 [v LCDcmd@a a `uc  1 a 1 4 ]
 "120
 } 0
-"179 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"184 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _displayLCD displayLCD `(v  1 e 0 0 ]
 {
-"182
-[v displayLCD@temp2 temp2 `[8]uc  1 a 8 33 ]
-"181
-[v displayLCD@temp1 temp1 `[8]uc  1 a 8 25 ]
-"179
-[v displayLCD@disp disp `i  1 p 2 19 ]
-"180
-[v displayLCD@F2777 F2777 `[8]uc  1 s 8 F2777 ]
-"181
-[v displayLCD@F2779 F2779 `[8]uc  1 s 8 F2779 ]
-"256
+"187
+[v displayLCD@temp2 temp2 `[8]uc  1 a 8 35 ]
+"186
+[v displayLCD@temp1 temp1 `[8]uc  1 a 8 27 ]
+"184
+[v displayLCD@disp disp `i  1 p 2 21 ]
+"185
+[v displayLCD@F2781 F2781 `[8]uc  1 s 8 F2781 ]
+"186
+[v displayLCD@F2783 F2783 `[8]uc  1 s 8 F2783 ]
+"270
 } 0
 "274 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\lcd.h
 [v _floatToASCII floatToASCII `(v  1 e 0 0 ]
 {
 [v floatToASCII@returnVal returnVal `*.4uc  1 a 1 wreg ]
-"320
+"335
+[v floatToASCII@k k `uc  1 a 1 10 ]
+"323
 [v floatToASCII@j_342 j `uc  1 a 1 5 ]
-"282
-[v floatToASCII@j j `i  1 a 2 7 ]
+"283
+[v floatToASCII@j j `i  1 a 2 8 ]
 "276
-[v floatToASCII@scaler scaler `ul  1 a 4 13 ]
+[v floatToASCII@scaler scaler `ul  1 a 4 15 ]
 "277
-[v floatToASCII@prevSum prevSum `ul  1 a 4 9 ]
+[v floatToASCII@prevSum prevSum `ul  1 a 4 11 ]
 "279
-[v floatToASCII@i i `uc  1 a 1 18 ]
+[v floatToASCII@i i `uc  1 a 1 19 ]
+"280
+[v floatToASCII@decPoint decPoint `uc  1 a 1 7 ]
 "278
 [v floatToASCII@leading leading `uc  1 a 1 6 ]
 "274
 [v floatToASCII@returnVal returnVal `*.4uc  1 a 1 wreg ]
-[v floatToASCII@num num `f  1 p 3 75 ]
-[v floatToASCII@precision precision `uc  1 p 1 78 ]
+[v floatToASCII@num num `f  1 p 3 76 ]
+[v floatToASCII@precision precision `uc  1 p 1 79 ]
 "276
-[v floatToASCII@returnVal returnVal `*.4uc  1 a 1 17 ]
-"339
+[v floatToASCII@returnVal returnVal `*.4uc  1 a 1 20 ]
+"346
 } 0
 "15 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\Umul32.c
 [v ___lmul __lmul `(ul  1 e 4 0 ]
@@ -503,12 +507,12 @@ CURRENT 7
 [v ___fttol __fttol `(l  1 e 4 0 ]
 {
 "47
-[v ___fttol@lval lval `ul  1 a 4 70 ]
+[v ___fttol@lval lval `ul  1 a 4 71 ]
 "46
-[v ___fttol@exp1 exp1 `uc  1 a 1 74 ]
-[v ___fttol@sign1 sign1 `uc  1 a 1 69 ]
+[v ___fttol@exp1 exp1 `uc  1 a 1 75 ]
+[v ___fttol@sign1 sign1 `uc  1 a 1 70 ]
 "44
-[v ___fttol@f1 f1 `f  1 p 3 61 ]
+[v ___fttol@f1 f1 `f  1 p 3 62 ]
 "73
 } 0
 "15 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\ftneg.c
@@ -521,40 +525,40 @@ CURRENT 7
 [v ___ftmul __ftmul `(f  1 e 3 0 ]
 {
 "65
-[v ___ftmul@f3_as_product f3_as_product `um  1 a 3 27 ]
+[v ___ftmul@f3_as_product f3_as_product `um  1 a 3 41 ]
 "64
-[v ___ftmul@sign sign `uc  1 a 1 31 ]
-[v ___ftmul@cntr cntr `uc  1 a 1 30 ]
-[v ___ftmul@exp exp `uc  1 a 1 26 ]
+[v ___ftmul@sign sign `uc  1 a 1 45 ]
+[v ___ftmul@cntr cntr `uc  1 a 1 44 ]
+[v ___ftmul@exp exp `uc  1 a 1 40 ]
 "62
-[v ___ftmul@f1 f1 `f  1 p 3 16 ]
-[v ___ftmul@f2 f2 `f  1 p 3 19 ]
+[v ___ftmul@f1 f1 `f  1 p 3 30 ]
+[v ___ftmul@f2 f2 `f  1 p 3 33 ]
 "157
 } 0
 "56 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\ftdiv.c
 [v ___ftdiv __ftdiv `(f  1 e 3 0 ]
 {
 "60
-[v ___ftdiv@f3 f3 `f  1 a 3 56 ]
+[v ___ftdiv@f3 f3 `f  1 a 3 57 ]
 "59
-[v ___ftdiv@sign sign `uc  1 a 1 60 ]
-[v ___ftdiv@exp exp `uc  1 a 1 59 ]
-[v ___ftdiv@cntr cntr `uc  1 a 1 55 ]
+[v ___ftdiv@sign sign `uc  1 a 1 61 ]
+[v ___ftdiv@exp exp `uc  1 a 1 60 ]
+[v ___ftdiv@cntr cntr `uc  1 a 1 56 ]
 "56
-[v ___ftdiv@f2 f2 `f  1 p 3 45 ]
-[v ___ftdiv@f1 f1 `f  1 p 3 48 ]
+[v ___ftdiv@f2 f2 `f  1 p 3 46 ]
+[v ___ftdiv@f1 f1 `f  1 p 3 49 ]
 "86
 } 0
 "86 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\ftadd.c
 [v ___ftadd __ftadd `(f  1 e 3 0 ]
 {
 "88
-[v ___ftadd@exp1 exp1 `uc  1 a 1 44 ]
-[v ___ftadd@exp2 exp2 `uc  1 a 1 43 ]
-[v ___ftadd@sign sign `uc  1 a 1 42 ]
+[v ___ftadd@exp1 exp1 `uc  1 a 1 29 ]
+[v ___ftadd@exp2 exp2 `uc  1 a 1 28 ]
+[v ___ftadd@sign sign `uc  1 a 1 27 ]
 "86
-[v ___ftadd@f1 f1 `f  1 p 3 32 ]
-[v ___ftadd@f2 f2 `f  1 p 3 35 ]
+[v ___ftadd@f1 f1 `f  1 p 3 17 ]
+[v ___ftadd@f2 f2 `f  1 p 3 20 ]
 "148
 } 0
 "62 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\float.c
@@ -615,19 +619,19 @@ CURRENT 7
 [v LCDSetBits@a a `uc  1 a 1 0 ]
 "100
 } 0
-"260 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"274 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _currentGainInit currentGainInit `(v  1 e 0 0 ]
 {
 [v currentGainInit@gain gain `uc  1 a 1 wreg ]
 [v currentGainInit@gain gain `uc  1 a 1 wreg ]
-"262
+"276
 [v currentGainInit@gain gain `uc  1 a 1 0 ]
-"296
+"310
 } 0
-"255 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
+"258 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _isr isr `II(v  1 e 0 0 ]
 {
-"258
+"261
 } 0
 "64 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _isrTimer0 isrTimer0 `(v  1 e 0 0 ]
