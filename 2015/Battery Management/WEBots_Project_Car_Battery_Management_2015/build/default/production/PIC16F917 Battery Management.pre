@@ -3690,7 +3690,7 @@ const float cell5RR = 9.03161;
 
 const float cell6RR = 11.1326;
 
-const uint8_t sampleNum = 10;
+const uint8_t sampleNum = 300;
 
 
 
@@ -3738,8 +3738,6 @@ OPTION_REGbits.nRBPU = 1;
 RD2 = 0;
 
 
-
-
 RC0 = 1;
 
 
@@ -3767,7 +3765,7 @@ RD4 = 1;
 
 currentGainInit(200);
 
-
+# 84
 while(1)
 {
 sampleReference();
@@ -3793,19 +3791,18 @@ RD0 = 1;
 _delay((unsigned long)((5)*(8000000/4000.0)));
 
 
-
-cellVolt[0] = 0.1 * ( cell1RR + 1 ) * sampleVoltage(CELL1) + 0.9 * cellVolt[0];
-cellVolt[1] = 0.1 * ( cell2RR + 1 ) * sampleVoltage(CELL2) + 0.9 * cellVolt[1];
-cellVolt[2] = 0.1 * ( cell3RR + 1 ) * sampleVoltage(CELL3) + 0.9 * cellVolt[2];
+cellVolt[0] = ( cell1RR + 1 ) * sampleVoltage(CELL1);
+cellVolt[1] = ( cell2RR + 1 ) * sampleVoltage(CELL2);
+cellVolt[2] = ( cell3RR + 1 ) * sampleVoltage(CELL3);
 
 RD0 = 0;
 RC3 = 1;
 
 _delay((unsigned long)((5)*(8000000/4000.0)));
 
-cellVolt[3] = 0.1 * ( cell4RR + 1 ) * sampleVoltage(CELL4) + 0.9 * cellVolt[3];
-cellVolt[4] = 0.1 * ( cell5RR + 1 ) * sampleVoltage(CELL5) + 0.9 * cellVolt[4];
-cellVolt[5] = 0.1 * ( cell6RR + 1 ) * sampleVoltage(CELL6) + 0.9 * cellVolt[5];
+cellVolt[3] = ( cell4RR + 1 ) * sampleVoltage(CELL4);
+cellVolt[4] = ( cell5RR + 1 ) * sampleVoltage(CELL5);
+cellVolt[5] = ( cell6RR + 1 ) * sampleVoltage(CELL6);
 
 RC3 = 0;
 

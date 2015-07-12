@@ -3,7 +3,7 @@
 [d edition pro ]
 [d chip 16F917 ]
 [d frameptr 6 ]
-"101 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"109 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [e E2721 . `uc
 CELL1 0
 CELL2 1
@@ -74,23 +74,23 @@ CURRENT 7
 [v _floatToASCII floatToASCII `(v  1 e 0 0 ]
 "64 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _main main `(v  1 e 0 0 ]
-"89
+"98
 [v _sampleBatteryCells sampleBatteryCells `(v  1 e 0 0 ]
-"120
+"128
 [v _sampleReference sampleReference `(v  1 e 0 0 ]
-"148
+"156
 [v _sampleVoltage sampleVoltage `(f  1 e 3 0 ]
-"165
+"173
 [v _sampleCurrent sampleCurrent `(v  1 e 0 0 ]
-"184
+"192
 [v _displayLCD displayLCD `(v  1 e 0 0 ]
-"274
+"282
 [v _currentGainInit currentGainInit `(v  1 e 0 0 ]
-"312
+"320
 [v _handlePB handlePB `(v  1 e 0 0 ]
 "214 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _initController initController `(v  1 e 0 0 ]
-"258
+"256
 [v _isr isr `II(v  1 e 0 0 ]
 "49 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _timeSetup timeSetup `(v  1 e 0 0 ]
@@ -305,23 +305,23 @@ CURRENT 7
 "64 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _main main `(v  1 e 0 0 ]
 {
-"85
+"94
 } 0
-"120
+"128
 [v _sampleReference sampleReference `(v  1 e 0 0 ]
 {
-"133
+"141
 [v sampleReference@i i `i  1 a 2 64 ]
-"146
+"154
 } 0
-"165
+"173
 [v _sampleCurrent sampleCurrent `(v  1 e 0 0 ]
 {
-"169
+"177
 [v sampleCurrent@i i `i  1 a 2 67 ]
-"167
+"175
 [v sampleCurrent@temp temp `ui  1 a 2 69 ]
-"181
+"189
 } 0
 "27 C:\Program Files (x86)\Microchip\xc8\v1.34\sources\common\lbtoft.c
 [v ___lbtoft __lbtoft `(f  1 e 3 0 ]
@@ -332,24 +332,24 @@ CURRENT 7
 [v ___lbtoft@c c `uc  1 a 1 15 ]
 "30
 } 0
-"89 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"98 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _sampleBatteryCells sampleBatteryCells `(v  1 e 0 0 ]
 {
-"118
+"126
 } 0
-"148
+"156
 [v _sampleVoltage sampleVoltage `(f  1 e 3 0 ]
 {
 [v sampleVoltage@chan chan `E2721  1 a 1 wreg ]
-"154
+"162
 [v sampleVoltage@i i `i  1 a 2 68 ]
-"150
+"158
 [v sampleVoltage@temp temp `ui  1 a 2 70 ]
-"148
+"156
 [v sampleVoltage@chan chan `E2721  1 a 1 wreg ]
-"150
+"158
 [v sampleVoltage@chan chan `E2721  1 a 1 67 ]
-"163
+"171
 } 0
 "73 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\adc.h
 [v _analogRead analogRead `(ui  1 e 2 0 ]
@@ -384,7 +384,7 @@ CURRENT 7
 "214 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _initController initController `(v  1 e 0 0 ]
 {
-"256
+"254
 } 0
 "49 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _timeSetup timeSetup `(v  1 e 0 0 ]
@@ -396,10 +396,10 @@ CURRENT 7
 {
 "71
 } 0
-"312 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"320 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _handlePB handlePB `(v  1 e 0 0 ]
 {
-"340
+"348
 } 0
 "81 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _stopWatch stopWatch `(ul  1 e 4 0 ]
@@ -429,20 +429,20 @@ CURRENT 7
 [v LCDcmd@a a `uc  1 a 1 4 ]
 "120
 } 0
-"184 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"192 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _displayLCD displayLCD `(v  1 e 0 0 ]
 {
-"187
+"195
 [v displayLCD@temp2 temp2 `[8]uc  1 a 8 35 ]
-"186
+"194
 [v displayLCD@temp1 temp1 `[8]uc  1 a 8 27 ]
-"184
+"192
 [v displayLCD@disp disp `i  1 p 2 21 ]
-"185
+"193
 [v displayLCD@F2781 F2781 `[8]uc  1 s 8 F2781 ]
-"186
+"194
 [v displayLCD@F2783 F2783 `[8]uc  1 s 8 F2783 ]
-"270
+"278
 } 0
 "274 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\lcd.h
 [v _floatToASCII floatToASCII `(v  1 e 0 0 ]
@@ -619,19 +619,19 @@ CURRENT 7
 [v LCDSetBits@a a `uc  1 a 1 0 ]
 "100
 } 0
-"274 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
+"282 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\PIC16F917 Battery Management.c
 [v _currentGainInit currentGainInit `(v  1 e 0 0 ]
 {
 [v currentGainInit@gain gain `uc  1 a 1 wreg ]
 [v currentGainInit@gain gain `uc  1 a 1 wreg ]
-"276
+"284
 [v currentGainInit@gain gain `uc  1 a 1 0 ]
-"310
+"318
 } 0
-"258 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
+"256 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\setup.h
 [v _isr isr `II(v  1 e 0 0 ]
 {
-"261
+"259
 } 0
 "64 C:\Users\Andrew Cullen\Documents\WE Bots\Project Car\Git\2015\Battery Management\WEBots_Project_Car_Battery_Management_2015\timer0.h
 [v _isrTimer0 isrTimer0 `(v  1 e 0 0 ]

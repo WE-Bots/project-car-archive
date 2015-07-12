@@ -109,7 +109,7 @@ FOSC =	Oscillator Selection bits
 #include <xc.h>
 #include <stdint.h> // allows access to more intuiative interger classes such as uint8_t, int16_t
 
-#define SHUT_DOWN_TEST
+//#define CIRCUIT_DEBUG
 
 /***** LCD Definitions *****/
 
@@ -194,7 +194,7 @@ const float cell5RR = 9.03161; // the resistor ratio of the cell 5 resistor divi
 
 const float cell6RR = 11.1326; // the resistor ratio of the cell 6 resistor divider, TopRes / BtmRes (OHM)
 
-const uint8_t sampleNum = 10; // the number of ADC samples to be averaged
+const uint8_t sampleNum = 300; // the number of ADC samples to be averaged
 
 /***** Functions *****/
 
@@ -240,8 +240,6 @@ void initController ()
     OPTION_REGbits.nRBPU = 1; // weak pullups dissabled
 
     UC_CGND = 0; // connect the ground for the microcontroller (active low)
-
-    //LCD_PWR_SW = 1; // keep LCD off ( active low )
 
     // temporay setup !!!!*****
     MOTOR_CONTROL = 1;

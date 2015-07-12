@@ -26,3 +26,16 @@
 *.exe
 *.out
 *.app
+
+# MPLAB compilation files
+*.p1
+*.pre
+*.cmf
+*.elf
+*.hex
+*.hxl
+*.lst
+*.map
+*.rlf
+*.sdb
+*.sym

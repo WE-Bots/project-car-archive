@@ -71,6 +71,15 @@ void main()
 
     currentGainInit(200);
 
+#ifdef CIRCUIT_DEBUG
+    REF_EN = 1;
+    TP_CLS_EN = 1;
+    BT_CLS_EN = 1;
+    OPAMP_CGND = 1;
+
+    while(1);
+#endif
+
     /***** MAIN LOOP *****/
     while(1)
     {
@@ -97,19 +106,18 @@ void sampleBatteryCells ()
     __delay_ms(5); // wait for the voltage to level out
 
     // sample the bottom cells
-    // also implements an IIR running average function
-    cellVolt[0] = 0.1 * ( cell1RR + 1 ) * sampleVoltage(CELL1) + 0.9 * cellVolt[0]; // cell 1
-    cellVolt[1] = 0.1 * ( cell2RR + 1 ) * sampleVoltage(CELL2) + 0.9 * cellVolt[1]; // cell 2
-    cellVolt[2] = 0.1 * ( cell3RR + 1 ) * sampleVoltage(CELL3) + 0.9 * cellVolt[2]; // cell 3
+    cellVolt[0] = ( cell1RR + 1 ) * sampleVoltage(CELL1); // cell 1
+    cellVolt[1] = ( cell2RR + 1 ) * sampleVoltage(CELL2); // cell 2
+    cellVolt[2] = ( cell3RR + 1 ) * sampleVoltage(CELL3); // cell 3
 
     BT_CLS_EN = 0; // turn off the first three voltage dividers
     TP_CLS_EN = 1; // turn on the last three voltage dividers
 
     __delay_ms(5);
 
-    cellVolt[3] = 0.1 * ( cell4RR + 1 ) * sampleVoltage(CELL4) + 0.9 * cellVolt[3]; // cell 4
-    cellVolt[4] = 0.1 * ( cell5RR + 1 ) * sampleVoltage(CELL5) + 0.9 * cellVolt[4]; // cell 5
-    cellVolt[5] = 0.1 * ( cell6RR + 1 ) * sampleVoltage(CELL6) + 0.9 * cellVolt[5]; // cell 6
+    cellVolt[3] = ( cell4RR + 1 ) * sampleVoltage(CELL4); // cell 4
+    cellVolt[4] = ( cell5RR + 1 ) * sampleVoltage(CELL5); // cell 5
+    cellVolt[5] = ( cell6RR + 1 ) * sampleVoltage(CELL6); // cell 6
 
     TP_CLS_EN = 0; // turn off the last three voltage dividers
 
