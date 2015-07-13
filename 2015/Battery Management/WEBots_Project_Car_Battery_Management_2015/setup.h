@@ -110,6 +110,8 @@ FOSC =	Oscillator Selection bits
 #include <stdint.h> // allows access to more intuiative interger classes such as uint8_t, int16_t
 
 //#define CIRCUIT_DEBUG
+#define SHUTOFF_DEBUG
+#define CELL2CELLVOLT
 
 /***** LCD Definitions *****/
 
@@ -195,6 +197,8 @@ const float cell5RR = 9.03161; // the resistor ratio of the cell 5 resistor divi
 const float cell6RR = 11.1326; // the resistor ratio of the cell 6 resistor divider, TopRes / BtmRes (OHM)
 
 const uint8_t sampleNum = 300; // the number of ADC samples to be averaged
+const float IIRnew = 0.2; // IIR filter constant for incoming data
+const float IIRprev = 0.8; // IIR filter constant eor previous data
 
 /***** Functions *****/
 
@@ -208,6 +212,9 @@ void currentGainInit ( uint8_t );
 void handlePB ();
 float batteryVoltage ();
 float sampleVoltage(ADCChannel  chan);
+uint8_t systemCheck ();
+void initCellVolt();
+void shutDown( uint8_t );
 
 
 
@@ -241,20 +248,69 @@ void initController ()
 
     UC_CGND = 0; // connect the ground for the microcontroller (active low)
 
-    // temporay setup !!!!*****
-    MOTOR_CONTROL = 1;
-
-
     initADC();
-
+    
     timeSetup();
 
     initLCD();
 
+    initCellVolt();
+
+    // start reading in values to stabalize the running average values
+    stopWatch(0);
+
+    while (stopWatch(1) < 2000)
+    {
+        systemCheck();
+    }
+
+    
+    // initial system check
+
+    uint8_t tempCheck = systemCheck();
+
+    if ( tempCheck != 0)
+    {
+        shutDown( tempCheck );
+    }
+
+    // initial check sucessful so connect power
+    MOTOR_CONTROL = 1;
+   
 }
 
 void interrupt isr()
 {
     isrTimer0();
+}
+
+// initializes the cell voltages, reduces the startup stabalization
+void initCellVolt()
+{
+    // Turn on the unity feedback op amps
+    OPAMP_CGND = 1;
+
+    // sample each of the cell voltages
+    BT_CLS_EN = 1; // turn on the first three voltage dividers
+
+    __delay_ms(5); // wait for the voltage to level out
+
+    // sample the bottom cells
+    cellVolt[0] = ( cell1RR + 1 ) * sampleVoltage(CELL1); // cell 1
+    cellVolt[1] = ( cell2RR + 1 ) * sampleVoltage(CELL2); // cell 2
+    cellVolt[2] = ( cell3RR + 1 ) * sampleVoltage(CELL3); // cell 3
+
+    BT_CLS_EN = 0; // turn off the first three voltage dividers
+    TP_CLS_EN = 1; // turn on the last three voltage dividers
+
+    __delay_ms(5);
+
+    cellVolt[3] = ( cell4RR + 1 ) * sampleVoltage(CELL4); // cell 4
+    cellVolt[4] = ( cell5RR + 1 ) * sampleVoltage(CELL5); // cell 5
+    cellVolt[5] = ( cell6RR + 1 ) * sampleVoltage(CELL6); // cell 6
+
+    TP_CLS_EN = 0; // turn off the last three voltage dividers
+
+    OPAMP_CGND = 0; // turn off the voltage dividers
 }
 #endif	/* SETUP_H */
