@@ -46,6 +46,7 @@ int speed_error = 0;
 int real_speed = 0;
 int accumulated_speed_error = 0;
 boolean emergency_stop = true;
+boolean stop_button = true;
 unsigned long timer = 0;
 int battery_voltage = 10;
 int battery_current = 50;
@@ -54,6 +55,10 @@ int distance = 0;
 
 void setup()
 {
+	//configure stop button interrupt
+	pinMode(2, INPUT_PULLUP);
+	attachInterrupt(0, stop, CHANGE);
+
 #ifdef I2C
 	Wire.begin();                 //start I2C
 #endif
@@ -98,7 +103,7 @@ void loop()
 	real_speed /= 4;
 	avg_encoder_distance/=4;
 
-	if (!emergency_stop)
+	if (!(emergency_stop||stop_button))
 	{
 		accumulated_speed_error += base_speed - real_speed;
 	}
@@ -117,6 +122,10 @@ void loop()
 	if (Serial1.available() > 1)
 	{
 		base_speed = (Serial1.parseInt() / 5 - 100);
+		if ((base_speed < -100) || (base_speed>100))
+		{
+			base_speed = 0;
+		}
 		steering_angle = (Serial1.parseInt() / 10 - 90);
 		//Serial.print("Speed: ");
 		//Serial.print(base_speed);
@@ -170,7 +179,7 @@ void loop()
 	//emergency_stop=false;
 	//drive the motors
 #ifdef MOTORS
-	if (emergency_stop)
+	if (emergency_stop || stop_button)
 	{
 		motor.writeMicroseconds(1500);
 		steer.write(90);
@@ -181,6 +190,12 @@ void loop()
 		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif
+}
+
+//Stop button ISR
+void stop()
+{
+	stop_button = digitalRead(2);
 }
 
 /*
