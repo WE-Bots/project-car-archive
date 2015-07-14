@@ -8,6 +8,11 @@
 *				Serial(USB)-PI
 *				D18-I2C SDA
 *				D19-I2C SCL
+*				D2-Collision avoidance interrupt
+*				D4-Right IR
+*				D5-Left IR
+*				D6-Start button
+*				D7-Mode indicator LED
 *	Discription:Handles decision making and communication between components of the car. Programed in Arduino.
 */
 
@@ -17,10 +22,10 @@
 #define DEBUG
 
 //uncomment for active communications while debugging
-//#define I2C
-#define USB
-#define BLUETOOTH
-#define MOTORS
+#define I2C
+//#define USB
+//#define BLUETOOTH
+//#define MOTORS
 
 #ifndef DEBUG
 #define I2C
@@ -37,7 +42,7 @@ Servo motor;
 Servo steer;
 #endif
 
-const int encoders[4] = { 0, 1, 2, 3 };		//encoder board addresses
+const int encoders[4] = { 8, 9, 10, 11 };		//encoder board addresses
 const int power_board = 4;
 
 int steering_angle = 0;
@@ -46,19 +51,31 @@ int speed_error = 0;
 int real_speed = 0;
 int accumulated_speed_error = 0;
 boolean emergency_stop = true;
-boolean stop_button = true;
 unsigned long timer = 0;
 int battery_voltage = 10;
 int battery_current = 50;
 int avg_encoder_distance = 0;
 int distance = 0;
 
+#ifdef USB
+static boolean serial_get_value(uint8_t &id, int16_t &value);
+static boolean serial_send_value(int angle, int speed);
+#endif
+
+#ifdef I2C
+boolean wire_get_value(int &first, int &second, int address);
+#endif
+
 void setup()
 {
-	//configure stop button interrupt
-	pinMode(2, INPUT_PULLUP);
-	attachInterrupt(0, stop, CHANGE);
+	//Start button config
+	pinMode(6, INPUT_PULLUP);
+	pinMode(7, OUTPUT);
 
+	//Collision avoidance config
+	//attachInterrupt(0, pause, CHANGE);
+
+	Serial.begin(9600);
 #ifdef I2C
 	Wire.begin();                 //start I2C
 #endif
@@ -74,7 +91,8 @@ void setup()
 #ifdef MOTORS
 	motor.attach(9);     // range 1000-2000		1500=stop
 	steer.attach(3);    // range 50-120   below 90 turns right		(this will need to be recalibrated when the car chassis is rebuilt)
-	while (millis() < 2000)
+	timer = millis();
+	while ((millis()-timer) < 2000)
 	{
 		motor.writeMicroseconds(1500);
 		steer.write(90);
@@ -91,29 +109,38 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
-	avg_encoder_distance=0;
-	for (int i = 0; i < 4; i++)
+	avg_encoder_distance = 0;
+	//for (int i = 0; i < 1; i++)
 	{
 		int encoder_period = 0;
-		int encoder_distance=0;
-		while (!wire_get_value(encoder_period, encoder_distance, encoders[i])){}
+		int encoder_distance = 0;
+		while (!wire_get_value(encoder_period, encoder_distance, 8)){ Serial.println("FAIL!!!!!!!!!!!"); delay(100); }
 		real_speed += encoder_period;
-		avg_encoder_distance+=encoder_distance;
+		avg_encoder_distance += encoder_distance;
+		delay(100);
+		Serial.println("********************************");
+		delay(100);
+		//Serial.print("encoder period: ");
+		//Serial.println(encoder_period);
+		//Serial.print("encoder distance: ");
+		//Serial.println(encoder_distance);
 	}
-	real_speed /= 4;
-	avg_encoder_distance/=4;
+	//real_speed /= 4;
+	//avg_encoder_distance /= 4;
+	//distance+=avg_encoder_distance;
+	//Serial.print("real speed: ");
+	//Serial.println(real_speed);
+	//Serial.print("distance: ");
+	//Serial.println(avg_encoder_distance);
 
-	if (!(emergency_stop||stop_button))
+	if (!emergency_stop)
 	{
 		accumulated_speed_error += base_speed - real_speed;
 	}
 	speed_error = constrain(0.5*(base_speed - real_speed) + 0.5*accumulated_speed_error, -100, 100);
 
 	//get data from power board
-	while(!wire_get_value(battery_voltage,battery_current,power_board)){}
-#ifdef BLUETOOTH
-	Serial1.write(battery_voltage + "," + battery_current);
-#endif
+	//while (!wire_get_value(battery_voltage, battery_current, power_board)){}
 #endif
 
 	//Remote control code
@@ -127,15 +154,13 @@ void loop()
 			base_speed = 0;
 		}
 		steering_angle = (Serial1.parseInt() / 10 - 90);
-		//Serial.print("Speed: ");
-		//Serial.print(base_speed);
-		//Serial.print("     Angle: ");
-		//Serial.println(steering_angle);
 		Serial1.print(battery_voltage);
 		Serial1.print(",");
 		Serial1.print(battery_current);
 		Serial1.print(",");
-		Serial1.println(real_speed);
+		Serial1.print(real_speed);
+		Serial1.print(",");
+		Serial1.pringln(distance);
 		emergency_stop = false;
 		timer = millis();
 	}
@@ -162,7 +187,9 @@ void loop()
 		Serial1.print(",");
 		Serial1.print(battery_current);
 		Serial1.print(",");
-		Serial1.println(real_speed);
+		Serial1.print(real_speed);
+		Serial1.print(",");
+		Serail1.println(distance);
 		timer = millis();
 	}
 	if ((millis() - timer) >= 300)
@@ -179,7 +206,7 @@ void loop()
 	//emergency_stop=false;
 	//drive the motors
 #ifdef MOTORS
-	if (emergency_stop || stop_button)
+	if (emergency_stop)
 	{
 		motor.writeMicroseconds(1500);
 		steer.write(90);
@@ -190,12 +217,6 @@ void loop()
 		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif
-}
-
-//Stop button ISR
-void stop()
-{
-	stop_button = digitalRead(2);
 }
 
 /*
@@ -224,7 +245,8 @@ they will be unmodified if a complete, valid entry is not obtained.
 /return
 -bool: True if a id-value pair was obtained. False otherwise.
 */
-static boolean serial_get_value(uint8_t &id, int16_t &value) {
+static boolean serial_get_value(uint8_t &id, int16_t &value) 
+{
 	// Static variables remain between calls
 	static char buffer[3][7]; // Three parameters, length 6 + '\0' each
 	static unsigned int charIdx[3] = { 0, 0, 0 }; // Index for each char container
@@ -322,7 +344,8 @@ function serial_send_value
 /return
 -bool: True if transmission was successful. Always true.
 */
-static boolean serial_send_value(int angle, int speed) {
+static boolean serial_send_value(int angle, int speed) 
+{
 	Serial.print('<');
 	Serial.print(angle);
 	Serial.print(',');
@@ -347,27 +370,37 @@ they will be unmodified if a complete, valid entry is not obtained.
 /return
 -bool: True if a packet was obtained. False otherwise.
 */
-static boolean wire_get_value(int &first, int &second, int address) {
-	if (Wire.requestFrom(address, 4)!=4)
+boolean wire_get_value(int &first, int &second, int address) 
+{
+	if (Wire.requestFrom(address, 4) != 4)
 		return false; //didn't receive the correct number of bytes
 
 	// Static variables remain between calls
-	static byte[3] buf16={0,0,'\0'}; //2 bytes +'\0'
-	static byte buf8=0;
-	static byte bufXOR=0;
+	char buf16[3] = { 0, 0, '\0' }; //2 bytes +'\0'
+	char buf8 = 0;
+	char bufXOR = 0;
 
 	// Read data
-	Wire.readBytes(buf16,2);
-	buf8=Wire.read();
-	bufXOR=Wire.read();
+	Wire.readBytes(buf16, 2);
+	buf8 = Wire.read();
+	bufXOR = Wire.read();
+	Serial.print("one: ");
+	Serial.println((byte)buf16[0]);
+	Serial.print("two: ");
+	Serial.println((byte)buf16[1]);
+	Serial.print("three: ");
+	Serial.println((byte)buf8);
+	Serial.print("xor: ");
+	Serial.println((byte)bufXOR);
+	Serial.println((byte)(buf16[0] ^ buf16[1] ^ buf8));
 
 	//check XOR
-	if (bufXOR!=buf16[0]^buf16[1]^buf8)
+	if (bufXOR != buf16[0] ^ buf16[1] ^ buf8)
 		return false;	//invalid XOR
 
 	// XOR was valid, pass the variables back to the caller, return true
 	first = atoi(buf16);
-	second=buf8;
+	second = buf8;
 	return true;
 }
 
@@ -386,15 +419,15 @@ function wire_send_value
 */
 /*
 static boolean wire_send_value(uint8_t id, int16_t value, int address) {
-	Wire.beginTransmission(address);
-	Wire.print('<');
-	Wire.print(id);
-	Wire.print(',');
-	Wire.print(value);
-	Wire.print(',');
-	Wire.print(id + value);
-	Wire.print('>');
-	return !Wire.endTransmission();
+Wire.beginTransmission(address);
+Wire.print('<');
+Wire.print(id);
+Wire.print(',');
+Wire.print(value);
+Wire.print(',');
+Wire.print(id + value);
+Wire.print('>');
+return !Wire.endTransmission();
 }*/
 #endif
 //};
