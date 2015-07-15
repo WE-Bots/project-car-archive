@@ -110,8 +110,13 @@ FOSC =	Oscillator Selection bits
 #include <stdint.h> // allows access to more intuiative interger classes such as uint8_t, int16_t
 
 //#define CIRCUIT_DEBUG
-#define SHUTOFF_DEBUG
+//#define SHUTOFF_DEBUG
 #define CELL2CELLVOLT
+
+// I2C
+// 2 byte unsigned int for voltage
+// 1 byte unsigned int for current
+// 1 byte of the three previous bytes XORed together
 
 /***** LCD Definitions *****/
 
@@ -173,10 +178,11 @@ float supVolt = 4.2; // supply voltage to be set by the sampleReference function
 uint16_t refValue = 0; // ADC value of the reference voltage
 
 float current = 0; // current flowing out of the battery
-float shuntRes = 0.01; // the resistance of the current shunt in ohms
 uint8_t currentGain = 200; // gain for the current sense module
 
 uint8_t LCDDisplayMode = 0;
+
+#include "i2c.h"
 
 /***** Calibration Variables *****/
 
@@ -196,9 +202,12 @@ const float cell5RR = 9.03161; // the resistor ratio of the cell 5 resistor divi
 
 const float cell6RR = 11.1326; // the resistor ratio of the cell 6 resistor divider, TopRes / BtmRes (OHM)
 
+const float shuntRes = 0.000690789; // the resistance of the current shunt in ohms
 const uint8_t sampleNum = 300; // the number of ADC samples to be averaged
 const float IIRnew = 0.2; // IIR filter constant for incoming data
 const float IIRprev = 0.8; // IIR filter constant eor previous data
+
+
 
 /***** Functions *****/
 
@@ -282,6 +291,8 @@ void initController ()
 void interrupt isr()
 {
     isrTimer0();
+
+    isrI2C();
 }
 
 // initializes the cell voltages, reduces the startup stabalization
