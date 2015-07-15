@@ -18,11 +18,6 @@
 // Make sure that this is not defined on the Raspberry Pi!
 //#define DISPLAY
 
-#ifdef DISPLAY
-// Name for OpenCV's display window (used for debugging only)
-static const std::string WINDOW = "Subscribed Image";
-#endif
-
 /*
  * class ImageProcessor
  *
