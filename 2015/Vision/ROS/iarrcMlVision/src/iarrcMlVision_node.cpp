@@ -6,6 +6,7 @@
 #include <sensor_msgs/CompressedImage.h>
 
 // OpenCV includes
+#include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -61,6 +62,30 @@ public:
     #endif
   }
 
+  // white_filter - boost white and remove non-white features
+  // Give a uint8 colour image - I don't know how it will behave otherwise!
+  void white_filter(cv::Mat &img)
+  {
+    // cv::Mat dst32;
+    // img.convertTo(dst32, CV_32FC3);
+    // cv::Mat spl[3];
+    // split(dst32,spl);
+    // spl[0] = spl[0].mul(spl[1]);
+    // spl[0] = spl[0].mul(spl[2]);
+    // // Thresholding works poorly...
+    // //threshold(spl[0], dst32, 200*200*200, 255, 0);
+    // //dst32.convertTo(img, CV_8UC1);
+    // cv::normalize(spl[0],img,0,255,CV_MINMAX,CV_8UC1);
+
+    // Try HSV conversion instead
+    // cv::Mat dst;
+    // cv::cvtColor(img, dst, CV_BGR2HSV);
+    int max_sat;
+    nh_.param("iarrcMlVision/max_sat",max_sat, 150); // Rejects yellow lines
+    // cv::inRange(dst,cv::Scalar(0,0,20),cv::Scalar(255,max_sat,255),img);
+    cv::inRange(img,cv::Scalar(max_sat,max_sat,max_sat),cv::Scalar(255,255,255),img);
+  }
+
   // proc_img - get new image, move into OpenCV, and process
   void proc_img(const sensor_msgs::CompressedImage& msg) //sensor_msgs::ImageConstPtr& (proper way)
   {
@@ -85,6 +110,12 @@ public:
     #ifdef DISPLAY
     cv::imshow("Subscribed Image", img);
     #endif
+
+    // // Convert to 'white-scale'
+    // white_filter(img);
+    // #ifdef DISPLAY
+    // cv::imshow("White-scaled Image", img);
+    // #endif
 
     //==========================================================================
     // Line detector (heavilly borrowed from the internet)
