@@ -24,7 +24,7 @@
 
 //uncomment for active communications while debugging
 //#define I2C
-//#define USB
+#define USB
 //#define BLUETOOTH
 //#define MOTORS
 
@@ -130,6 +130,29 @@ void setup()
 
 void loop()
 {
+	//set speed and steering angle when in autonomous mode
+#ifdef AUTONOMOUS
+	if (race_mode == 1)
+	{
+#ifdef USB
+		//put pi communication stuff here
+		serial_get_value(steering_angle, base_speed);
+#endif
+		steering_angle = 0;
+		if (distance > 5000)	//need to figure out what this value should actually be
+		{
+			base_speed = 0;
+		}
+	}
+	else if (race_mode == 2)
+	{
+#ifdef USB
+		//put pi communication stuff here
+		serial_get_value(steering_angle, base_speed);
+#endif
+	}
+#endif
+
 	//get data over I2C
 #ifdef I2C
 	//this needs to be fixed????
@@ -205,7 +228,7 @@ void loop()
 #endif
 #endif
 
-	//Autonomous code
+	//communicate with the remote emergency stop app
 #ifdef AUTONOMOUS
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
@@ -224,10 +247,6 @@ void loop()
 	{
 		emergency_stop = true;
 	}
-#endif
-
-#ifdef USB
-	//put pi communication stuff here
 #endif
 #endif
 
@@ -273,90 +292,61 @@ they will be unmodified if a complete, valid entry is not obtained.
 /return
 -bool: True if a id-value pair was obtained. False otherwise.
 */
-static boolean serial_get_value(uint8_t &id, int16_t &value) 
+static boolean serial_get_value(int &first, int &second)
 {
 	// Static variables remain between calls
-	static char buffer[3][7]; // Three parameters, length 6 + '\0' each
-	static unsigned int charIdx[3] = { 0, 0, 0 }; // Index for each char container
-	static unsigned int buffIdx = 0; // Current container receiving data
+	static int buffer[2] = { 0, 0 };
 	static boolean started = false;
+	static boolean success = false;
 	// Read chars until there is no data in the buffer or we find a terminator
-	while (Serial.available() > 0) {
+	while (Serial.available() >= 11)
+	{
 		// Check for start of package
-		if (Serial.peek() == '<') {
+		if (Serial.peek() == '<')
+		{
 			Serial.read(); // Eat the byte
 			started = true;
-			buffIdx = 0;
-			for (int i = 0; i < 3; ++i)
-				charIdx[i] = 0;
 		}
-		else if (!started) {
+		else
+		{
 			// Skip this char, go to next until a packet opener is found.
 			Serial.read(); // Eat byte.
 			continue;
 		}
-		else if (Serial.peek() == ',') {
+
+		//read the first int
+		buffer[0] = Serial.parseInt();
+
+		//check for parser
+		if (Serial.peek() == ',')
+		{
 			Serial.read(); // Eat the byte
-			if ((charIdx[buffIdx] == 0) || (buffIdx >= 2)) {
-				// Current is still empty or encountered a seventh char - bad.
-				started = false; // Throw away this packet
-				continue;
-			}
-			buffer[buffIdx][charIdx[buffIdx]++] = '\0'; // Add null terminator
-			buffIdx++;
 		}
-		else if (Serial.peek() == '>') {
-			if (!started || charIdx[0] == 0 || charIdx[1] == 0 || charIdx[2] == 0) {
-				// No valid beginning of package was found, or a buffer
-				// is still empty.
-				// Buffers likely contain garbage. Toss the packet.
-				Serial.read(); // Eat char
-				started = false;
-				continue;
-			}
-			// Don't eat the byte - leave it for a check outside of the loop
-			buffer[buffIdx][charIdx[buffIdx]++] = '\0'; // Add null terminator
-			break;
+		else
+		{
+			started = false; // Throw away this packet
+			continue;
 		}
-		else // Must be a digit. Maybe check just in case?
-			if (charIdx[buffIdx] == 5) {
-				// Too long to be an int16_t integer.
-				Serial.read(); // Eat char
-				started = false; // Packet is invalid
-				continue;
-			}
-		buffer[buffIdx][charIdx[buffIdx]++] = Serial.read();
+
+		//read the second int
+		buffer[1] = Serial.parseInt();
+
+		//check for terminator
+		if (Serial.peek() == '>')
+		{
+			Serial.read(); // Eat the byte
+			//pass the variables back to the caller
+			first = buffer[0];
+			second = buffer[1];
+			success = true;
+		}
+		else
+		{
+			started = false; // Throw away this packet
+			continue;
+		}
 	}
-
-	// Check if buffer was emptied (ALWAYS check before peeking)
-	if (Serial.available() == 0)
-		return false; // Processed whole buffer without receiving complete packet
-
-	// Check if terminator was reached
-	if (Serial.peek() != '>')
-		return false; // Not sure how you could even get here.
-	// Maybe came in after the check in the loop.
-
-	// Reserve return value
-	uint8_t retid;
-	int16_t retval;
-	int16_t chksum;
-
-	// Get id TODO: verify that they're all valid integers (atoi does not)
-	retid = atoi(buffer[0]);
-	// Get value
-	retval = atoi(buffer[1]);
-	// Get checksum
-	chksum = atoi(buffer[2]);
-
-	// Compare checksum
-	if ((id + retval) != chksum)
-		return false;
-
-	// Checksum was valid, pass the variables back to the caller, return true
-	id = retid;
-	value = retval;
-	return true;
+	return success;
 }
 
 /*
@@ -372,7 +362,7 @@ function serial_send_value
 /return
 -bool: True if transmission was successful. Always true.
 */
-static boolean serial_send_value(int angle, int speed) 
+static boolean serial_send_value(int angle, int speed)
 {
 	Serial.print('<');
 	Serial.print(angle);
