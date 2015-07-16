@@ -13,17 +13,17 @@
 *				D5-Left IR
 *				D6-Start button
 *				D7-Drag race mode indicator LED
-*				D8-Circuit race mode indicator LED
+*				D13-Circuit race mode indicator LED
 *	Discription:Handles decision making and communication between components of the car. Programed in Arduino.
 */
 
 //uncomment for control type
-//#define AUTONOMOUS
-#define REMOTE_CONTROL
+#define AUTONOMOUS
+//#define REMOTE_CONTROL
 #define DEBUG
 
 //uncomment for active communications while debugging
-#define I2C
+//#define I2C
 //#define USB
 //#define BLUETOOTH
 //#define MOTORS
@@ -70,11 +70,6 @@ boolean wire_get_value(int &first, int &second, int address);
 
 void setup()
 {
-	//Start button config
-	pinMode(6, INPUT_PULLUP);
-	pinMode(7, OUTPUT);
-	pinMode(8, OUTPUT);
-
 	//Collision avoidance config
 	//attachInterrupt(0, pause, CHANGE);
 
@@ -92,20 +87,27 @@ void setup()
 #endif
 
 #ifdef AUTONOMOUS
+	//Start button config
+	pinMode(6, INPUT_PULLUP);
+	pinMode(7, OUTPUT);
+	pinMode(13, OUTPUT);
+
 	//start button selection
 	while (!race_mode)
 	{
+		digitalWrite(7, LOW);
+		digitalWrite(13, LOW);
 		if (!digitalRead(6))
 		{
-			race_mode=1;
-			digitalWrite(7,HIGH);
+			race_mode = 1;
+			digitalWrite(7, HIGH);
 			timer = millis();
-			while ((millis() - timer>500) && (millis() - timer<1000))
+			while ((millis() - timer) < 2000)
 			{
-				if (!digitalRead(6))
+				if ((!digitalRead(6)) && ((millis() - timer) > 1000))
 				{
 					race_mode = 2;
-					digitalWrite(8, HIGH);
+					digitalWrite(13, HIGH);
 					break;
 				}
 			}
