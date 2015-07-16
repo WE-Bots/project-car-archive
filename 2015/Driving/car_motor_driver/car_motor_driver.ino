@@ -168,7 +168,7 @@ void loop()
 	}
 
 	//get data from power board
-	//while (!wire_get_value(battery_voltage, battery_current, power_board)){}
+	//while (!wire_get_value(battery_voltage, battery_current, power_board)){delay(10);}
 #endif
 
 	//Remote control code
@@ -400,18 +400,19 @@ they will be unmodified if a complete, valid entry is not obtained.
 */
 boolean wire_get_value(int &first, int &second, int address)
 {
-	if (Wire.requestFrom(address, 4) != 4)
+	if (Wire.requestFrom(address, 7) != 7)
 		return false; //didn't receive the correct number of bytes
 
 	// Static variables remain between calls
 	char buf16[3] = { 0, 0, '\0' }; //2 bytes +'\0'
 	char buf8 = 0;
-	char bufXOR = 0;
+	char bufnibble[7];
 
 	// Read data
-	Wire.readBytes(buf16, 2);
-	buf8 = Wire.read();
-	bufXOR = Wire.read();
+	Wire.readBytes(bufnibble, 7);
+	buf16[0]=((bufnibble[0]&0x0f)<<4)|(bufnibble[1]&0x0f);
+	buf16[2]=((bufnibble[2]&0x0f)<<4)|(bufnibble[3]&0x0f);
+	buf8=((bufnibble[4]&0x0f)<<4)|(bufnibble[5]&0x0f);
 	Serial.print("one: ");
 	Serial.println((byte)buf16[0]);
 	Serial.print("two: ");
@@ -419,11 +420,11 @@ boolean wire_get_value(int &first, int &second, int address)
 	Serial.print("three: ");
 	Serial.println((byte)buf8);
 	Serial.print("xor: ");
-	Serial.println((byte)bufXOR);
-	Serial.println((byte)(buf16[0] ^ buf16[1] ^ buf8));
+	Serial.println((byte)(bufnibble[6]&0x0f));
+	Serial.println((byte)(bufnibble[0] ^ bufnibble[1] ^ bufnibble[2]^ bufnibble[3]^ bufnibble[4]^ bufnibble[5]));
 
 	//check XOR
-	if (bufXOR != buf16[0] ^ buf16[1] ^ buf8)
+	if ((bufnibble[6]&0x0f) != bufnibble[0] ^ bufnibble[1] ^ bufnibble[2]^ bufnibble[3]^ bufnibble[4]^ bufnibble[5])
 		return false;	//invalid XOR
 
 	// XOR was valid, pass the variables back to the caller, return true
