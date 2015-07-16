@@ -50,6 +50,169 @@ double DEG_TO_RAD (double x)
 }
 
 
+
+
+// Image utility functions
+// This function calculates the distance between two points
+double distance (double x1, double y1, double x2, double y2)
+{
+  return sqrt(abs(pow(y2-y1, 2) + pow (x2-x1, 2)));
+}
+//OpenCV-friendly overload!
+double distance (cv::Point p1, cv::Point p2)
+{
+  return distance (p1.x, p1.y, p2.x, p2.y);
+}
+
+// Finds the intersection point between two lines
+cv::Point2f computeIntersect(cv::Vec4i t1, cv::Vec4i t2)
+{
+  int x1 = t1[0], y1 = t1[1], x2 = t1[2], y2 = t1[3], x3 = t2[0], y3 = t2[1], x4 = t2[2], y4 = t2[3];
+  double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+  if (d == 0) return cv::Point2f(0,0);
+  
+  double xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
+  double yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
+  
+  // If this point actually intersects with the drawn lines, and not the drawn lines' extension
+  if ((xi >= x3 && xi <= x4 || xi >= x4 && xi <= x3) && (yi >= y3 && yi <= y4 || yi >= y4 && yi <= y3) && (xi >= x1 && xi <= x2 || xi >= x2 && xi <= x1) && (yi >= y1 && yi <= y2 || yi >= y2 && yi <= y1))
+    return cv::Point2f(xi,yi);
+  else
+    return cv::Point2f(0,0);
+}
+
+//OpenCV goes clockwise from a vector pointing right
+int angleOfLine (cv::Vec4i closestLine)
+{
+  double dx = closestLine[2] - closestLine[0];
+  double dy = -(closestLine[3] - closestLine[1]); //negative to avoid the upside-downness of openCV's image; it's confusing me
+  
+  return RAD_TO_DEG(atan(dx/dy));
+}
+
+cv::Vec4i formVectors(int startx, int starty, double vecAngle, double vecMagnitude)
+{
+  return cv::Vec4i(startx, starty, startx + vecMagnitude * cos(DEG_TO_RAD(vecAngle)), starty + vecMagnitude * sin(DEG_TO_RAD(vecAngle)));
+}
+
+cv::Point formEndPoint(cv::Point startPoint, double angle, double magnitude)
+{
+  return cv::Point(startPoint.x + magnitude * cos(DEG_TO_RAD(angle)), startPoint.y + magnitude * sin(DEG_TO_RAD(angle)));
+}
+
+
+class probeVectors
+{
+private:
+  cv::Point startPos;
+  cv::Point endPos;
+  double angle;
+  double magnitude;
+  
+  cv::Point textPos;
+  int textSize;
+  cv::Scalar textColour;
+  
+  cv::Vec4i cvVector; // This holds the vector that represents the car's direction in CV's visual world
+  cv::Vec4i closestLine; // This holds the closest line that collided with this line
+  cv::Point intersectionPoint;
+  double distToCollision;
+  bool collisionFound;
+  
+
+public:
+  probeVectors(int x, int y, double ang, double mag, int tx, int ty, int ts = 3, cv::Scalar tc = cv::Scalar(0, 255, 0)) : textPos(tx, ty),
+    startPos(x,y), textColour (tc)
+  {
+    cvVector = formVectors (x, y, ang + 270, mag);
+    endPos.x = cvVector[2];
+    endPos.y = cvVector[3];
+    angle = ang;
+    magnitude = mag;
+    
+    textSize = ts;
+    
+    distToCollision = 500000; // a very large arbitrary value that will end up overwritten
+    collisionFound = false;
+  }
+  const int& operator[] (int x) const
+  {
+    return cvVector[x];
+  }
+  
+  operator const cv::Vec4i&() const
+  {
+    return cvVector;
+  }
+  
+  // Checks if this line collides with any of the given lines, returns true and saves the closest colliding line if so, else returns false
+  bool checkForClosestCollision (std::vector<cv::Vec4i> lines)
+  {
+    // Zero out the old value in closestLine
+    for (int i = 0; i < 4; i++)
+      closestLine[i] = 0;
+    
+    
+    distToCollision = 500000; // a very large arbitrary value that will end up overwritten
+    
+    for (unsigned int i = 0;i<lines.size();i++)
+    {
+      cv::Point2f pt = computeIntersect(cvVector,lines[i]); // Find the intersection of this line and the car's line, if it exists
+      if (pt.x >= 0 && pt.y >=0 && pt.y < startPos.y) //If this line is in a valid position in front of the car (last term possibly redundant due to changes in computeIntersect?)
+      {
+        double adist = distance (pt, startPos);
+        if ( adist < distToCollision && adist <= magnitude) // if this line is closer than a previously-found one (last term possibly redundant due to changes in computeIntersect?)
+        {
+          distToCollision = adist;
+          intersectionPoint = pt;
+          closestLine = lines[i]; // record this line
+        }
+      }
+    }
+    
+    if (distToCollision < 500000)
+    {
+      collisionFound = true;
+      return collisionFound;
+    }
+    else
+    {
+      collisionFound = false;
+      return collisionFound;
+    }
+  }
+  
+  // The new angle must be the angle of the line minus the angle of the car to get angle of the new direction relative to car, not y-axis
+  int getSafeAngle() const
+  {
+    if (collisionFound == false)
+      return 0;
+    
+    int safeAngle = angleOfLine(closestLine) - angle;
+    
+    if (safeAngle > 90)
+      safeAngle = 90;
+    else if (safeAngle < -90)
+      safeAngle = -90;
+    
+    return safeAngle;
+  }
+  
+  void overlayData (cv::Mat colourImg) const
+  {
+    int safeAngle = getSafeAngle();
+    int displayAngle = safeAngle + 270 + angle; //add 270 + CAR_ANGLE so that the angle is relative to OpenCV's axis
+    
+    cv::line(colourImg, startPos, endPos, cv::Scalar(0, 0, 255), 3); // Display car direction
+    cv::line(colourImg, startPos, (collisionFound) ? intersectionPoint : startPos, cv::Scalar(255, 0, 0), 3); // Display line to collision
+    cv::line(colourImg, startPos, (collisionFound) ? formEndPoint(startPos, displayAngle, magnitude) : startPos, cv::Scalar(0, 255, 0), 3); // Display car plotted direction
+    
+    putText(colourImg, NumberToString(safeAngle).c_str(), textPos, cv::FONT_HERSHEY_PLAIN, textSize, textColour); // Display angle being sent to Kevin
+  }
+};
+
+
+
 /*
  * class ImageProcessor
  *
@@ -60,13 +223,6 @@ double DEG_TO_RAD (double x)
 class ImageProcessor
 {
   // Member variables
-  
-  // Line Constants
-#define STARTX (300)
-#define STARTY (400)
-#define MAGNITUDE (200)
-#define CAR_ANGLE (-30)
-  
   ros::NodeHandle nh_;
   // image_transport::ImageTransport it_;
   // image_transport::Subscriber it_sub_;
@@ -75,48 +231,14 @@ class ImageProcessor
   ros::Subscriber img_sub_; // This is very bad practice, but we're stuck
                               // with what the raspicam_node gives us.
 
-  cv::Vec4i car_direction; // This holds the vector that represents the car's direction
+  probeVectors car_direction;
+  probeVectors testProbe;
+  probeVectors test2Probe;
 
   int houghVote_;
-  
-  
-  // Image utility functions
-  // This function calculates the distance between two points
-  double distance (double x1, double y1, double x2, double y2)
-  {
-    return sqrt(abs(pow(y2-y1, 2) + pow (x2-x1, 2)));
-  }
-  //OpenCV-friendly overload!
-  double distance (cv::Point p1, cv::Point p2)
-  {
-    return distance (p1.x, p1.y, p2.x, p2.y);
-  }
-  
-  cv::Point2f computeIntersect(cv::Vec4i t1, cv::Vec4i t2) {
-    int x1 = t1[0], y1 = t1[1], x2 = t1[2], y2 = t1[3], x3 = t2[0], y3 = t2[1], x4 = t2[2], y4 = t2[3];
-    int d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
-    if (d == 0) return cv::Point2f(0,0);
-    
-    int xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
-    int yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
-    
-    if ((xi >= x3 && xi <= x4 || xi >= x4 && xi <= x3) && (yi >= y3 && yi <= y4 || yi >= y4 && xi <= y3) )
-      return cv::Point2f(xi,yi);
-    else
-      return cv::Point2f(0,0);
-  }
-  
-  //OpenCV goes clockwise from a vector pointing right
-  int angleOfLine (cv::Vec4i closestLine)
-  {
-    double dx = closestLine[2] - closestLine[0];
-    double dy = -(closestLine[3] - closestLine[1]); //negative to avoid the upside-downness of openCV's image; it's confusing me
-    
-    return RAD_TO_DEG(atan(dx/dy));
-  }
 
 public:
-  ImageProcessor() : car_direction(STARTX, STARTY, STARTX + MAGNITUDE * cos(DEG_TO_RAD(CAR_ANGLE + 270)), STARTY + MAGNITUDE * sin(DEG_TO_RAD(CAR_ANGLE + 270)))
+  ImageProcessor() : car_direction(300, 400, 0, 200, 250, 50, 5, cv::Scalar(0, 255, 0)), testProbe(200, 350, -30, 150, 10, 50, 5, cv::Scalar(255, 255, 0)), test2Probe(400, 350, 30, 150, 450, 50, 5, cv::Scalar(255,0,100))
     //: it_(nh_)
   {
     // Something is up here!
@@ -240,50 +362,27 @@ public:
     // cv::addWeighted(grad_x_abs, 0.5, grad_y_abs, 0.5, 0, grad);
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    // Find intersections with the car direction, and returns the safest angle relative to the car in which to proceed
     
-    // Find intersections with the car direction, note the line that is closest to the car
-    cv::Vec4i closestLine (0,0,0,0); // Stores the points that make up the closest valid line to the car
-    double dist = 500000; // a very large arbitrary value that will end up overwritten
-    for (unsigned int i = 0;i<lines.size();i++)
-    {
-      cv::Point2f pt = computeIntersect(car_direction,lines[i]); // Find the intersection of this line and the car's line, if it exists
-      if (pt.x >= 0 && pt.y >=0 && pt.y < car_direction[1]) //If this line is in a valid position in front of the car
-      {
-        double adist = distance (pt.x, pt.y, car_direction[0], car_direction[1]);
-        if ( adist < dist) // if this line is closer than a previously-found one
-        {
-          dist = adist;
-          closestLine = lines[i]; // record this line
-        }
-      }
-    }
+    int angle = 0; // Holds angle to send to Kevin
     
+    if (car_direction.checkForClosestCollision(lines))
+      angle = car_direction.getSafeAngle();
     
-    // Find angle that needs to be sent to Kevin, relative to the car's direction of motion
-    int angle = 0; //stores the angle of direction that will be sent to Kevin
+    if (testProbe.checkForClosestCollision(lines))
+      testProbe.getSafeAngle();
     
-    if (dist <= MAGNITUDE) { //if a valid line was detected, the new angle must be the angle of the line minus the angle of the car to get angle of the new direction relative to car, not y-axis
-      angle = angleOfLine(closestLine) - CAR_ANGLE;
-      
-      if (angle > 90)
-        angle = 90;
-      else if (angle < -90)
-        angle = -90;
-    }
+    if (test2Probe.checkForClosestCollision(lines))
+      test2Probe.getSafeAngle();
     
-    //ROS_INFO("%d", angle);
     
     // Display Image
     #ifdef DISPLAY
-    angle += 270 + CAR_ANGLE; //add 270 + CAR_ANGLE so that the angle is relative to OpenCV's axis
     cv::Mat colourOverlay;
-    cvtColor(houghP, colourOverlay,  CV_GRAY2RGB );
-    cv::line(colourOverlay, cv::Point(car_direction[0],car_direction[1]), cv::Point(car_direction[2],car_direction[3]), cv::Scalar(200, 200, 255), 3); // Display car direction
-    cv::line(colourOverlay, cv::Point2f(car_direction[0],car_direction[1]), (dist <= MAGNITUDE) ? computeIntersect(car_direction,closestLine) : cv::Point2f(car_direction[0],car_direction[1]), cv::Scalar(255, 200, 200), 3); // Display line to collision
-    cv::line(colourOverlay, cv::Point(car_direction[0],car_direction[1]), cv::Point(STARTX + MAGNITUDE * cos(DEG_TO_RAD(angle)), STARTY + MAGNITUDE * sin(DEG_TO_RAD(angle))), cv::Scalar(200, 255, 200), 3); // Display car plotted direction; remove the effects of the default car angle to render properly
-    angle -= 270 + CAR_ANGLE; // visualization correction no longer necessary, revert back to car's POV
-    putText(colourOverlay, NumberToString(angle).c_str(), cv::Point(50, 50), cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar(0, 255, 0));
-    //cv::circle (houghP, cv::Point(car_direction[0],car_direction[1]), 30, cv::Scalar(255,255,255));
+    cvtColor(houghP, colourOverlay, CV_GRAY2RGB);
+    car_direction.overlayData(colourOverlay);
+    testProbe.overlayData(colourOverlay);
+    test2Probe.overlayData(colourOverlay);
     cv::imshow(WINDOW, colourOverlay);
     cv::waitKey(1);
     #endif
