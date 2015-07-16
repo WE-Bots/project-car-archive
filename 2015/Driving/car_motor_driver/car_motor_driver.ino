@@ -55,8 +55,8 @@ boolean emergency_stop = true;
 unsigned long timer = 0;
 int battery_voltage = 10;
 int battery_current = 50;
-int avg_encoder_distance = 0;
-int distance = 0;
+int old_encoder_distance[4] = { 0, 0, 0, 0 };
+unsigned long distance = 0;
 int race_mode = 0;
 
 #ifdef USB
@@ -135,35 +135,37 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
-	avg_encoder_distance = 0;
-	//for (int i = 0; i < 1; i++)
-	{
-		int encoder_period = 0;
-		int encoder_distance = 0;
-		while (!wire_get_value(encoder_period, encoder_distance, 8)){ Serial.println("FAIL!!!!!!!!!!!"); delay(100); }
-		real_speed += encoder_period;
-		avg_encoder_distance += encoder_distance;
-		delay(100);
-		Serial.println("********************************");
-		delay(100);
-		//Serial.print("encoder period: ");
-		//Serial.println(encoder_period);
-		//Serial.print("encoder distance: ");
-		//Serial.println(encoder_distance);
-	}
-	//real_speed /= 4;
-	//avg_encoder_distance /= 4;
-	//distance+=avg_encoder_distance;
-	//Serial.print("real speed: ");
-	//Serial.println(real_speed);
-	//Serial.print("distance: ");
-	//Serial.println(avg_encoder_distance);
-
 	if (!emergency_stop)
 	{
+		for (int i = 0; i < 4; i++)
+		{
+			int encoder_period = 0;
+			int encoder_distance = 0;
+			while (!wire_get_value(encoder_period, encoder_distance, 8))
+			{
+				delay(10);
+			}
+			real_speed += encoder_period;
+			//check for rollover
+			if(encoder_distance<(old_encoder_distance[i]%256))
+			{
+				//there was roll over
+				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256)+256;
+			}
+			else
+			{
+				//no rollover
+				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256);
+			}
+		}
+		//average values
+		real_speed /= 4;
+		distance = (old_encoder_distance[0]+old_encoder_distance[1]+old_encoder_distance[2]+old_encoder_distance[3])/4;
+
+		//calculate speed error
 		accumulated_speed_error += base_speed - real_speed;
+		speed_error = constrain(0.5*(base_speed - real_speed) + 0.5*accumulated_speed_error, -100, 100);
 	}
-	speed_error = constrain(0.5*(base_speed - real_speed) + 0.5*accumulated_speed_error, -100, 100);
 
 	//get data from power board
 	//while (!wire_get_value(battery_voltage, battery_current, power_board)){}
