@@ -115,6 +115,8 @@ private:
   
 
 public:
+  static const int carAngle = -30; // Specifies the angle of direction of the car relative to the footage
+  
   probeVectors(int x, int y, double ang, double mag, int tx, int ty, int ts = 3, cv::Scalar tc = cv::Scalar(0, 255, 0)) : textPos(tx, ty),
     startPos(x,y), textColour (tc)
   {
@@ -177,24 +179,24 @@ public:
   }
   
   // The new angle must be the angle of the line minus the angle of the car to get angle of the new direction relative to car, not y-axis
-  int getSafeAngle() const
+  int getAngle() const
   {
     if (collisionFound == false)
       return 0;
     
     int safeAngle = angleOfLine(closestLine) - angle;
     
-    if (safeAngle > 90)
+    /*if (safeAngle > 90)
       safeAngle = 90;
     else if (safeAngle < -90)
-      safeAngle = -90;
+      safeAngle = -90;*/
     
     return safeAngle;
   }
   
   void overlayData (cv::Mat& colourImg) const
   {
-    int safeAngle = getSafeAngle();
+    int safeAngle = getAngle();
     int displayAngle = safeAngle + 270 + angle; //add 270 + CAR_ANGLE so that the angle is relative to OpenCV's axis
     
     cv::line(colourImg, startPos, endPos, cv::Scalar(0, 0, 255), 3); // Display car direction
@@ -202,6 +204,33 @@ public:
     cv::line(colourImg, startPos, (collisionFound) ? formEndPoint(startPos, displayAngle, magnitude) : startPos, cv::Scalar(0, 255, 0), 3); // Display car plotted direction
     
     putText(colourImg, NumberToString(safeAngle).c_str(), textPos, cv::FONT_HERSHEY_PLAIN, textSize, textColour); // Display angle being sent to Kevin
+  }
+  
+  static int getConsensusAngle(std::vector<probeVectors>* instances, std::vector<cv::Vec4i>& lines)
+  {
+    int counter(0), sum(0);
+    
+    for (int iter = 0; iter < instances->size(); iter++)
+    {
+      instances->at(iter).checkForClosestCollision(lines);
+      int inputAngle = instances->at(iter).getAngle();
+      
+      if (inputAngle != 0)
+      {
+        inputAngle -= (instances->at(iter).angle + carAngle);
+        sum += inputAngle; // Find the angle relative to the car's direction of motion
+        ++counter;
+      }
+    }
+    
+    int safeAngle = (counter !=0) ? sum/counter : 0;
+    
+    if (safeAngle > 90)
+     safeAngle = 90;
+     else if (safeAngle < -90)
+     safeAngle = -90;
+    
+    return safeAngle;
   }
 };
 
@@ -251,16 +280,19 @@ class ImageProcessor
   ros::Subscriber img_sub_; // This is very bad practice, but we're stuck
                               // with what the raspicam_node gives us.
 
-  probeVectors car_direction;
-  probeVectors testProbe;
-  probeVectors test2Probe;
+  std::vector <probeVectors> probes; // Holds the probes
 
   int houghVote_;
 
 public:
-  ImageProcessor() : car_direction(300, 400, 0, 200, 250, 50, 5, cv::Scalar(0, 255, 0)), testProbe(200, 350, -30, 150, 10, 50, 5, cv::Scalar(255, 255, 0)), test2Probe(400, 350, 30, 150, 450, 50, 5, cv::Scalar(255,0,100))
+  ImageProcessor()
     //: it_(nh_)
   {
+    //Intialize probes
+    probes.push_back(probeVectors(300, 400, 0, 200, 225, 50, 5, cv::Scalar(0, 255, 0)));
+    probes.push_back(probeVectors(200, 350, -30, 150, 10, 50, 5, cv::Scalar(255, 255, 0)));
+    probes.push_back(probeVectors(400, 350, 30, 150, 400, 50, 5, cv::Scalar(255,0,100)));
+    
     // Something is up here!
     // it_sub_ = it_.subscribe("/camera/image", 1,
     //   &ImageProcessor::proc_img, this);
@@ -411,16 +443,16 @@ public:
 
     // Find intersections with the car direction, and returns the safest angle relative to the car in which to proceed
     
-    int angle = 0; // Holds angle to send to Kevin
+    int angle = probeVectors::getConsensusAngle(&probes, lines); // Holds angle to send to Kevin
     
-    if (car_direction.checkForClosestCollision(lines))
-      angle = car_direction.getSafeAngle();
+    /*if (car_direction.checkForClosestCollision(lines))
+      angle = car_direction.getAngle();
     
     if (testProbe.checkForClosestCollision(lines))
-      testProbe.getSafeAngle();
+      testProbe.getAngle();
     
     if (test2Probe.checkForClosestCollision(lines))
-      test2Probe.getSafeAngle();
+      test2Probe.getAngle();*/
     
     
     // Display Image
@@ -428,9 +460,10 @@ public:
     cv::Mat colourOverlay;
     cvtColor(houghP, colourOverlay, CV_GRAY2RGB);
     cv::subtract(cv::Scalar::all(255),colourOverlay, colourOverlay);
-    car_direction.overlayData(colourOverlay);
-    testProbe.overlayData(colourOverlay);
-    test2Probe.overlayData(colourOverlay);
+    for (int i = 0; i < probes.size(); i++)
+      probes[i].overlayData(colourOverlay);
+    putText(colourOverlay, NumberToString(angle).c_str(), cv::Point(225, 100), cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar (100,255,255));
+    
     cv::imshow("P Hough Transformed Image", colourOverlay);
  
     cv::waitKey(1); // Give OpenCV a chance to draw the images
