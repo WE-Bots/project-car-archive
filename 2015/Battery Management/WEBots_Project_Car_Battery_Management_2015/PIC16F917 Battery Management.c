@@ -71,12 +71,40 @@ void main()
 
     currentGainInit(200);
 
+#ifdef CIRCUIT_DEBUG
+    REF_EN = 1;
+    TP_CLS_EN = 1;
+    BT_CLS_EN = 1;
+    OPAMP_CGND = 1;
+
+    while(1);
+#endif
+
     /***** MAIN LOOP *****/
     while(1)
     {
-        sampleReference();
-        sampleCurrent();
-        sampleBatteryCells();
+        // check if the cells and current are within range
+        if ( systemCheck() != 0)
+        {
+            R_LED = 1;
+
+            stopWatch(0); // start a stopwatch
+
+            // wait one second to ensure that it isn't just a surge
+            while ( stopWatch(1) < 1000 )
+            {
+                systemCheck(); // keep updating the variables to remove lag in running average
+            }
+
+            uint8_t tempCheck = systemCheck();
+
+            if ( tempCheck != 0 )
+            {
+                shutDown( tempCheck );
+            }
+
+            R_LED = 0;
+        }
         
         handlePB();
         
@@ -97,19 +125,18 @@ void sampleBatteryCells ()
     __delay_ms(5); // wait for the voltage to level out
 
     // sample the bottom cells
-    // also implements an IIR running average function
-    cellVolt[0] = 0.1 * ( cell1RR + 1 ) * sampleVoltage(CELL1) + 0.9 * cellVolt[0]; // cell 1
-    cellVolt[1] = 0.1 * ( cell2RR + 1 ) * sampleVoltage(CELL2) + 0.9 * cellVolt[1]; // cell 2
-    cellVolt[2] = 0.1 * ( cell3RR + 1 ) * sampleVoltage(CELL3) + 0.9 * cellVolt[2]; // cell 3
+    cellVolt[0] = IIRnew * ( cell1RR + 1 ) * sampleVoltage(CELL1) + IIRprev * cellVolt[0]; // cell 1
+    cellVolt[1] = IIRnew * ( cell2RR + 1 ) * sampleVoltage(CELL2) + IIRprev * cellVolt[1]; // cell 2
+    cellVolt[2] = IIRnew * ( cell3RR + 1 ) * sampleVoltage(CELL3) + IIRprev * cellVolt[2]; // cell 3
 
     BT_CLS_EN = 0; // turn off the first three voltage dividers
     TP_CLS_EN = 1; // turn on the last three voltage dividers
 
     __delay_ms(5);
 
-    cellVolt[3] = 0.1 * ( cell4RR + 1 ) * sampleVoltage(CELL4) + 0.9 * cellVolt[3]; // cell 4
-    cellVolt[4] = 0.1 * ( cell5RR + 1 ) * sampleVoltage(CELL5) + 0.9 * cellVolt[4]; // cell 5
-    cellVolt[5] = 0.1 * ( cell6RR + 1 ) * sampleVoltage(CELL6) + 0.9 * cellVolt[5]; // cell 6
+    cellVolt[3] = IIRnew * ( cell4RR + 1 ) * sampleVoltage(CELL4) + IIRprev * cellVolt[3]; // cell 4
+    cellVolt[4] = IIRnew * ( cell5RR + 1 ) * sampleVoltage(CELL5) + IIRprev * cellVolt[4]; // cell 5
+    cellVolt[5] = IIRnew * ( cell6RR + 1 ) * sampleVoltage(CELL6) + IIRprev * cellVolt[5]; // cell 6
 
     TP_CLS_EN = 0; // turn off the last three voltage dividers
 
@@ -217,8 +244,11 @@ void displayLCD ( int disp )
             LCDWriteString(temp1);
             LCDWriteString(" V      ");
 
-            //floatToASCII( temp2, cellVolt[1] - cellVolt[0], 2);
+#ifdef CELL2CELLVOLT
+            floatToASCII( temp2, cellVolt[1] - cellVolt[0], 2);
+#else
             floatToASCII( temp2, cellVolt[1], 2);
+#endif
             LCDSetCursor(0x10);
             LCDWriteString("Cell 2:");
             LCDWriteString(temp2);
@@ -230,15 +260,21 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 3 and 4
         case 2:
         {
-            //floatToASCII( temp1, cellVolt[2] - cellVolt [1], 2);
+#ifdef CELL2CELLVOLT
+            floatToASCII( temp1, cellVolt[2] - cellVolt [1], 2);
+#else
             floatToASCII( temp1, cellVolt[2], 2);
+#endif
             LCDSetCursor(0x00);
             LCDWriteString("Cell 3:");
             LCDWriteString(temp1);
             LCDWriteString(" V      ");
 
-            //floatToASCII( temp2, cellVolt[3] - cellVolt[2], 2);
+#ifdef CELL2CELLVOLT
+            floatToASCII( temp2, cellVolt[3] - cellVolt[2], 2);
+#else
             floatToASCII( temp2, cellVolt[3], 2);
+#endif
             LCDSetCursor(0x10);
             LCDWriteString("Cell 4:");
             LCDWriteString(temp2);
@@ -250,15 +286,21 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 5 and 6
         case 3:
         {
-            //floatToASCII( temp1, cellVolt[4] - cellVolt [3], 2);
+#ifdef CELL2CELLVOLT
+            floatToASCII( temp1, cellVolt[4] - cellVolt [3], 2);
+#else
             floatToASCII( temp1, cellVolt[4], 2);
+#endif
             LCDSetCursor(0x00);
             LCDWriteString("Cell 5:");
             LCDWriteString(temp1);
             LCDWriteString(" V      ");
 
-            //floatToASCII( temp2, cellVolt[5] - cellVolt[4], 2);
+#ifdef CELL2CELLVOLT
+            floatToASCII( temp2, cellVolt[5] - cellVolt[4], 2);
+#else
             floatToASCII( temp2, cellVolt[5], 2);
+#endif
             LCDSetCursor(0x10);
             LCDWriteString("Cell 6:");
             LCDWriteString(temp2);
@@ -339,24 +381,6 @@ void handlePB ()
         LCDDisplayMode = 0;
 }
 
-void checkCurrent ()
-{
-    if ( current > 100)
-    {
-        // see if it is just a spike
-        __delay_ms(500);
-
-        sampleReference();
-        sampleCurrent();
-
-        if (current > 100)
-        {
-            // over allowable current
-            MOTOR_CONTROL = 0;
-        }
-    }
-}
-
 // if system check is sucessful the function will return 0
 // if a cell is out of range it will return the cell number
 // if current is out of range it will return 7
@@ -373,5 +397,90 @@ uint8_t systemCheck ()
         return 1;
     }
 
+    // check cell 2 voltage
+    if ( cellVolt[1] - cellVolt[0] < cellVoltL )
+    {
+        // cell 2 voltage is out of range
+        return 2;
+    }
+
+    // check cell 3 voltage
+    if ( cellVolt[2] - cellVolt[1] < cellVoltL )
+    {
+        // cell 3 voltage is out of range
+        return 3;
+    }
+
+    // check cell 4 voltage
+    if ( cellVolt[3] - cellVolt[2] < cellVoltL )
+    {
+        // cell 4 voltage is out of range
+        return 4;
+    }
+
+    // check cell 5 voltage
+    if ( cellVolt[4] - cellVolt[3] < cellVoltL )
+    {
+        // cell 5 voltage is out of range
+        return 5;
+    }
+
+    // check cell 6 voltage
+    if ( cellVolt[5] - cellVolt[4] < cellVoltL )
+    {
+        // cell 6 voltage is out of range
+        return 6;
+    }
+
+    // check current
+    if ( current > 90 )
+    {
+        // current is oot opf range
+        return 7;
+    }
+
     return 0;
+}
+
+void shutDown( uint8_t error)
+{
+    #ifdef SHUTOFF_DEBUG
+
+                // something went wrong .. display error message and flash lights
+                char tempChar[4];
+                uint8ToASCII(tempChar, error);
+                LCDSetCursor(0x00);
+                LCDWriteString("ERROR WITH: ");
+                LCDWriteString(tempChar);
+
+                while(1)
+                {
+                    G_LED = 0;
+                    __delay_ms(200);
+                    G_LED = 1;
+                    __delay_ms(200);
+                }
+#else
+                // something went wrong, shut everything down and go into low powered sleep
+                GIE = 0;
+
+                // for low power consumption set everything as output low
+                // also shuts off the battery power
+                TRISA = 0b00000000;
+                TRISB = 0b00000000;
+                TRISC = 0b00000000;
+                TRISD = 0b00000000;
+                TRISE = 0b00000000;
+
+                PORTA = 0;
+                PORTB = 0;
+                PORTC = 0;
+                PORTD = 0;
+                PORTE = 0;
+
+                while(1)
+                {
+                    SLEEP();
+                }
+#endif
 }
