@@ -37,6 +37,8 @@
 #define	I2C_H
 
 void initI2C();
+void updateI2CData ();
+void isrI2C ();
 
 void initI2C()
 {
@@ -74,56 +76,82 @@ void initI2C()
     PIE1bits.SSPIE = 1;
 }
 
+void updateI2CData ()
+{
+        // initialize the variables
+        for ( uint8_t i = 0; i <= 3; i++)
+        {
+            sendData[i] = 0;
+        }
+
+        // set the values of sendData
+        // first, 2 bytes - unsigned int for the voltage
+        //  - map the voltage from 19.2V to 25.2V in 2 bytes
+        //      - return return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        uint16_t sendVolt = (cellVolt[5] - 19.2) * 10922.6666;
+
+        sendData[0] = sendVolt & 0x00FF; // low part of the voltage
+
+        sendData[1] = ( sendVolt & 0xFF00 ) >> 8; // high part of the voltage
+
+        // second, 1 byte - unsigned int for the current
+        sendData[2] = ( uint8_t )current; // will provide a 1 A resolution
+                                        // potentially in the future mult by 2 to get 0.5 A resolution
+
+        // last, 1 byte - result of the above 3 bytes XORed together
+        sendData[3] = ( sendData[0] ^ sendData[1] ) ^ sendData[2];
+}
+
 void isrI2C ()
 {
     if (PIE1bits.SSPIE == 1 &&  PIR1bits.SSPIF == 1 )
     {
         // *** Service I2C interrupt
 
-        static uint8_t sendData[4]; // array to hold the data to be sent
-        static uint8_t count;
-
-        // if the last byte was an address
-        if ( SSPSTATbits.D_A == 0)
+        if ( countI2C == 1 )
         {
-            // initialize the variables
-            for ( uint8_t i = 0; i <= 3; i++)
-            {
-                sendData[i] = 0;
-            }
+            SSPBUF = sendData[1];
+            countI2C++;
+        }
 
-            count = 0;
+        else if ( countI2C == 2 )
+        {
+            SSPBUF = sendData[2];
+            countI2C++;
+        }
 
-            // set the values of sendData
-            // first, 2 bytes - unsigned int for the voltage
-            //  - map the voltage from 19.2V to 25.2V in 2 bytes
-            //      - return return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-            uint16_t sendVolt = (cellVolt[5] - 19.2) * 10922.6666;
+        else if ( countI2C == 3 )
+        {
+            SSPBUF = sendData[3];
+            countI2C++;
+        }
 
-            sendData[0] = sendVolt & 0x00FF; // low part of the voltage
-
-            sendData[1] = sendVolt & 0xFF00; // high part of the voltage
-
-            // second, 1 byte - unsigned int for the current
-            sendData[2] = ( uint8_t )current; // will provide a 1 A resolution
-                                            // potentially in the future mult by 2 to get 0.5 A resolution
-
-            // last, 1 byte - result of the above 3 bytes XORed together
-            sendData[3] = ( sendData[0] ^ sendData[1]) ^ sendData[2];
-
+        else if ( countI2C == 4)
+        {
+            countI2C = 0;
             // send the first byte of data
-            SSPBUF = sendData[count];
-            count++;
+            SSPBUF = sendData[0];
+            countI2C++;
         }
-
+/*
         // else if the last byte was data
-        else
+        if ( countI2C == 1 )
         {
-            SSPBUF = sendData[count];
-            count++;
+            SSPBUF = sendData[countI2C];
+            countI2C++;
         }
+        // if the last byte was an address
+        else if ( countI2C == 4 )
+        {
+            countI2C = 0;
+            // send the first byte of data
+            SSPBUF = sendData[countI2C];
+            countI2C++;
+        }
+*/
 
-        PIR1bits.SSPIF = 1; // reset the interrupt flag
+
+        PIR1bits.SSPIF = 0; // reset the interrupt flag
     }
 }
 

@@ -210,26 +210,29 @@ void sampleCurrent ()
 // display data to the LCD screen, input interger 0...3 depending on the data desired to be displayed
 void displayLCD ( int disp )
 {
+
     char temp1[8] = {0,0,0,0,0,0,0,0};
     char temp2[8] = {0,0,0,0,0,0,0,0};
 
     switch( disp )
     {
+#ifndef SAVE_MEMORY
         // display the total voltage of the battery and the estimated percentage left
         // along with the current
         case 0:
         {
+            // Voltage
             floatToASCII( temp1, cellVolt[5], 2);
             LCDSetCursor(0x00);
-            LCDWriteString("Voltage:");
+            LCDWriteString(str1);
             LCDWriteString(temp1);
-            LCDWriteString(" V      ");
-
+            LCDWriteString(str9);
+            // Current
             floatToASCII( temp2, current, 2);
             LCDSetCursor(0x10);
-            LCDWriteString("Current:");
+            LCDWriteString(str2);
             LCDWriteString(temp2);
-            LCDWriteString(" A       ");
+            LCDWriteString(str10);
             
             break;
         }
@@ -237,22 +240,23 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 1 and 2
         case 1:
         {
-
+            // Cell 1
             floatToASCII( temp1, cellVolt[0], 2);
             LCDSetCursor(0x00);
-            LCDWriteString("Cell 1:");
+            LCDWriteString(str3);
             LCDWriteString(temp1);
-            LCDWriteString(" V      ");
+            LCDWriteString(str9);
 
+            // Cell 2
 #ifdef CELL2CELLVOLT
             floatToASCII( temp2, cellVolt[1] - cellVolt[0], 2);
 #else
             floatToASCII( temp2, cellVolt[1], 2);
 #endif
             LCDSetCursor(0x10);
-            LCDWriteString("Cell 2:");
+            LCDWriteString(str4);
             LCDWriteString(temp2);
-            LCDWriteString(" V       ");
+            LCDWriteString(str9);
 
             break;
         }
@@ -260,25 +264,27 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 3 and 4
         case 2:
         {
+            // Cell 3
 #ifdef CELL2CELLVOLT
             floatToASCII( temp1, cellVolt[2] - cellVolt [1], 2);
 #else
             floatToASCII( temp1, cellVolt[2], 2);
 #endif
             LCDSetCursor(0x00);
-            LCDWriteString("Cell 3:");
+            LCDWriteString(str5);
             LCDWriteString(temp1);
-            LCDWriteString(" V      ");
+            LCDWriteString(str9);
 
+            // Cell 4
 #ifdef CELL2CELLVOLT
             floatToASCII( temp2, cellVolt[3] - cellVolt[2], 2);
 #else
             floatToASCII( temp2, cellVolt[3], 2);
 #endif
             LCDSetCursor(0x10);
-            LCDWriteString("Cell 4:");
+            LCDWriteString(str6);
             LCDWriteString(temp2);
-            LCDWriteString(" V       ");
+            LCDWriteString(str9);
 
             break;
         }
@@ -286,15 +292,16 @@ void displayLCD ( int disp )
         // display the cell voltages of cells 5 and 6
         case 3:
         {
+            // Cell 5
 #ifdef CELL2CELLVOLT
             floatToASCII( temp1, cellVolt[4] - cellVolt [3], 2);
 #else
             floatToASCII( temp1, cellVolt[4], 2);
 #endif
             LCDSetCursor(0x00);
-            LCDWriteString("Cell 5:");
+            LCDWriteString(str7);
             LCDWriteString(temp1);
-            LCDWriteString(" V      ");
+            LCDWriteString(str9);
 
 #ifdef CELL2CELLVOLT
             floatToASCII( temp2, cellVolt[5] - cellVolt[4], 2);
@@ -302,12 +309,13 @@ void displayLCD ( int disp )
             floatToASCII( temp2, cellVolt[5], 2);
 #endif
             LCDSetCursor(0x10);
-            LCDWriteString("Cell 6:");
+            LCDWriteString(str8);
             LCDWriteString(temp2);
-            LCDWriteString(" V       ");
+            LCDWriteString(str9);
 
             break;
         }
+#endif
     }
 }
 
@@ -346,7 +354,6 @@ void currentGainInit ( uint8_t gain )
             CG_SEL1 = 1; // sets gain as 50
             return;
         }
-
     }
 
 }
@@ -389,6 +396,7 @@ uint8_t systemCheck ()
     sampleReference();
     sampleCurrent();
     sampleBatteryCells();
+    updateI2CData();
 
     // check cell 1 voltage
     if ( cellVolt[0] < cellVoltL )

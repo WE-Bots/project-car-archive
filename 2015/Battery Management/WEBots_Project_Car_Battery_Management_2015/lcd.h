@@ -43,7 +43,7 @@ void LCD4bitCmd(char);
 void LCDSetCursor(char);
 void LCDWriteChar(char);
 void LCDWriteString(const char*);
-void clearLCD();
+//void clearLCD();
 void uint8ToASCII ( char*, uint8_t );
 void uint16ToASCII ( char*, uint16_t );
 void floatToASCII ( char* , float , uint8_t );
@@ -168,10 +168,10 @@ void LCDWriteString(const char *a)
     }
 }
 
-void clearLCD()
-{
-    LCDcmd(0x01);
-}
+//void clearLCD()
+//{
+//    LCDcmd(0x01);
+//}
 
 // ensure that the array is at least 4 elements long
 void uint8ToASCII ( char* returnVal, uint8_t num )

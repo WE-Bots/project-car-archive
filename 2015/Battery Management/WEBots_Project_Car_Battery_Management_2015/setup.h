@@ -112,6 +112,7 @@ FOSC =	Oscillator Selection bits
 //#define CIRCUIT_DEBUG
 //#define SHUTOFF_DEBUG
 #define CELL2CELLVOLT
+//#define SAVE_MEMORY
 
 // I2C
 // 2 byte unsigned int for voltage
@@ -182,8 +183,6 @@ uint8_t currentGain = 200; // gain for the current sense module
 
 uint8_t LCDDisplayMode = 0;
 
-#include "i2c.h"
-
 /***** Calibration Variables *****/
 
 const float refVolt = 1.128; // calibration value for the reference voltage
@@ -206,6 +205,24 @@ const float shuntRes = 0.000690789; // the resistance of the current shunt in oh
 const uint8_t sampleNum = 300; // the number of ADC samples to be averaged
 const float IIRnew = 0.2; // IIR filter constant for incoming data
 const float IIRprev = 0.8; // IIR filter constant eor previous data
+
+uint8_t sendData[4]; // array to hold the data to be sent through I2C
+char countI2C = 4;
+
+#include "i2c.h"
+
+#ifndef SAVE_MEMORY
+const char str1 [] = "Voltage:";
+const char str2 [] = "Current:";
+const char str3 [] = "Cell 1: ";
+const char str4 [] = "Cell 2: ";
+const char str5 [] = "Cell 3: ";
+const char str6 [] = "Cell 4: ";
+const char str7 [] = "Cell 5: ";
+const char str8 [] = "Cell 6: ";
+const char str9 [] = " V      ";
+const char str10 [] = " A       ";
+#endif
 
 
 
@@ -265,6 +282,8 @@ void initController ()
 
     initCellVolt();
 
+    //initI2C();
+
     // start reading in values to stabalize the running average values
     stopWatch(0);
 
@@ -292,7 +311,7 @@ void interrupt isr()
 {
     isrTimer0();
 
-    isrI2C();
+    //isrI2C();
 }
 
 // initializes the cell voltages, reduces the startup stabalization
