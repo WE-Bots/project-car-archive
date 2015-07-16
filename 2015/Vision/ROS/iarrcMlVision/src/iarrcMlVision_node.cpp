@@ -6,6 +6,7 @@
 #include <sensor_msgs/CompressedImage.h>
 
 // OpenCV includes
+#include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -17,11 +18,6 @@
 
 // Make sure that this is not defined on the Raspberry Pi!
 //#define DISPLAY
-
-#ifdef DISPLAY
-// Name for OpenCV's display window (used for debugging only)
-static const std::string WINDOW = "Subscribed Image";
-#endif
 
 /*
  * class ImageProcessor
@@ -57,18 +53,37 @@ public:
 
     // For regular Hough transform
     houghVote_ = -1; // Force to be reset
-
-    // Comment when compiling on the Pi
-    #ifdef DISPLAY
-    cv::namedWindow(WINDOW);
-    #endif
   }
 
   ~ImageProcessor()
   {
     #ifdef DISPLAY
-    cv::destroyWindow(WINDOW);
+    cv::destroyAllWindows();
     #endif
+  }
+
+  // white_filter - boost white and remove non-white features
+  // Give a uint8 colour image - I don't know how it will behave otherwise!
+  void white_filter(cv::Mat &img)
+  {
+    // cv::Mat dst32;
+    // img.convertTo(dst32, CV_32FC3);
+    // cv::Mat spl[3];
+    // split(dst32,spl);
+    // spl[0] = spl[0].mul(spl[1]);
+    // spl[0] = spl[0].mul(spl[2]);
+    // // Thresholding works poorly...
+    // //threshold(spl[0], dst32, 200*200*200, 255, 0);
+    // //dst32.convertTo(img, CV_8UC1);
+    // cv::normalize(spl[0],img,0,255,CV_MINMAX,CV_8UC1);
+
+    // Try HSV conversion instead
+    // cv::Mat dst;
+    // cv::cvtColor(img, dst, CV_BGR2HSV);
+    int max_sat;
+    nh_.param("iarrcMlVision/max_sat",max_sat, 150); // Rejects yellow lines
+    // cv::inRange(dst,cv::Scalar(0,0,20),cv::Scalar(255,max_sat,255),img);
+    cv::inRange(img,cv::Scalar(max_sat,max_sat,max_sat),cv::Scalar(255,255,255),img);
   }
 
   // proc_img - get new image, move into OpenCV, and process
@@ -91,6 +106,17 @@ public:
     img = cv::imdecode(cv::Mat(msg.data),1);
     // Hax hax hax
 
+    // Display Subscribed Image
+    #ifdef DISPLAY
+    cv::imshow("Subscribed Image", img);
+    #endif
+
+    // // Convert to 'white-scale'
+    // white_filter(img);
+    // #ifdef DISPLAY
+    // cv::imshow("White-scaled Image", img);
+    // #endif
+
     //==========================================================================
     // Line detector (heavilly borrowed from the internet)
     // see www.transistor.io/revisiting-lane-detection-using-opencv.html
@@ -103,11 +129,18 @@ public:
     // Canny edge detection
     cv::Mat contours;
     // TUNE Make sure these parameters are good for various conditions
-    cv::Canny(img, contours, 50, 350);
+    int a,b;
+    nh_.param("iarrcMlVision/canny_1",a, 85); // These both make the transform reject more.
+    nh_.param("iarrcMlVision/canny_2",b,380); // Originally 50, 350
+    cv::Canny(img, contours, a, b);
     #ifdef DISPLAY
-    cv::Mat contoursInv;
-    cv::threshold(contours,contoursInv,128,255,cv::THRESH_BINARY_INV);
+    //cv::Mat contoursInv;
+    //cv::threshold(contours,contoursInv,128,255,cv::THRESH_BINARY_INV);
+    cv::imshow("Canny Transformed Image",  contours);
     #endif
+
+    // Black out edges that are parts of the car by just drawing over them
+    cv::rectangle(contours,cv::Point(0,contours.rows),cv::Point((int)contours.cols*5/8,(int)contours.rows*3/4),cv::Scalar(0),-1);
 
     // // Hough transform
     // // Note: houghVote_ is the min number of points must be found to be a line
@@ -135,17 +168,32 @@ public:
 
     // Probabalistic Hough transform (better)
     LineFinder lf; // From OpenCV cookbook, see included linefinder.h
-    lf.setLineLengthAndGap(60, 10); // min len (pix), min gap (pix)
-    lf.setMinVote(4); // minimum number of points to be a line
+    int min_len, min_gap, min_vte;
+    nh_.param("iarrcMlVision/min_len", min_len, 60); // Originally 60
+    nh_.param("iarrcMlVision/min_gap", min_gap, 15); // Originally 10
+    nh_.param("iarrcMlVision/min_vte", min_vte, 15); // Originally  4
+    lf.setLineLengthAndGap(min_len, min_gap); // min len (pix), min gap (pix)
+    lf.setMinVote(min_vte);               // minimum number of points to be a line
     std::vector<cv::Vec4i> lines = lf.findLines(contours); // TODO check if [x1, y1, x2, y2] (use OpenCV's docs)
-    #ifdef DISPLAY
     cv::Mat houghP(img.size(), CV_8U, cv::Scalar(0));
     lf.drawDetectedLines(houghP);
+    #ifdef DISPLAY
+    cv::imshow("P Hough Transformed Image", houghP);
     #endif
     // TODO
     // Grab the two longest lines and use their angles and positions to control
     // the steering.  Maybe use length for speed?  Long ==> straight-away?
 
+    // Distance transform
+    // Invert image
+    cv::threshold(houghP,houghP,128,255,cv::THRESH_BINARY_INV);
+    cv::Mat dst32;
+    cv::distanceTransform(houghP,dst32,CV_DIST_L2,3);
+    #ifdef DISPLAY
+    cv::Mat dstDisp;
+    cv::normalize(dst32,dstDisp,0.0,1.0,CV_MINMAX);
+    cv::imshow("Distance Transoformed Image", dstDisp);
+    #endif
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // // Simple image gradient calculation - pretty useless
@@ -168,15 +216,15 @@ public:
     // cv::addWeighted(grad_x_abs, 0.5, grad_y_abs, 0.5, 0, grad);
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    // Display Image
-    #ifdef DISPLAY
-    cv::imshow(WINDOW, houghP);
-    cv::waitKey(1);
-    #endif
+
 
     // TODO
     // Get steering and trottle from image... Somehow...
     // ...
+
+    #ifdef DISPLAY
+    cv::waitKey(1); // Give OpenCV a chance to draw the images
+    #endif
 
     // End of line detector
     //==========================================================================
