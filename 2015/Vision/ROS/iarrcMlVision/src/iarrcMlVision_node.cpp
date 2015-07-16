@@ -206,6 +206,32 @@ public:
 };
 
 
+// Trackbar code (got too lazy to bother figuring out how to stuff both nh_ object and the parameter string into userdata... so copy-paste)
+void canny_1Trackbar(int trackbarValue, void* ud)
+{
+  ros::NodeHandle* userdata = (ros::NodeHandle*) ud;
+  userdata->setParam("iarrcMlVision/canny_1", trackbarValue);
+}
+void canny_2Trackbar(int trackbarValue, void* ud)
+{
+  ros::NodeHandle* userdata = (ros::NodeHandle*) ud;
+  userdata->setParam("iarrcMlVision/canny_2", trackbarValue);
+}
+void min_lenTrackbar(int trackbarValue, void* ud)
+{
+  ros::NodeHandle* userdata = (ros::NodeHandle*) ud;
+  userdata->setParam("iarrcMlVision/min_len", trackbarValue);
+}
+void min_gapTrackbar(int trackbarValue, void* ud)
+{
+  ros::NodeHandle* userdata = (ros::NodeHandle*) ud;
+  userdata->setParam("iarrcMlVision/min_gap", trackbarValue);
+}
+void min_vteTrackbar(int trackbarValue, void* ud)
+{
+  ros::NodeHandle* userdata = (ros::NodeHandle*) ud;
+  userdata->setParam("iarrcMlVision/min_vte", trackbarValue);
+}
 
 /*
  * class ImageProcessor
@@ -298,6 +324,8 @@ public:
     #ifdef DISPLAY
     //cv::Mat contoursInv;
     //cv::threshold(contours,contoursInv,128,255,cv::THRESH_BINARY_INV);
+    cv::createTrackbar("Canny Lower", "Canny Transformed Image", &a, 600, canny_1Trackbar, &nh_);
+    cv::createTrackbar("Canny Upper", "Canny Transformed Image", &b, 600, canny_2Trackbar, &nh_);
     cv::imshow("Canny Transformed Image",  contours);
     #endif
 
@@ -340,6 +368,9 @@ public:
     cv::Mat houghP(img.size(), CV_8U, cv::Scalar(0));
     lf.drawDetectedLines(houghP);
     #ifdef DISPLAY
+    cv::createTrackbar("Min Length", "P Hough Transformed Image", &min_len, 200, min_lenTrackbar, &nh_);
+    cv::createTrackbar("Min Gap", "P Hough Transformed Image", &min_gap, 50, min_gapTrackbar, &nh_);
+    cv::createTrackbar("Min Vote", "P Hough Transformed Image", &min_vte, 30, min_vteTrackbar, &nh_);
     cv::imshow("P Hough Transformed Image", houghP);
     #endif
     // TODO
