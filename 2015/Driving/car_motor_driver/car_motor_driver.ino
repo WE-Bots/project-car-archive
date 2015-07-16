@@ -52,6 +52,7 @@ int speed_error = 0;
 int real_speed = 0;
 int accumulated_speed_error = 0;
 boolean emergency_stop = true;
+boolean stop = false;
 unsigned long timer = 0;
 int battery_voltage = 10;
 int battery_current = 50;
@@ -71,6 +72,7 @@ boolean wire_get_value(int &first, int &second, int address);
 void setup()
 {
 	//Collision avoidance config
+	pinMode(2, INPUT);
 	//attachInterrupt(0, pause, CHANGE);
 
 	Serial.begin(9600);
@@ -158,7 +160,7 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
-	if (!emergency_stop)
+	if (!emergency_stop||stop)
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -253,7 +255,7 @@ void loop()
 	//emergency_stop=false;
 	//drive the motors
 #ifdef MOTORS
-	if (emergency_stop)
+	if (emergency_stop||stop)
 	{
 		motor.writeMicroseconds(1500);
 		steer.write(90);
@@ -264,6 +266,12 @@ void loop()
 		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif
+}
+
+//collision avoidance ISR
+void pause()
+{
+	stop = digitalRead(2);
 }
 
 /*
@@ -292,12 +300,12 @@ they will be unmodified if a complete, valid entry is not obtained.
 /return
 -bool: True if a id-value pair was obtained. False otherwise.
 */
-static boolean serial_get_value(int &first, int &second)
+boolean serial_get_value(int &first, int &second)
 {
 	// Static variables remain between calls
-	static int buffer[2] = { 0, 0 };
-	static boolean started = false;
-	static boolean success = false;
+	int buffer[2] = { 0, 0 };
+	boolean started = false;
+	boolean success = false;
 	// Read chars until there is no data in the buffer or we find a terminator
 	while (Serial.available() >= 11)
 	{
@@ -362,7 +370,7 @@ function serial_send_value
 /return
 -bool: True if transmission was successful. Always true.
 */
-static boolean serial_send_value(int angle, int speed)
+boolean serial_send_value(int angle, int speed)
 {
 	Serial.print('<');
 	Serial.print(angle);
