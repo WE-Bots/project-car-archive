@@ -12,7 +12,8 @@
 *				D4-Right IR
 *				D5-Left IR
 *				D6-Start button
-*				D7-Mode indicator LED
+*				D7-Drag race mode indicator LED
+*				D8-Circuit race mode indicator LED
 *	Discription:Handles decision making and communication between components of the car. Programed in Arduino.
 */
 
@@ -43,7 +44,7 @@ Servo steer;
 #endif
 
 const int encoders[4] = { 8, 9, 10, 11 };		//encoder board addresses
-const int power_board = 4;
+const int power_board = 12;
 
 int steering_angle = 0;
 int base_speed = 0;
@@ -56,6 +57,7 @@ int battery_voltage = 10;
 int battery_current = 50;
 int avg_encoder_distance = 0;
 int distance = 0;
+int race_mode = 0;
 
 #ifdef USB
 static boolean serial_get_value(uint8_t &id, int16_t &value);
@@ -71,6 +73,7 @@ void setup()
 	//Start button config
 	pinMode(6, INPUT_PULLUP);
 	pinMode(7, OUTPUT);
+	pinMode(8, OUTPUT);
 
 	//Collision avoidance config
 	//attachInterrupt(0, pause, CHANGE);
@@ -88,6 +91,28 @@ void setup()
 	Serial1.begin(9600);			//Start bluetooth communications 
 #endif
 
+#ifdef AUTONOMOUS
+	//start button selection
+	while (!race_mode)
+	{
+		if (!digitalRead(6))
+		{
+			race_mode=1;
+			digitalWrite(7,HIGH);
+			timer = millis();
+			while ((millis() - timer>500) && (millis() - timer<1000))
+			{
+				if (!digitalRead(6))
+				{
+					race_mode = 2;
+					digitalWrite(8, HIGH);
+					break;
+				}
+			}
+		}
+	}
+#endif
+
 #ifdef MOTORS
 	motor.attach(9);     // range 1000-2000		1500=stop
 	steer.attach(3);    // range 50-120   below 90 turns right		(this will need to be recalibrated when the car chassis is rebuilt)
@@ -98,7 +123,6 @@ void setup()
 		steer.write(90);
 	}
 #endif
-
 	timer = millis();
 }
 
@@ -144,7 +168,7 @@ void loop()
 #endif
 
 	//Remote control code
-#ifndef AUTONOMOUS
+#ifdef REMOTE_CONTROL
 #ifdef BLUETOOTH
 	if (Serial1.available() > 1)
 	{
@@ -178,7 +202,7 @@ void loop()
 #endif
 
 	//Autonomous code
-#ifndef REMOTE_CONTROL
+#ifdef AUTONOMOUS
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
 	{
@@ -370,7 +394,7 @@ they will be unmodified if a complete, valid entry is not obtained.
 /return
 -bool: True if a packet was obtained. False otherwise.
 */
-boolean wire_get_value(int &first, int &second, int address) 
+boolean wire_get_value(int &first, int &second, int address)
 {
 	if (Wire.requestFrom(address, 4) != 4)
 		return false; //didn't receive the correct number of bytes
