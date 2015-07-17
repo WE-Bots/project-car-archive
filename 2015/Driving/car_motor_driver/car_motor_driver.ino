@@ -171,12 +171,9 @@ void loop()
 		for (int i = 0; i < 4; i++)
 		{
 			int encoder_distance = 0;
-			Serial.print("Board: ");
-			Serial.println(i);
 			new_timer[i] = micros();
 			while (!wire_get_value(encoder_distance, encoders[i]))
 			{
-				Serial.println("FAIL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				delay(1);
 				new_timer[i] = micros();
 			}
@@ -185,8 +182,6 @@ void loop()
 			{
 				//there was roll over
 				real_speed += (encoder_distance - (old_encoder_distance[i] % 256) + 256)/(new_timer[i]-old_timer[i]);
-				Serial.println(encoder_distance);
-				Serial.println(new_timer[i] - old_timer[i]);
 				old_timer[i] = new_timer[i];
 				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256)+256;
 			}
@@ -194,8 +189,6 @@ void loop()
 			{
 				//no rollover
 				real_speed += (encoder_distance - (old_encoder_distance[i] % 256)) / (new_timer[i] - old_timer[i]);
-				Serial.println(encoder_distance);
-				Serial.println(new_timer[i] - old_timer[i]);
 				old_timer[i] = new_timer[i];
 				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256);
 			}
@@ -203,6 +196,15 @@ void loop()
 		//average values
 		real_speed /= 4;
 		distance = (old_encoder_distance[0]+old_encoder_distance[1]+old_encoder_distance[2]+old_encoder_distance[3])/4;
+
+		for (int i = 0; i < 4; i++)
+		{
+			Serial.print("Board: ");
+			Serial.println(i);
+			Serial.print("Distance: ");
+			Serial.println(old_encoder_distance[i]);
+		}
+		Serial.println("************************************************");
 
 		//calculate speed error
 		accumulated_speed_error += base_speed - real_speed;
