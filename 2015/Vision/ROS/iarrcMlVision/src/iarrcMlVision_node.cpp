@@ -22,7 +22,7 @@
 #include <string>
 
 // Make sure that this is not defined on the Raspberry Pi!
-#define DISPLAY
+//#define DISPLAY
 
 
 // Utility Functions
@@ -117,6 +117,7 @@ private:
 
 public:
   static const int carAngle = -30; // Specifies the angle of direction of the car relative to the footage
+  static const int warpCombat = 15; // HAX to combat fisheye until it's dewarped
   
   probeVectors(int x, int y, double ang, double mag, int tx, int ty, int ts = 3, cv::Scalar tc = cv::Scalar(0, 255, 0)) : textPos(tx, ty),
     startPos(x,y), textColour (tc)
@@ -187,6 +188,8 @@ public:
     
     int safeAngle = angleOfLine(closestLine) - angle;
     
+    safeAngle -= safeAngle/abs(safeAngle) * warpCombat; // Hax to try to combat the fisheye
+    
     /*if (safeAngle > 90)
       safeAngle = 90;
     else if (safeAngle < -90)
@@ -213,18 +216,15 @@ public:
     
     for (int iter = 0; iter < instances->size(); iter++)
     {
-      instances->at(iter).checkForClosestCollision(lines);
-      int inputAngle = instances->at(iter).getAngle();
-      
-      if (inputAngle != 0)
+      if (instances->at(iter).checkForClosestCollision(lines) == true)
       {
-        inputAngle -= (instances->at(iter).angle + carAngle);
+        int inputAngle = instances->at(iter).getAngle() + instances->at(iter).angle - carAngle;
         sum += inputAngle; // Find the angle relative to the car's direction of motion
         ++counter;
       }
     }
     
-    int safeAngle = (counter !=0) ? sum/counter : 0;
+    int safeAngle = (counter != 0) ? sum/counter : 0;
     
     if (safeAngle > 90)
      safeAngle = 90;
