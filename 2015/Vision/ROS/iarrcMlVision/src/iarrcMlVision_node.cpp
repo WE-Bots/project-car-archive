@@ -289,11 +289,6 @@ public:
   ImageProcessor()
     //: it_(nh_)
   {
-    //Intialize probes
-    probes.push_back(probeVectors(300, 400, 0, 200, 225, 50, 5, cv::Scalar(0, 255, 0)));
-    probes.push_back(probeVectors(200, 350, -30, 150, 10, 50, 5, cv::Scalar(255, 255, 0)));
-    probes.push_back(probeVectors(400, 350, 30, 150, 400, 50, 5, cv::Scalar(255,0,100)));
-    
     // Something is up here!
     // it_sub_ = it_.subscribe("/camera/image", 1,
     //   &ImageProcessor::proc_img, this);
@@ -357,6 +352,14 @@ public:
     img = cv::imdecode(cv::Mat(msg.data),1);
     // Hax hax hax
 
+    if (probes.empty())
+    {
+      //Intialize probes
+      probes.push_back(probeVectors(img.cols * .25, img.rows * 0.8, 0, (double)175 * sqrt(pow((double)img.cols/640, 2)+ pow((double)img.rows/480, 2)) / sqrt(2), img.cols *.5, 50, 5, cv::Scalar(0, 255, 0)));
+      probes.push_back(probeVectors(img.cols * .25, img.rows * 0.8, -30, (double)150 * sqrt(pow((double)img.cols/640, 2) + pow((double)img.rows/480, 2)) / sqrt(2), 10, 50, 5, cv::Scalar(255, 255, 0)));
+      probes.push_back(probeVectors(img.cols * .25, img.rows * 0.8, 45, (double)225 * sqrt(pow((double)img.cols/640, 2) + pow((double)img.rows/480, 2)) / sqrt(2), img.cols *.75, 50, 5, cv::Scalar(255,0,100)));
+    }
+    
     // Display Subscribed Image
     #ifdef DISPLAY
     cv::imshow("Subscribed Image", img);
@@ -442,7 +445,7 @@ public:
 
     // Distance transform
     // Invert image
-    cv::threshold(houghP,houghP,128,255,cv::THRESH_BINARY_INV);
+    /*cv::threshold(houghP,houghP,128,255,cv::THRESH_BINARY_INV);
     cv::Mat dst32;
     cv::distanceTransform(houghP,dst32,CV_DIST_L2,3);
     #ifdef DISPLAY
@@ -450,7 +453,7 @@ public:
     cv::normalize(dst32,dstDisp,0.0,1.0,CV_MINMAX);
     cv::imshow("Distance Transoformed Image", dstDisp);
     #endif
-
+     */
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // // Simple image gradient calculation - pretty useless
     // cv::Mat img_gray, grad;
@@ -493,7 +496,7 @@ public:
     cv::subtract(cv::Scalar::all(255),colourOverlay, colourOverlay);
     for (int i = 0; i < probes.size(); i++)
       probes[i].overlayData(colourOverlay);
-    putText(colourOverlay, NumberToString(angle).c_str(), cv::Point(225, 100), cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar (100,255,255));
+    putText(colourOverlay, NumberToString(angle).c_str(), cv::Point(img.cols / 2, 100), cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar (100,255,255));
     
     cv::imshow("P Hough Transformed Image", colourOverlay);
  
