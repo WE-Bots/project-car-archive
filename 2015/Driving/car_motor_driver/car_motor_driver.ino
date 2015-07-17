@@ -18,13 +18,13 @@
 */
 
 //uncomment for control type
-#define AUTONOMOUS
+//#define AUTONOMOUS
 //#define REMOTE_CONTROL
 #define DEBUG
 
 //uncomment for active communications while debugging
-//#define I2C
-#define USB
+#define I2C
+//#define USB
 //#define BLUETOOTH
 //#define MOTORS
 
@@ -69,11 +69,15 @@ static boolean serial_send_value(int angle, int speed);
 boolean wire_get_value(int &first, int &second, int address);
 #endif
 
+void pause();
+
 void setup()
 {
 	//Collision avoidance config
 	pinMode(2, INPUT);
-	//attachInterrupt(0, pause, CHANGE);
+	attachInterrupt(0, pause, CHANGE);
+	pinMode(4, INPUT);
+	pinMode(5, INPUT);
 
 	Serial.begin(9600);
 #ifdef I2C
@@ -160,13 +164,15 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
-	if (!emergency_stop||stop)
+	if (!emergency_stop||stop||base_speed==0)
 	{
 		for (int i = 0; i < 4; i++)
 		{
 			int encoder_period = 0;
 			int encoder_distance = 0;
-			while (!wire_get_value(encoder_period, encoder_distance, 8))
+			Serial.print("Board: ");
+			Serial.println(i);
+			while (!wire_get_value(encoder_period, encoder_distance, encoders[i]))
 			{
 				delay(10);
 			}
@@ -226,8 +232,16 @@ void loop()
 #ifdef USB
 	//put pi communication stuff here
 	//only for getting the training video
-	serial_send_value(constrain(steering_angle, -30, 40), real_speed);
+	serial_send_value(constrain(steering_angle, -30, 40), base_speed);
 #endif
+	if (digitalRead(4))
+	{
+		steering_angle += 10;
+	}
+	if(digitalRead(5))
+	{
+		steering_angle-=10;
+	}
 #endif
 
 	//communicate with the remote emergency stop app
@@ -255,7 +269,7 @@ void loop()
 	//emergency_stop=false;
 	//drive the motors
 #ifdef MOTORS
-	if (emergency_stop||stop)
+	if (emergency_stop||stop||base_speed==0)
 	{
 		motor.writeMicroseconds(1500);
 		steer.write(90);
@@ -398,36 +412,45 @@ they will be unmodified if a complete, valid entry is not obtained.
 */
 boolean wire_get_value(int &first, int &second, int address)
 {
-	if (Wire.requestFrom(address, 7) != 7)
+	if (Wire.requestFrom(address, 9) != 9)
+	{
+		while (Wire.available() > 0)
+		{
+			Wire.read();
+		}
 		return false; //didn't receive the correct number of bytes
-
+	}
 	// Static variables remain between calls
-	char buf16[3] = { 0, 0, '\0' }; //2 bytes +'\0'
-	char buf8 = 0;
-	char bufnibble[7];
+	char buffirst[3] = { 0, 0, '\0' }; //2 bytes +'\0'
+	char bufsecond[3] = { 0, 0, '\0' };
+	char bufnibble[9];
 
 	// Read data
 	Wire.readBytes(bufnibble, 7);
-	buf16[0]=((bufnibble[0]&0x0f)<<4)|(bufnibble[1]&0x0f);
-	buf16[2]=((bufnibble[2]&0x0f)<<4)|(bufnibble[3]&0x0f);
-	buf8=((bufnibble[4]&0x0f)<<4)|(bufnibble[5]&0x0f);
+	buffirst[0]=((bufnibble[0]&0x0f)<<4)|(bufnibble[1]&0x0f);
+	buffirst[1]=((bufnibble[2]&0x0f)<<4)|(bufnibble[3]&0x0f);
+	bufsecond[0]=((bufnibble[4]&0x0f)<<4)|(bufnibble[5]&0x0f);
+	bufsecond[2] = ((bufnibble[6] & 0x0f) << 4) | (bufnibble[7] & 0x0f);
 	Serial.print("one: ");
-	Serial.println((byte)buf16[0]);
+	Serial.println((byte)buffirst[0]);
 	Serial.print("two: ");
-	Serial.println((byte)buf16[1]);
+	Serial.println((byte)buffirst[1]);
 	Serial.print("three: ");
-	Serial.println((byte)buf8);
+	Serial.println((byte)bufsecond[0]);
+	Serial.print("four: ");
+	Serial.println((byte)bufsecond[1]);
 	Serial.print("xor: ");
-	Serial.println((byte)(bufnibble[6]&0x0f));
-	Serial.println((byte)(bufnibble[0] ^ bufnibble[1] ^ bufnibble[2]^ bufnibble[3]^ bufnibble[4]^ bufnibble[5]));
+	Serial.println((byte)(bufnibble[8]&0x0f));
+	Serial.println((byte)(bufnibble[0] ^ bufnibble[1] ^ bufnibble[2] ^ bufnibble[3] ^ bufnibble[4] ^ bufnibble[5] ^ bufnibble[6] ^ bufnibble[7]));
+	Serial.println("****************************************");
 
 	//check XOR
-	if ((bufnibble[6]&0x0f) != bufnibble[0] ^ bufnibble[1] ^ bufnibble[2]^ bufnibble[3]^ bufnibble[4]^ bufnibble[5])
+	if ((bufnibble[9] & 0x0f) != (bufnibble[0] ^ bufnibble[1] ^ bufnibble[2] ^ bufnibble[3] ^ bufnibble[4] ^ bufnibble[5] ^ bufnibble[6] ^ bufnibble[7]))
 		return false;	//invalid XOR
 
 	// XOR was valid, pass the variables back to the caller, return true
-	first = atoi(buf16);
-	second = buf8;
+	first = atoi(buffirst);
+	second = atoi(bufsecond);
 	return true;
 }
 
