@@ -113,6 +113,7 @@ FOSC =	Oscillator Selection bits
 //#define SHUTOFF_DEBUG
 #define CELL2CELLVOLT
 //#define SAVE_MEMORY
+//#define CURRENT_DEBUG
 
 // I2C
 // 2 byte unsigned int for voltage
@@ -179,7 +180,7 @@ float supVolt = 4.2; // supply voltage to be set by the sampleReference function
 uint16_t refValue = 0; // ADC value of the reference voltage
 
 float current = 0; // current flowing out of the battery
-uint8_t currentGain = 200; // gain for the current sense module
+uint8_t currentGain[] = {200, 100, 50, 25}; // gain for the current sense module
 
 uint8_t LCDDisplayMode = 0;
 
@@ -201,7 +202,7 @@ const float cell5RR = 9.03161; // the resistor ratio of the cell 5 resistor divi
 
 const float cell6RR = 11.1326; // the resistor ratio of the cell 6 resistor divider, TopRes / BtmRes (OHM)
 
-const float shuntRes = 0.000690789; // the resistance of the current shunt in ohms
+const float shuntRes = 0.001269309; // the resistance of the current shunt in ohms
 const uint8_t sampleNum = 300; // the number of ADC samples to be averaged
 const float IIRnew = 0.2; // IIR filter constant for incoming data
 const float IIRprev = 0.8; // IIR filter constant eor previous data

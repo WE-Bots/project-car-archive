@@ -192,18 +192,59 @@ float sampleVoltage(ADCChannel  chan)
 void sampleCurrent ()
 {
     uint16_t temp = 0;
+    float tempCurrent = 0;
 
+#ifndef CURRENT_DEBUG
+    // check to find an appropriate current gain to measure the current
+    for (uint8_t i = 0; i <= 3; i++)
+    {
+        currentGainInit(currentGain[i]); // update the current gain
+
+        __delay_ms(2); // wait for the current gain output to stabalize
+
+        // sample the voltage and calibrate is to an actual voltage
+        for ( int i = 0; i <= sampleNum; i++)
+        {
+            temp += analogRead(CURRENT);
+        }
+
+        // averaged 10 bit number
+        temp = temp / sampleNum;
+
+        tempCurrent = (temp * supVolt)/1023;
+
+        if ( tempCurrent < supVolt - 0.2 )
+        {
+            current = tempCurrent / ( currentGain[i] * shuntRes );
+            // convert the digital voltage into an actual voltage then into a current accounting for the currrent gain
+            // return as mA value
+            return;
+        }
+
+    }
+
+    // if the voltage is above all of the gains then just send the value using the lowest gain.
+    current = tempCurrent / ( currentGain[3] * shuntRes );
+#else
+    uint8_t gain = 0;
+
+    currentGainInit( currentGain[gain] ); // update the current gain
+
+    __delay_ms(2); // wait for the current gain output to stabalize
+
+    // sample the voltage and calibrate is to an actual voltage
     for ( int i = 0; i <= sampleNum; i++)
     {
         temp += analogRead(CURRENT);
     }
 
+    // averaged 10 bit number
     temp = temp / sampleNum;
 
-    // convert the digital value into voltage
-    // convert an amplified voltage to a current using the shunt resistance
-    // divide by the gain to get the actual voltage and divide by the resistance to get the current
-    current = ((temp * supVolt)/1023) / (shuntRes * currentGain);
+    tempCurrent = (temp * supVolt)/1023;
+
+    current = tempCurrent / ( currentGain[gain] * shuntRes );
+#endif
 
 }
 
@@ -444,7 +485,7 @@ uint8_t systemCheck ()
     if ( current > 90 )
     {
         // current is oot opf range
-        return 7;
+        // return 7; // MAKE SURE TO UNCOMMENT IF CHECKING CURRENT
     }
 
     return 0;
