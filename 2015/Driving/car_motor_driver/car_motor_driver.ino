@@ -164,7 +164,7 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
-	if (!emergency_stop||stop||base_speed==0)
+	if ((emergency_stop||stop||base_speed==0))
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -172,8 +172,9 @@ void loop()
 			int encoder_distance = 0;
 			Serial.print("Board: ");
 			Serial.println(i);
-			while (!wire_get_value(encoder_period, encoder_distance, encoders[i]))
+			while (!wire_get_value(encoder_period, encoder_distance, encoders[0]))
 			{
+				Serial.println("FAIL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				delay(10);
 			}
 			real_speed += encoder_period;
@@ -412,7 +413,7 @@ they will be unmodified if a complete, valid entry is not obtained.
 */
 boolean wire_get_value(int &first, int &second, int address)
 {
-	if (Wire.requestFrom(address, 9) != 9)
+	if (Wire.requestFrom(address, 5) != 5)
 	{
 		while (Wire.available() > 0)
 		{
@@ -423,33 +424,41 @@ boolean wire_get_value(int &first, int &second, int address)
 	// Static variables remain between calls
 	char buffirst[3] = { 0, 0, '\0' }; //2 bytes +'\0'
 	char bufsecond[3] = { 0, 0, '\0' };
-	char bufnibble[9];
+	char buf[5];
 
 	// Read data
-	Wire.readBytes(bufnibble, 7);
-	buffirst[0]=((bufnibble[0]&0x0f)<<4)|(bufnibble[1]&0x0f);
-	buffirst[1]=((bufnibble[2]&0x0f)<<4)|(bufnibble[3]&0x0f);
-	bufsecond[0]=((bufnibble[4]&0x0f)<<4)|(bufnibble[5]&0x0f);
-	bufsecond[2] = ((bufnibble[6] & 0x0f) << 4) | (bufnibble[7] & 0x0f);
+	Wire.readBytes(buf,5);
+	buffirst[0] = 0x01 & buf[1];
+	buffirst[0] << 7;
+	buffirst[0] = buffirst[0] | (buf[0] & 0x7f);
+	buffirst[1] = buf[1]&0x7f;
+	buffirst[1] >> 1;
+	bufsecond[0] = 0x01 & buf[3];
+	bufsecond[0] << 7;
+	bufsecond[0] = bufsecond[0] | (buf[2] & 0x7f);
+	bufsecond[1] = buf[3] & 0x7f;
+	bufsecond[1] >> 1;
 	Serial.print("one: ");
-	Serial.println((byte)buffirst[0]);
+	Serial.println((byte)(buf[0]));
 	Serial.print("two: ");
-	Serial.println((byte)buffirst[1]);
+	Serial.println((byte)(buf[1]));
 	Serial.print("three: ");
-	Serial.println((byte)bufsecond[0]);
+	Serial.println((byte)(buf[2]));
 	Serial.print("four: ");
-	Serial.println((byte)bufsecond[1]);
+	Serial.println((byte)(buf[3] ));
 	Serial.print("xor: ");
-	Serial.println((byte)(bufnibble[8]&0x0f));
-	Serial.println((byte)(bufnibble[0] ^ bufnibble[1] ^ bufnibble[2] ^ bufnibble[3] ^ bufnibble[4] ^ bufnibble[5] ^ bufnibble[6] ^ bufnibble[7]));
+	Serial.println((byte)(buf[4]));
+	Serial.println((byte)((buf[0] ^ buf[1] ^ buf[2] ^ buf[3])&0x7f));
 	Serial.println("****************************************");
 
 	//check XOR
-	if ((bufnibble[9] & 0x0f) != (bufnibble[0] ^ bufnibble[1] ^ bufnibble[2] ^ bufnibble[3] ^ bufnibble[4] ^ bufnibble[5] ^ bufnibble[6] ^ bufnibble[7]))
+	if ((buf[4] & 0x7f) != (((buf[0] ^ buf[1] ^ buf[2] ^ buf[3]) & 0x7f)))
 		return false;	//invalid XOR
 
 	// XOR was valid, pass the variables back to the caller, return true
 	first = atoi(buffirst);
+	Serial.print("atoi: ");
+	Serial.println(first);
 	second = atoi(bufsecond);
 	return true;
 }
