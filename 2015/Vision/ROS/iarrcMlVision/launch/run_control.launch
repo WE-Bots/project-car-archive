@@ -4,6 +4,6 @@
        User has to start camera capture manually. I recommend using a WiFi
        module and SSHing into the Pi to do this. -->
   <node pkg="car_serial_comms" name="car_comms" type="car_serial_comms_node"/>
-  <node pkg="raspicam" name="pi_cam" type="raspicam_node"/>
+<node pkg="raspicam" name="pi_cam" type="raspicam_node" args="_width:=320 _height:=240 _framerate:=7"/>
   <node pkg="iarrcMlVision" type="iarrcMlVision_node" name="vision_controller"/>
 </launch>
