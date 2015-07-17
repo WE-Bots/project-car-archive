@@ -59,6 +59,8 @@ int battery_current = 50;
 int old_encoder_distance[4] = { 0, 0, 0, 0 };
 unsigned long distance = 0;
 int race_mode = 0;
+unsigned long new_timer[4] = { 0, 0, 0, 0 };
+unsigned long old_timer[4] = { 0, 0, 0, 0 };
 
 #ifdef USB
 static boolean serial_get_value(uint8_t &id, int16_t &value);
@@ -66,7 +68,7 @@ static boolean serial_send_value(int angle, int speed);
 #endif
 
 #ifdef I2C
-boolean wire_get_value(int &first, int &second, int address);
+boolean wire_get_value(int &data, int address);
 #endif
 
 void pause();
@@ -168,25 +170,33 @@ void loop()
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			int encoder_period = 0;
 			int encoder_distance = 0;
 			Serial.print("Board: ");
 			Serial.println(i);
-			while (!wire_get_value(encoder_period, encoder_distance, encoders[0]))
+			new_timer[i] = micros();
+			while (!wire_get_value(encoder_distance, encoders[i]))
 			{
 				Serial.println("FAIL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-				delay(10);
+				delay(1);
+				new_timer[i] = micros();
 			}
-			real_speed += encoder_period;
 			//check for rollover
 			if(encoder_distance<(old_encoder_distance[i]%256))
 			{
 				//there was roll over
+				real_speed += (encoder_distance - (old_encoder_distance[i] % 256) + 256)/(new_timer[i]-old_timer[i]);
+				Serial.println(encoder_distance);
+				Serial.println(new_timer[i] - old_timer[i]);
+				old_timer[i] = new_timer[i];
 				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256)+256;
 			}
 			else
 			{
 				//no rollover
+				real_speed += (encoder_distance - (old_encoder_distance[i] % 256)) / (new_timer[i] - old_timer[i]);
+				Serial.println(encoder_distance);
+				Serial.println(new_timer[i] - old_timer[i]);
+				old_timer[i] = new_timer[i];
 				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256);
 			}
 		}
@@ -411,56 +421,18 @@ they will be unmodified if a complete, valid entry is not obtained.
 /return
 -bool: True if a packet was obtained. False otherwise.
 */
-boolean wire_get_value(int &first, int &second, int address)
+boolean wire_get_value(int &data, int address)
 {
-	if (Wire.requestFrom(address, 5) != 5)
-	{
-		while (Wire.available() > 0)
-		{
-			Wire.read();
-		}
-		return false; //didn't receive the correct number of bytes
-	}
-	// Static variables remain between calls
-	char buffirst[3] = { 0, 0, '\0' }; //2 bytes +'\0'
-	char bufsecond[3] = { 0, 0, '\0' };
-	char buf[5];
-
-	// Read data
-	Wire.readBytes(buf,5);
-	buffirst[0] = 0x01 & buf[1];
-	buffirst[0] << 7;
-	buffirst[0] = buffirst[0] | (buf[0] & 0x7f);
-	buffirst[1] = buf[1]&0x7f;
-	buffirst[1] >> 1;
-	bufsecond[0] = 0x01 & buf[3];
-	bufsecond[0] << 7;
-	bufsecond[0] = bufsecond[0] | (buf[2] & 0x7f);
-	bufsecond[1] = buf[3] & 0x7f;
-	bufsecond[1] >> 1;
-	Serial.print("one: ");
-	Serial.println((byte)(buf[0]));
-	Serial.print("two: ");
-	Serial.println((byte)(buf[1]));
-	Serial.print("three: ");
-	Serial.println((byte)(buf[2]));
-	Serial.print("four: ");
-	Serial.println((byte)(buf[3] ));
-	Serial.print("xor: ");
-	Serial.println((byte)(buf[4]));
-	Serial.println((byte)((buf[0] ^ buf[1] ^ buf[2] ^ buf[3])&0x7f));
-	Serial.println("****************************************");
-
-	//check XOR
-	if ((buf[4] & 0x7f) != (((buf[0] ^ buf[1] ^ buf[2] ^ buf[3]) & 0x7f)))
-		return false;	//invalid XOR
-
-	// XOR was valid, pass the variables back to the caller, return true
-	first = atoi(buffirst);
-	Serial.print("atoi: ");
-	Serial.println(first);
-	second = atoi(bufsecond);
-	return true;
+	Wire.requestFrom(address, 1);
+			if (Wire.available() > 0)
+			{
+				data=Wire.read();
+				return true;
+			}
+			else
+			{
+				return false; //return false; //didn't receive the correct number of bytes
+			}
 }
 
 /*
