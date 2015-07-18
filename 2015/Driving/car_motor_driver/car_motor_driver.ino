@@ -14,19 +14,20 @@
 *				D6-Start button
 *				D7-Drag race mode indicator LED
 *				D13-Circuit race mode indicator LED
+*				D12-Start button light
 *	Discription:Handles decision making and communication between components of the car. Programed in Arduino.
 */
 
 //uncomment for control type
-//#define AUTONOMOUS
+#define AUTONOMOUS
 //#define REMOTE_CONTROL
-#define DEBUG
+//#define DEBUG
 
 //uncomment for active communications while debugging
 #define I2C
 //#define USB
-//#define BLUETOOTH
-//#define MOTORS
+#define BLUETOOTH
+#define MOTORS
 
 #ifndef DEBUG
 #define I2C
@@ -44,7 +45,6 @@ Servo steer;
 #endif
 
 const int encoders[4] = { 8, 9, 10, 11 };		//encoder board addresses
-const int power_board = 12;
 
 int steering_angle = 0;
 int base_speed = 0;
@@ -81,7 +81,6 @@ void setup()
 	pinMode(4, INPUT);
 	pinMode(5, INPUT);
 
-	Serial.begin(9600);
 #ifdef I2C
 	Wire.begin();                 //start I2C
 #endif
@@ -99,16 +98,19 @@ void setup()
 	pinMode(6, INPUT_PULLUP);
 	pinMode(7, OUTPUT);
 	pinMode(13, OUTPUT);
+	pinMode(12,OUTPUT);
 
 	//start button selection
 	while (!race_mode)
 	{
 		digitalWrite(7, LOW);
 		digitalWrite(13, LOW);
+		digitalWrite(12,LOW);
 		if (!digitalRead(6))
 		{
 			race_mode = 1;
 			digitalWrite(7, HIGH);
+			digitalWrite(12,HIGH);
 			timer = millis();
 			while ((millis() - timer) < 2000)
 			{
@@ -127,7 +129,7 @@ void setup()
 	motor.attach(9);     // range 1000-2000		1500=stop
 	steer.attach(3);    // range 50-120   below 90 turns right		(this will need to be recalibrated when the car chassis is rebuilt)
 	timer = millis();
-	while ((millis()-timer) < 2000)
+	while ((millis()-timer) < 12000)
 	{
 		motor.writeMicroseconds(1500);
 		steer.write(90);
@@ -146,17 +148,30 @@ void loop()
 		//put pi communication stuff here
 		serial_get_value(steering_angle, base_speed);
 #endif
-		steering_angle = 0;
-		if (distance > 5000)	//need to figure out what this value should actually be
+			base_speed = 2000;
+		steering_angle = 2;
+		if ((distance % 100) < 15)
+			steering_angle = 1;
+		if (distance > 1690)	//need to figure out what this value should actually be
 		{
 			base_speed = 0;
 		}
 	}
 	else if (race_mode == 2)
 	{
+		if ((millis()%1000)<500)
+			digitalWrite(12,HIGH);
+		else
+			digitalWrite(12,LOW);
 #ifdef USB
 		//put pi communication stuff here
-		serial_get_value(steering_angle, base_speed);
+		serial_get_value(battery_voltage, battery_current);
+		serial_send_value(battery_voltage, battery_current);
+		//if (base_speed != 0)
+		steering_angle = battery_voltage;
+			base_speed = 2000;
+			if (base_speed < 4000)
+				base_speed++;
 #endif
 	}
 #endif
@@ -166,7 +181,7 @@ void loop()
 	//this needs to be fixed????
 	//read real speed and find the speed error
 	real_speed = 0;
-	if ((emergency_stop||stop||base_speed==0))
+	if (!(emergency_stop||stop||base_speed==0))
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -181,34 +196,25 @@ void loop()
 			if(encoder_distance<(old_encoder_distance[i]%256))
 			{
 				//there was roll over
-				real_speed += (encoder_distance - (old_encoder_distance[i] % 256) + 256)/(new_timer[i]-old_timer[i]);
+				real_speed += (encoder_distance - (old_encoder_distance[i] % 256) + 256)*52500/(new_timer[i]-old_timer[i]);
 				old_timer[i] = new_timer[i];
 				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256)+256;
 			}
 			else
 			{
 				//no rollover
-				real_speed += (encoder_distance - (old_encoder_distance[i] % 256)) / (new_timer[i] - old_timer[i]);
+				real_speed += (encoder_distance - (old_encoder_distance[i] % 256)) *52500/ (new_timer[i] - old_timer[i]);
 				old_timer[i] = new_timer[i];
 				old_encoder_distance[i]+=encoder_distance-(old_encoder_distance[i]%256);
 			}
 		}
 		//average values
-		real_speed /= 4;
+		real_speed = real_speed/4;		//speed in mm/s
 		distance = (old_encoder_distance[0]+old_encoder_distance[1]+old_encoder_distance[2]+old_encoder_distance[3])/4;
-
-		for (int i = 0; i < 4; i++)
-		{
-			Serial.print("Board: ");
-			Serial.println(i);
-			Serial.print("Distance: ");
-			Serial.println(old_encoder_distance[i]);
-		}
-		Serial.println("************************************************");
 
 		//calculate speed error
 		accumulated_speed_error += base_speed - real_speed;
-		speed_error = constrain(0.5*(base_speed - real_speed) + 0.5*accumulated_speed_error, -100, 100);
+		speed_error = constrain(0.9*(base_speed - real_speed) + 0.1*accumulated_speed_error, -1000, 1000);
 	}
 
 	//get data from power board
@@ -220,8 +226,8 @@ void loop()
 #ifdef BLUETOOTH
 	if (Serial1.available() > 1)
 	{
-		base_speed = (Serial1.parseInt() / 5 - 100);
-		if ((base_speed < -100) || (base_speed>100))
+		base_speed = (Serial1.parseInt() / 5 - 2000);
+		if ((base_speed < -2000) || (base_speed>2000))
 		{
 			base_speed = 0;
 		}
@@ -232,7 +238,7 @@ void loop()
 		Serial1.print(",");
 		Serial1.print(real_speed);
 		Serial1.print(",");
-		Serial1.pringln(distance);
+		Serial1.println(distance);
 		emergency_stop = false;
 		timer = millis();
 	}
@@ -247,15 +253,17 @@ void loop()
 	//only for getting the training video
 	serial_send_value(constrain(steering_angle, -30, 40), base_speed);
 #endif
+#endif
+
+	//collision avoidance steering
 	if (digitalRead(4))
 	{
 		steering_angle += 10;
 	}
-	if(digitalRead(5))
+	if (digitalRead(5))
 	{
-		steering_angle-=10;
+		steering_angle -= 10;
 	}
-#endif
 
 	//communicate with the remote emergency stop app
 #ifdef AUTONOMOUS
@@ -269,7 +277,7 @@ void loop()
 		Serial1.print(",");
 		Serial1.print(real_speed);
 		Serial1.print(",");
-		Serail1.println(distance);
+		Serial1.println(distance);
 		timer = millis();
 	}
 	if ((millis() - timer) >= 300)
@@ -289,7 +297,7 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 + constrain(base_speed + speed_error, -500, 500)); //add conversion for pulse period to servo control
+		motor.writeMicroseconds(1500 + constrain((base_speed + speed_error)/25, -100, 100)); //add conversion for pulse period to servo control
 		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif
@@ -331,10 +339,11 @@ boolean serial_get_value(int &first, int &second)
 {
 	// Static variables remain between calls
 	int buffer[2] = { 0, 0 };
+	char buf16[4]={'0','0','0','\0'};
 	boolean started = false;
 	boolean success = false;
 	// Read chars until there is no data in the buffer or we find a terminator
-	while (Serial.available() >= 11)
+	while (Serial.available() >= 5)
 	{
 		// Check for start of package
 		if (Serial.peek() == '<')
@@ -350,7 +359,9 @@ boolean serial_get_value(int &first, int &second)
 		}
 
 		//read the first int
-		buffer[0] = Serial.parseInt();
+		for (int i = 0; i < 3 && Serial.peek() != ','; i++)
+			buf16[i] = Serial.read();
+		buffer[0] = atoi(buf16);
 
 		//check for parser
 		if (Serial.peek() == ',')
@@ -364,7 +375,9 @@ boolean serial_get_value(int &first, int &second)
 		}
 
 		//read the second int
-		buffer[1] = Serial.parseInt();
+		for (int i = 0; i < 3 && Serial.peek() != '>'; i++)
+			buf16[i] = Serial.read();
+		buffer[1] = atoi(buf16);
 
 		//check for terminator
 		if (Serial.peek() == '>')
