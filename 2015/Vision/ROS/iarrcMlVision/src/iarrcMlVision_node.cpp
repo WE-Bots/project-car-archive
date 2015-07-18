@@ -518,7 +518,7 @@ public:
     car_serial_comms::ThrottleAndSteering out_msg; // Message to send
     out_msg.header.stamp = ros::Time::now(); // Record the time
     out_msg.header.frame_id = "/chassis"; // Just for fun
-    out_msg.steering = angle; // Steering angle, -90 to +90 (ask Kevin)
+    out_msg.steering = -angle; // Steering angle, -90 to +90 (ask Kevin) (REVERSE THE ANGLES!)
     out_msg.throttle = 9; // Speed in m/s
     cmd_pub_.publish(out_msg); // Send it
     //**********************************************
