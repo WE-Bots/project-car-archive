@@ -6,5 +6,5 @@
         rosbag -a -0 BAG_NAME.bag -t TIME_IN_SEC
        -->
   <node pkg="car_serial_comms" name="car_comms" type="car_serial_comms_node"/> <!-- output="screen" -->
-  <node pkg="raspicam" name="pi_cam" type="raspicam_node"/>
+  <node pkg="raspicam" name="pi_cam" type="raspicam_node" args="_width:=320 _height:=240 _framerate:=7"/>
 </launch>
