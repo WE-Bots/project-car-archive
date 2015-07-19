@@ -1,0 +1,84 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sl320
+
+\f0\fs22 \cf0 \expnd0\expndtw0\kerning0
+Pi Setup:\
+\
+Change password to WEBOTS\
+remap keyboard\
+spoofmac (defunct)\
+update everything\
+Added wifi configuration scripts\
+git config \'97global credential.helper cache\
+installed screen\
+Installed usbmount\
+In /etc/usbmount/usbmount.conf\
+->\'a0FS_MOUNTOPTIONS="-fstype=vfat,umask=0000\'94\
+\
+link ~/catkin_ws/src/car_serial_comms to ~/git/Project-CAR/2015/Vision/ROS/car_serial_comms\
+link ~/catkin_ws/src/iarrc... to ~/git/Project-CAR/2015/Vision/ROS/iarrc\'85\
+\
+created stage1 and stage2 (remember to change save location on 64GB card!)\
+\
+installed gparted\
+\
+fstab extra entry:\
+/dev/mmcblk0p3 /media/ExtraData ext4 auto,defaults,nofail,noatime,rw,user,exec 0 3\
+\
+create /media/ExtraData (permissions: 777)\
+\
+sudo apt-get install --no-install-recommends bluetooth bluez-tools bridge-utils python-gobject -y\
+\uc0\u8232 \
+sudo brctl addbr br0\
+\uc0\u8232 \
+/etc/network/interfaces:\
+*delete wlan1*\
+auto br0\
+iface br0 inet manual\
+\'a0 bridge_maxwait 5\
+\'a0 bridge_ports eth0 wlan0\
+\uc0\u8232 \
+iface bnep0 inet static\
+\'a0 address 10.0.1.1\
+\'a0 netmask 255.255.255.0\
+\'a0 broadcast 10.0.1.255\
+\uc0\u8232 \
+/etc/start.sh: (don\'92t forget executable permissions!)\
+#! /bin/sh\
+\uc0\u8232 \
+sleep 15\
+\
+sudo bt-network -s nap br0 &\
+\uc0\u8232 \
+root crontab:\
+@reboot /etc/start.sh\
+\uc0\u8232 \
+*copy /etc/bluetooth and /var/lib/bluetooth between the Pis*\
+\uc0\u8232 \
+sudo bt-adapter --set Discoverable 1\
+sudo bt-adapter --set Name WE-Vision\
+sudo bt-network -s nap br0 (this needs to run automatically on boot - handled by start.sh)\
+sudo bt-agent\
+	Remember to connect to network right after pairing to bring up authorization screen to accept!\
+sudo bluez-test-device trusted *device MAC* yes\
+\uc0\u8232 \
+NOTE: Turn off other network connections before attempting SSH!\
+ALSO, REMEMBER TO WAIT A LITTLE AFTER BOOT! Approximately 1:30\
+\uc0\u8232 \
+\uc0\u8232 \
+\uc0\u8232 \
+IDEAS: - Play back a rosbag of the course during the race, to feed the arduino commands right back to it\
+\uc0\u8232 \
+\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl320
+\ls1\ilvl0\cf0 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+line density (over time?) filter\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Position of line = different events\
+}
