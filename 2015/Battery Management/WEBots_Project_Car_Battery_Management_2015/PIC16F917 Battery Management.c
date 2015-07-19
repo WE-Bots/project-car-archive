@@ -83,6 +83,29 @@ void main()
     /***** MAIN LOOP *****/
     while(1)
     {
+
+        if ( E_STOP == 0 )
+        {
+            BRCount = 0; // reset the brown out counter
+
+            MOTOR_CONTROL = 0;
+            R_LED = 1;
+
+            while( E_STOP == 0 )
+            {
+
+            }
+
+            R_LED = 0;
+            MOTOR_CONTROL = 1;
+        }
+
+        // brownout occured
+        if ( PCONbits.nBOR == 0)
+        {
+            brownOutHandle ();
+        }
+
         // check if the cells and current are within range
         if ( systemCheck() != 0)
         {
@@ -489,6 +512,24 @@ uint8_t systemCheck ()
     }
 
     return 0;
+}
+
+// function that is called if a brownout has occured
+// most likely when motor control is turned on
+//      wait and turn it bacck on again
+void brownOutHandle ()
+{
+    PCONbits.nBOR = 1; // reset brownout module
+
+    BRCount = BRCount + 1;
+
+    if ( BRCount >= 20)
+    {
+        shutDown(1);
+    }
+    __delay_ms(50);
+
+    MOTOR_CONTROL = 1;
 }
 
 void shutDown( uint8_t error)

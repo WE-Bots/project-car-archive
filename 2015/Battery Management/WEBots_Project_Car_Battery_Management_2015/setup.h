@@ -52,7 +52,7 @@
 *                   LCD_PWR_SW      - RD6                               *
 *                   LCD_PB          - RD5                               *
 *                   G_LED           - RD4                               *
-*                   5V_REG1_EN      - RC5                               *
+*                   E_STOP          - RC5                               *
 *                   5V_REG2_EN      - RC4                               *
 *                   12V_REG_EN      - RD3                               *
 *                   UC_CGND         - RD2                               *
@@ -104,7 +104,7 @@ FOSC =	Oscillator Selection bits
     EXTRCCLK	RC oscillator: CLKOUT function on RA6/OSC2/CLKOUT/T1OSO pin, RC on RA7/OSC1/CLKIN/T1OSI
  */
 
-#pragma config WDTE = OFF, PWRTE = OFF, CP = OFF, BOREN = OFF, DEBUG = ON, FCMEN = OFF, MCLRE = ON, CPD = OFF, IESO = ON, FOSC = INTOSCIO
+#pragma config WDTE = OFF, PWRTE = OFF, CP = OFF, BOREN = ON, DEBUG = ON, FCMEN = OFF, MCLRE = ON, CPD = OFF, IESO = ON, FOSC = INTOSCIO
 
 #include <xc.h>
 #include <stdint.h> // allows access to more intuiative interger classes such as uint8_t, int16_t
@@ -162,7 +162,7 @@ FOSC =	Oscillator Selection bits
 
 #define UC_CGND RD2
 #define MOTOR_CONTROL RC0
-#define REG1_5V_EN RC5
+#define E_STOP RC5
 #define REG2_5V_EN RC4
 #define REG_12V_EN RD3
 #define TEMP_TH RA4
@@ -209,6 +209,7 @@ const float IIRprev = 0.8; // IIR filter constant eor previous data
 
 uint8_t sendData[4]; // array to hold the data to be sent through I2C
 char countI2C = 4;
+uint8_t BRCount = 0; // variable to count the number of brownouts
 
 #include "i2c.h"
 
@@ -251,10 +252,13 @@ void initController ()
     OSCCONbits.IRCF = 0b111; // Select 8MHz as clock frequency
     OSCCONbits.SCS = 0; // Configuration word defines clock source
 
+    PCONbits.SBOREN = 1; // enable the brownout restet control
+    PCONbits.nBOR = 1; // reset brownout module
+
     // set to 1 for input, 0 for output
     TRISA = 0b00111111;
     TRISB = 0b00000000;
-    TRISC = 0b00000000;
+    TRISC = 0b00100000;
     TRISD = 0b01100000;
     TRISE = 0b00000111;
 
