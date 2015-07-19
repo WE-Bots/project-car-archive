@@ -26,6 +26,16 @@
 *.exe
 *.out
 *.app
+2015/Driving/car_motor_driver/Visual Micro/.car_motor_driver.vsarduino.h
+2015/Driving/car_motor_driver/Visual Micro/Compile.vmps.xml
+2015/Driving/car_motor_driver/Visual Micro/Configuration.Debug.vmps.xml
+2015/Driving/car_motor_driver/Visual Micro/Upload.vmps.xml
+2015/Driving/car_motor_driver/car_motor_driver.sdf
+2015/Driving/car_motor_driver/car_motor_driver.sln
+2015/Driving/car_motor_driver/car_motor_driver.v12.suo
+2015/Driving/car_motor_driver/car_motor_driver.vcxproj
+2015/Driving/car_motor_driver/car_motor_driver.vcxproj.filters
+2015/Driving/car_motor_driver/car_motor_driver.opensdf
 
 # MPLAB compilation files
 *.p1

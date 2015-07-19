@@ -6,7 +6,7 @@ unsigned long time=0;
 void setup()
 {
   motor.attach(9);
-  stear.attach(10);
+  stear.attach(3);
 }
 
 void loop()
