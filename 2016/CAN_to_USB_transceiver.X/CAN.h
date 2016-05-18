@@ -12,6 +12,17 @@
 extern "C" {
 #endif
 
+#define NUM_OF_ECAN_BUFFERS 32
+    //This is the ECAN message buffer declaration. Note the buffer alignment.
+    unsigned int ecan1MsgBuf[NUM_OF_ECAN_BUFFERS][8]
+    __attribute__((aligned(NUM_OF_ECAN_BUFFERS * 16)));
+
+    //functions
+    void init();
+    int CANIsTransmitReady();
+    void CANTransmit(unsigned int SID, unsigned int length, unsigned int* data);
+    void CANTransmitRemote(unsigned int SID);
+
 
 
 #ifdef	__cplusplus
