@@ -7,7 +7,7 @@ void CANInit()
     //put module in configure mode
     C1CTRL1bits.REQOP = 4;
     while (C1CTRL1bits.OPMODE != 4);
-    C1CTRL1bits.WIN = 0;
+    C1CTRL1bits.WIN = 1;
 
     //Set up the CAN module for 250kbps speed with 10 Tq per bit.
     C1CFG1 = 0x47; // BRP = 8 SJW = 2 Tq
@@ -25,6 +25,37 @@ void CANInit()
     DMA0STAL = (unsigned int) &ecan1MsgBuf;
     DMA0STAH = (unsigned int) &ecan1MsgBuf;
     DMA0CONbits.CHEN = 0x1;
+
+    //Assign 32x8word Message Buffers for ECAN1 in device RAM. This example uses DMA1 for RX.
+    DMA1CONbits.SIZE = 0x0;
+    DMA1CONbits.DIR = 0x0;
+    DMA1CONbits.AMODE = 0x2;
+    DMA1CONbits.MODE = 0x0;
+    DMA1REQ = 34;
+    DMA1CNT = 7;
+    DMA1PAD = (volatile unsigned int) &C1RXD;
+    DMA1STAL = (unsigned int) &ecan1MsgBuf;
+    DMA1STAH = (unsigned int) &ecan1MsgBuf;
+    DMA1CONbits.CHEN = 0x1;
+
+    /* Select Acceptance Filter Mask 0 for Acceptance Filter 0 */
+    C1FMSKSEL1bits.F0MSK = 0x0;
+    /* Configure Acceptance Filter Mask 0 register to mask SID<2:0>
+     * Mask Bits (11-bits) : 0b111 1111 1111 */
+    C1RXM0SIDbits.SID = 0x7FF;
+    /* Configure Acceptance Filter 0 to match standard identifier
+    Filter Bits (11-bits): 0b100 1000 1111 with the mask setting, message with SID*/
+    C1RXF0SIDbits.SID = 0x048F;
+    /* Acceptance Filter 0 to check for Standard Identifier */
+    C1RXM0SIDbits.MIDE = 0x1;
+    C1RXF0SIDbits.EXIDE = 0x0;
+    /* Acceptance Filter 0 to use Message Buffer 10 to store message */
+    C1BUFPNT1bits.F0BP = 0xA;
+    /* Filter 0 enabled for Identifier match with incoming message */
+    C1FEN1bits.FLTEN0 = 0x1;
+    /* Clear Window Bit to Access ECAN
+     * Control Registers */
+    C1CTRL1bits.WIN = 0x0;
 
     //Configure Message Buffer 0 for Transmission and assign priority
     C1TR01CONbits.TXEN0 = 0x1;

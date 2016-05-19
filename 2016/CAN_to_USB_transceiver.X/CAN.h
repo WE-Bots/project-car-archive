@@ -19,7 +19,7 @@ extern "C" {
 
     //functions
     void init();
-    int CANIsTransmitReady();
+    int CANIsTransmitComplete();
     void CANTransmit(unsigned int SID, unsigned int length, unsigned int* data);
     void CANTransmitRemote(unsigned int SID);
 

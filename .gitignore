@@ -39,4 +39,6 @@
 *.rlf
 *.sdb
 *.sym
+*.mk
+*.bash
 2016/CAN_to_USB_transceiver.X/nbproject/Makefile-genesis.properties
