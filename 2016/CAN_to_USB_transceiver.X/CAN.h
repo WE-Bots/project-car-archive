@@ -11,6 +11,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+#include <p33Exxxx.h>
 
 #define NUM_OF_ECAN_BUFFERS 32
     //This is the ECAN message buffer declaration. Note the buffer alignment.
