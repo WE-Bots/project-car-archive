@@ -5,12 +5,12 @@
  * Created on June 21, 2016, 8:12 PM
  */
 
-/* List of extra TODO's
+/* List of TODO's
  * - Check for whether there will be a LED on the PCB
  * - Figure out which ports are being used to send and receive data
  * - Figure out where to store Quaternion data
- * - Write a simple api for the Keiman Filter
- * - Write and research calibration code
+ * - Write a simple api for the Kalman Filter
+ * - Write and research calibration code 
  */
 
 /**************************************
