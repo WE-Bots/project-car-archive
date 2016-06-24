@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=IMU_XC16.c vector3d.c
+SOURCEFILES_QUOTED_IF_SPACED=IMU_XC16.c vector3d.c quaternion.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/IMU_XC16.o ${OBJECTDIR}/vector3d.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/IMU_XC16.o.d ${OBJECTDIR}/vector3d.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/IMU_XC16.o ${OBJECTDIR}/vector3d.o ${OBJECTDIR}/quaternion.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/IMU_XC16.o.d ${OBJECTDIR}/vector3d.o.d ${OBJECTDIR}/quaternion.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/IMU_XC16.o ${OBJECTDIR}/vector3d.o
+OBJECTFILES=${OBJECTDIR}/IMU_XC16.o ${OBJECTDIR}/vector3d.o ${OBJECTDIR}/quaternion.o
 
 # Source Files
-SOURCEFILES=IMU_XC16.c vector3d.c
+SOURCEFILES=IMU_XC16.c vector3d.c quaternion.c
 
 
 CFLAGS=
@@ -102,6 +102,13 @@ ${OBJECTDIR}/vector3d.o: vector3d.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  vector3d.c  -o ${OBJECTDIR}/vector3d.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/vector3d.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/vector3d.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/quaternion.o: quaternion.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/quaternion.o.d 
+	@${RM} ${OBJECTDIR}/quaternion.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  quaternion.c  -o ${OBJECTDIR}/quaternion.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/quaternion.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -mno-eds-warn  -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/quaternion.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/IMU_XC16.o: IMU_XC16.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -116,6 +123,13 @@ ${OBJECTDIR}/vector3d.o: vector3d.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/vector3d.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  vector3d.c  -o ${OBJECTDIR}/vector3d.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/vector3d.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/vector3d.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/quaternion.o: quaternion.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/quaternion.o.d 
+	@${RM} ${OBJECTDIR}/quaternion.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  quaternion.c  -o ${OBJECTDIR}/quaternion.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/quaternion.o.d"      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/quaternion.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

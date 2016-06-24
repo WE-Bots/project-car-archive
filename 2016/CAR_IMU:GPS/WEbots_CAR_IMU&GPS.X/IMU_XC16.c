@@ -6,10 +6,10 @@
  */
 
 /* List of extra TODO's
- * - Check for whether there will be a LED on the PCB
- * - Figure out which ports are being used to send and receive data
- * - Figure out where to store Quaternion data
- * - Write a simple api for the Kalman Filter
+ * - Check for whether there will be a LED on the PCB //No
+ * - Figure out which ports are being used to send and receive data //Look at the board I sent you we are using regular serial port communication for the GPS and the SDA1/SCL1 for the I2C
+ * - Figure out where to store Quaternion data //This is given
+ * - Write a simple api for the Kalman Filter //This is pretty math based so we need a few more math libraries as well which I can do
  * - Write and research calibration code
  */
 
@@ -26,6 +26,7 @@
 
 // 'C' source line config statements
 
+//TODO: this will have to be moved into another file
 // FGS
 #pragma config GWRP = OFF               // General Segment Write-Protect bit (General Segment may be written)
 #pragma config GSS = OFF                // General Segment Code-Protect bit (General Segment Code protect is disabled)
@@ -66,11 +67,14 @@
 // #pragma config statements should precede project file includes.
 // Use project enums instead of #define for ON and OFF.
 
-#include "vector3d.h"
+#include "quaternion.h"
+//I added this just for testing feel free to remove
 
 //TODO: Setup pre-processor directives for defining macros which
 //      will be useful later
 
+//TODO: This is a COMPLETELY wrong file you will have to change this, IMU should be a
+//      library
 int main(void) {
     return 0;
     
@@ -80,4 +84,5 @@ int main(void) {
 //      and memory addresses used for saving quaternion data
 
 //TODO: make an i2c library for the i2c communication
-//TODO: decide on either using c++ or c (Darryl's code was rewritten into c++ for MPLAB)
+//TODO: make an interrupt system so when the GPS is ready to transmit to do so
+//      then pull the IMU info after
