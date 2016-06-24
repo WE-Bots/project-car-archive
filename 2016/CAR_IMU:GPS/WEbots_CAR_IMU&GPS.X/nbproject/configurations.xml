@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>vector3d.h</itemPath>
       <itemPath>quaternion.h</itemPath>
+      <itemPath>structs.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
