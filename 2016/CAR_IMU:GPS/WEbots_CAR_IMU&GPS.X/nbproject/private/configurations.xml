@@ -3,9 +3,9 @@
   <projectmakefile>Makefile</projectmakefile>
   <defaultConf>0</defaultConf>
   <confs>
-    <conf name="default" type="2">
+    <conf name="default" type="3">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
+      <languageToolchainDir>/opt/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

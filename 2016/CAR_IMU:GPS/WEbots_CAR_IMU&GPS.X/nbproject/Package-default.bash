@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/WEbots_CAR_IMU_GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=WEbots_CAR_IMU_GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=webotscarimu&gps.x/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/WEbots_CAR_IMU_GPS.X.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=WEbots_CAR_IMU_GPS.X.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=WEbotsCARIMU&GPS.X/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/webotscarimu&gps.x/bin
-copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
+makeDirectory ${TMPDIR}/WEbotsCARIMU&GPS.X/lib
+copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}lib/${OUTPUT_BASENAME}" 0644
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/webotscarimu&gps.x.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/WEbotsCARIMU&GPS.X.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/webotscarimu&gps.x.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/WEbotsCARIMU&GPS.X.tar *
 checkReturnCode
 
 # Cleanup
