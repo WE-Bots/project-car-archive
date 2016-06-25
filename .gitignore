@@ -53,6 +53,7 @@
 2015/Driving/car_motor_driver/car_motor_driver.vcxproj.filters
 2015/Driving/car_motor_driver/car_motor_driver.opensdf
 
+<<<<<<< HEAD
 # Additional excludes for MPLAB X
 *.obj.dmp
 html/
@@ -67,3 +68,6 @@ nb-configuration.xml
 funclist
 **/nbproject/Makefile-*
 **/disassembly/
+=======
+/2016/CAR_IMU:GPS/WEbots_CAR_IMU&GPS.X/build/default/
+>>>>>>> d61afd7d6c6a54d2c3a67ec557b7aab359c78909
