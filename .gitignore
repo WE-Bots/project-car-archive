@@ -53,3 +53,17 @@
 2015/Driving/car_motor_driver/car_motor_driver.vcxproj.filters
 2015/Driving/car_motor_driver/car_motor_driver.opensdf
 
+# Additional excludes for MPLAB X
+*.obj.dmp
+html/
+**/nbproject/private/
+**/nbproject/Package-*.bash
+**/build/
+**/nbbuild/
+**/dist/
+**/nbdist/
+nbactions.xml
+nb-configuration.xml
+funclist
+**/nbproject/Makefile-*
+**/disassembly/
