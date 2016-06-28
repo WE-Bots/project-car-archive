@@ -3,6 +3,9 @@
  * Author: Kevin
  *
  * Created on May 15, 2016, 12:37 PM
+ *
+ * Description: Basic functions for use of the CAN module on the dsPIC33EP256MU806.
+ *              Developed for use as part of WE Bots Project C.A.R.
  */
 
 #ifndef CAN_H
@@ -18,8 +21,8 @@ extern "C" {
     unsigned int ecan1MsgBuf[NUM_OF_ECAN_BUFFERS][8]
     __attribute__((aligned(NUM_OF_ECAN_BUFFERS * 16)));
 
-    //functions
-    void init();
+    //Public functions
+    void CANInit();
     int CANIsTransmitComplete();
     void CANTransmit(unsigned int SID, unsigned int length, unsigned int* data);
     void CANTransmitRemote(unsigned int SID);
