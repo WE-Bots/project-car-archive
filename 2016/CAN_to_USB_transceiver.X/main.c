@@ -1,4 +1,5 @@
 #include "Init.h"
+#include <uart.h>
 //#include "CAN.h"
 
 void main()
@@ -13,9 +14,14 @@ void main()
     while (1)
     {
         LATDbits.LATD2 = 1;
-        for (i=0; i < 0xFFFF; i++){}
+        for (i = 0; i < 0xFFFF; i++)
+        {
+        }
         LATDbits.LATD2 = 0;
-        for (i= 0; i < 0xFFFF; i++){}
+        for (i = 0; i < 0xFFFF; i++)
+        {
+        }
     }
+    return;
 }
 
