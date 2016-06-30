@@ -1,4 +1,3 @@
-#include "Init.h"
 #include <uart.h>
 
 void UARTInit()

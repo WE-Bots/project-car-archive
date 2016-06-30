@@ -12,8 +12,7 @@
 extern "C" {
 #endif
 
-#include <xc.h>
-
+// Configuration bits
 // FGS
 #pragma config GWRP = OFF               // General Segment Write-Protect bit (General Segment may be written)
 #pragma config GSS = OFF                // General Segment Code-Protect bit (General Segment Code protect is disabled)
