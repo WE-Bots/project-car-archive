@@ -1,4 +1,5 @@
 #include "L3G4200D.h"
+//#include <Wire.h>
 
 L3G4200D::L3G4200D(){
   x=0;
