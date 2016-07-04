@@ -7,6 +7,8 @@
       <itemPath>vector3d.h</itemPath>
       <itemPath>quaternion.h</itemPath>
       <itemPath>structs.h</itemPath>
+      <itemPath>GPS.h</itemPath>
+      <itemPath>UART.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -18,6 +20,7 @@
       <itemPath>IMU_XC16.c</itemPath>
       <itemPath>vector3d.c</itemPath>
       <itemPath>quaternion.c</itemPath>
+      <itemPath>../GPS.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
