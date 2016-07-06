@@ -2,7 +2,7 @@
  * Invensense MPU-9250 library using the SPI interface
  *
  * Copyright (C) 2015 Brian Chen
- * 
+ *
  * Open source under the MIT License. See LICENSE.txt.
  */
 
@@ -10,6 +10,7 @@
 #define MPU9250_h
 #include <p33EP256MU806.h>
 #include <spi.h>
+
 // #define AK8963FASTMODE
 
 // mpu9250 registers
@@ -129,10 +130,10 @@
 #define MPUREG_ZA_OFFSET_H         0x7D
 #define MPUREG_ZA_OFFSET_L         0x7E
 /* ---- AK8963 Reg In MPU9250 ----------------------------------------------- */
- 
+
 #define AK8963_I2C_ADDR             0x0c//0x18
 #define AK8963_Device_ID            0x48
- 
+
 // Read-only Reg
 #define AK8963_WIA                  0x00
 #define AK8963_INFO                 0x01
@@ -155,7 +156,7 @@
 #define AK8963_ASAX                 0x10
 #define AK8963_ASAY                 0x11
 #define AK8963_ASAZ                 0x12
- 
+
 // Configuration bits mpu9250
 #define BIT_SLEEP 0x40
 #define BIT_H_RESET 0x80
@@ -184,43 +185,58 @@
 #define BIT_INT_ANYRD_2CLEAR        0x10
 #define BIT_RAW_RDY_EN              0x01
 #define BIT_I2C_IF_DIS              0x10
- 
+
 #define READ_FLAG   0x80
- 
+
 /* ---- Sensitivity --------------------------------------------------------- */
- 
+
 #define MPU9250A_2g       ((float)0.000061035156f) // 0.000061035156 g/LSB
 #define MPU9250A_4g       ((float)0.000122070312f) // 0.000122070312 g/LSB
 #define MPU9250A_8g       ((float)0.000244140625f) // 0.000244140625 g/LSB
 #define MPU9250A_16g      ((float)0.000488281250f) // 0.000488281250 g/LSB
- 
+
 #define MPU9250G_250dps   ((float)0.007633587786f) // 0.007633587786 dps/LSB
 #define MPU9250G_500dps   ((float)0.015267175572f) // 0.015267175572 dps/LSB
 #define MPU9250G_1000dps  ((float)0.030487804878f) // 0.030487804878 dps/LSB
 #define MPU9250G_2000dps  ((float)0.060975609756f) // 0.060975609756 dps/LSB
- 
-#define MPU9250M_4800uT   ((float)0.6f)            // 0.6 uT/LSB
- 
-#define MPU9250T_85degC   ((float)0.002995177763f) // 0.002995177763 degC/LSB
- 
-#define     Magnetometer_Sensitivity_Scale_Factor ((float)0.15f)    
- 
 
-  
+#define MPU9250M_4800uT   ((float)0.6f)            // 0.6 uT/LSB
+
+#define MPU9250T_85degC   ((float)0.002995177763f) // 0.002995177763 degC/LSB
+
+#define     Magnetometer_Sensitivity_Scale_Factor ((float)0.15f)
+
+
+typedef struct MPU9250 {
+  float acc_divider;
+  float gyro_divider;
+
+  int calib_data[3];
+  float Magnetometer_ASA[3];
+
+  float accel_data[3];
+  float temperature;
+  float gyro_data[3];
+  float mag_data[3];
+  unsigned int mag_data_raw[3];
+
+  float randomstuff[3];   // seemed to be an issue with memory being disturbed so allocated random memory space here
+
+  long my_clock;
+  unsigned char my_cs;
+  unsigned char my_low_pass_filter;
+  unsigned char my_low_pass_filter_acc;
+
+  float g_bias[3];
+  float a_bias[3];      // Bias corrections for gyro and accelerometer
+};
+
     // constructor. Default low pass filter of 188Hz
-/*******
- * To be removed?
-    MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ){
-        my_clock = clock;
-        my_cs = cs;
-        my_low_pass_filter = low_pass_filter;
-        my_low_pass_filter_acc = low_pass_filter_acc;
-    }
- */
+    void MPU9250(MPU9250 mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ);
     unsigned int WriteReg(unsigned char WriteAddr, unsigned char WriteData );
     unsigned int ReadReg(unsigned char WriteAddr, unsigned char WriteData );
     void ReadRegs(unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
- 
+
     bool init(bool calib_gyro = true, bool calib_acc = true);
     void read_temp();
     void read_acc();
@@ -237,31 +253,5 @@
     void read_mag();
     void read_all();
     void calibrate(float *dest1, float *dest2);
- 
-    struct MPU9250 { 
-    float acc_divider;
-    float gyro_divider;
-    
-    int calib_data[3];
-    float Magnetometer_ASA[3];
- 
-    float accel_data[3];
-    float temperature;
-    float gyro_data[3];
-    float mag_data[3];
-    unsigned short mag_data_raw[3];    
 
-    float randomstuff[3];   // seemed to be an issue with memory being disturbed so allocated random memory space here
-
-    long my_clock;
-    unsigned char my_cs;
-    unsigned char my_low_pass_filter;
-    unsigned char my_low_pass_filter_acc;
-
-    //float randomstuffs[3];
-
-    float g_bias[3];
-    float a_bias[3];      // Bias corrections for gyro and accelerometer
-};
- 
 #endif

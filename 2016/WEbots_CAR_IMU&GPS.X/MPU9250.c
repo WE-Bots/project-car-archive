@@ -9,6 +9,13 @@
  */
 #include "MPU9250.h"
 
+void MPU9250(MPU9250 mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
+    mpu.my_clock = clock;
+    mpu.my_cs = cs;
+    mpu.my_low_pass_filter = low_pass_filter;
+    mpu.my_low_pass_filter_acc = low_pass_filter_acc;
+}
+
 unsigned int MPU9250::WriteReg( unsigned char WriteAddr, unsigned char WriteData )
 {
     unsigned int temp_val;
@@ -225,12 +232,12 @@ unsigned int MPU9250::whoami(){
 void MPU9250::read_acc()
 {
     unsigned char response[6];
-    int16_t bit_data;
+    signed int bit_data;
     float data;
     int i;
     ReadRegs(MPUREG_ACCEL_XOUT_H,response,6);
     for(i = 0; i < 3; i++) {
-        bit_data = ((int16_t)response[i*2]<<8)|response[i*2+1];
+        bit_data = ((signed int)response[i*2]<<8)|response[i*2+1];
         data = (float)bit_data;
         accel_data[i] = data/acc_divider - a_bias[i];
     }
@@ -247,12 +254,12 @@ void MPU9250::read_acc()
 void MPU9250::read_gyro()
 {
     unsigned char response[6];
-    int16_t bit_data;
+    signed int bit_data;
     float data;
     int i;
     ReadRegs(MPUREG_GYRO_XOUT_H,response,6);
     for(i = 0; i < 3; i++) {
-        bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
+        bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
         gyro_data[i] = data/gyro_divider - g_bias[i];
     }
@@ -267,11 +274,11 @@ void MPU9250::read_gyro()
 
 void MPU9250::read_temp(){
     unsigned char response[2];
-    int16_t bit_data;
+    signed int bit_data;
     float data;
     ReadRegs(MPUREG_TEMP_OUT_H,response,2);
 
-    bit_data = ((int16_t)response[0]<<8)|response[1];
+    bit_data = ((signed int)response[0]<<8)|response[1];
     data = (float)bit_data;
     temperature = (data/340)+36.53;
     deselect();
@@ -351,7 +358,7 @@ void MPU9250::read_mag(){
     ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
     //must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
     for(i = 0; i < 3; i++) {
-        mag_data_raw[i] = ((int16_t)response[i*2+1]<<8)|response[i*2];
+        mag_data_raw[i] = ((signed int)response[i*2+1]<<8)|response[i*2];
         data = (float)mag_data_raw[i];
         mag_data[i] = data*Magnetometer_ASA[i];
     }
@@ -368,7 +375,7 @@ unsigned char MPU9250::get_CNTL1(){
 
 void MPU9250::read_all(){
     unsigned char response[21];
-    int16_t bit_data;
+    signed int bit_data;
     float data;
     int i;
 
@@ -381,23 +388,23 @@ void MPU9250::read_all(){
     ReadRegs(MPUREG_ACCEL_XOUT_H,response,21);
     //Get accelerometer value
     for(i = 0; i < 3; i++) {
-        bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
+        bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
         accel_data[i] = data/acc_divider - a_bias[i];
     }
     //Get temperature
-    bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
+    bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
     data = (float)bit_data;
     temperature = ((data-21)/333.87)+21;
     //Get gyroscope value
     for(i=4; i < 7; i++) {
-        bit_data = ((int16_t)response[i*2]<<8) | response[i*2+1];
+        bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
         gyro_data[i-4] = data/gyro_divider - g_bias[i-4];
     }
     //Get Magnetometer value
     for(i=7; i < 10; i++) {
-        mag_data_raw[i] = ((int16_t)response[i*2+1]<<8) | response[i*2];
+        mag_data_raw[i] = ((signed int)response[i*2+1]<<8) | response[i*2];
         data = (float)mag_data_raw[i];
         mag_data[i-7] = data * Magnetometer_ASA[i-7];
     }
@@ -405,7 +412,7 @@ void MPU9250::read_all(){
 
 void MPU9250::calibrate(float *dest1, float *dest2){
     unsigned char data[12]; // data array to hold accelerometer and gyro x, y, z, data
-    uint16_t ii, packet_count, fifo_count;
+    usigned int ii, packet_count, fifo_count;
     int32_t gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
 
     // reset device
@@ -433,8 +440,8 @@ void MPU9250::calibrate(float *dest1, float *dest2){
     WriteReg(MPUREG_GYRO_CONFIG, 0x00);  // Set gyro full-scale to 250 degrees per second, maximum sensitivity
     WriteReg(MPUREG_ACCEL_CONFIG, 0x00); // Set accelerometer full-scale to 2 g, maximum sensitivity
 
-    uint16_t  gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
-    uint16_t  accelsensitivity = 16384;  // = 16384 LSB/g
+    usigned int  gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
+    usigned int  accelsensitivity = 16384;  // = 16384 LSB/g
 
       // Configure FIFO to capture accelerometer and gyro data for bias calculation
     WriteReg(MPUREG_USER_CTRL, 0x40);   // Enable FIFO
@@ -444,18 +451,18 @@ void MPU9250::calibrate(float *dest1, float *dest2){
     // At end of sample accumulation, turn off FIFO sensor read
     WriteReg(MPUREG_FIFO_EN, 0x00);        // Disable gyro and accelerometer sensors for FIFO
     ReadRegs(MPUREG_FIFO_COUNTH, data, 2); // read FIFO sample count
-    fifo_count = ((uint16_t)data[0] << 8) | data[1];
+    fifo_count = ((usigned int)data[0] << 8) | data[1];
     packet_count = fifo_count/12;// How many sets of full gyro and accelerometer data for averaging
 
     for (ii = 0; ii < packet_count; ii++) {
-        int16_t accel_temp[3] = {0, 0, 0}, gyro_temp[3] = {0, 0, 0};
+        signed int accel_temp[3] = {0, 0, 0}, gyro_temp[3] = {0, 0, 0};
         ReadRegs(MPUREG_FIFO_R_W, data, 12); // read data for averaging
-        accel_temp[0] = (int16_t) (((int16_t)data[0] << 8) | data[1]  ) ;  // Form signed 16-bit integer for each sample in FIFO
-        accel_temp[1] = (int16_t) (((int16_t)data[2] << 8) | data[3]  ) ;
-        accel_temp[2] = (int16_t) (((int16_t)data[4] << 8) | data[5]  ) ;
-        gyro_temp[0]  = (int16_t) (((int16_t)data[6] << 8) | data[7]  ) ;
-        gyro_temp[1]  = (int16_t) (((int16_t)data[8] << 8) | data[9]  ) ;
-        gyro_temp[2]  = (int16_t) (((int16_t)data[10] << 8) | data[11]) ;
+        accel_temp[0] = (signed int) (((signed int)data[0] << 8) | data[1]  ) ;  // Form signed 16-bit integer for each sample in FIFO
+        accel_temp[1] = (signed int) (((signed int)data[2] << 8) | data[3]  ) ;
+        accel_temp[2] = (signed int) (((signed int)data[4] << 8) | data[5]  ) ;
+        gyro_temp[0]  = (signed int) (((signed int)data[6] << 8) | data[7]  ) ;
+        gyro_temp[1]  = (signed int) (((signed int)data[8] << 8) | data[9]  ) ;
+        gyro_temp[2]  = (signed int) (((signed int)data[10] << 8) | data[11]) ;
 
         accel_bias[0] += (int32_t) accel_temp[0]; // Sum individual signed 16-bit biases to get accumulated signed 32-bit biases
         accel_bias[1] += (int32_t) accel_temp[1];
@@ -504,11 +511,11 @@ void MPU9250::calibrate(float *dest1, float *dest2){
 
     int32_t accel_bias_reg[3] = {0, 0, 0}; // A place to hold the factory accelerometer trim biases
     ReadRegs(MPUREG_XA_OFFSET_H, data, 2); // Read factory accelerometer trim values
-    accel_bias_reg[0] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
+    accel_bias_reg[0] = (int32_t) (((signed int)data[0] << 8) | data[1]);
     ReadRegs(MPUREG_YA_OFFSET_H, data, 2);
-    accel_bias_reg[1] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
+    accel_bias_reg[1] = (int32_t) (((signed int)data[0] << 8) | data[1]);
     ReadRegs(MPUREG_ZA_OFFSET_H, data, 2);
-    accel_bias_reg[2] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
+    accel_bias_reg[2] = (int32_t) (((signed int)data[0] << 8) | data[1]);
 
     uint32_t mask = 1uL; // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
     unsigned char mask_bit[3] = {0, 0, 0}; // Define array to hold mask bit for each accelerometer bias axis
