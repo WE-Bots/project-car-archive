@@ -10,7 +10,7 @@ void UARTInit()
     //9600 baud, 8-bit data, no parity, one stop bit, no interruts
     DisableIntU1RX;
     DisableIntU1TX;
-    OpenUART1(0x8000, 0xA400, 23);
+    OpenUART1(UART_EN & UART_NO_PAR_8BIT & UART_1STOPBIT, UART_TX_ENABLE, 23);
     
     return;
 }
