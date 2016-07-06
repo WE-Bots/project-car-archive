@@ -208,15 +208,18 @@
 
   
     // constructor. Default low pass filter of 188Hz
+/*******
+ * To be removed?
     MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ){
         my_clock = clock;
         my_cs = cs;
         my_low_pass_filter = low_pass_filter;
         my_low_pass_filter_acc = low_pass_filter_acc;
     }
+ */
     unsigned int WriteReg(unsigned char WriteAddr, unsigned char WriteData );
     unsigned int ReadReg(unsigned char WriteAddr, unsigned char WriteData );
-    void ReadRegs(uint8_t ReadAddr, uint8_t *ReadBuf, unsigned int Bytes );
+    void ReadRegs(unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
  
     bool init(bool calib_gyro = true, bool calib_acc = true);
     void read_temp();
@@ -229,8 +232,8 @@
     void select();
     void deselect();
     unsigned int whoami();
-    uint8_t AK8963_whoami();
-    uint8_t get_CNTL1();
+    unsigned char AK8963_whoami();
+    unsigned char get_CNTL1();
     void read_mag();
     void read_all();
     void calibrate(float *dest1, float *dest2);
@@ -246,14 +249,14 @@
     float temperature;
     float gyro_data[3];
     float mag_data[3];
-    int16_t mag_data_raw[3];    
+    unsigned short mag_data_raw[3];    
 
     float randomstuff[3];   // seemed to be an issue with memory being disturbed so allocated random memory space here
 
     long my_clock;
-    uint8_t my_cs;
-    uint8_t my_low_pass_filter;
-    uint8_t my_low_pass_filter_acc;
+    unsigned char my_cs;
+    unsigned char my_low_pass_filter;
+    unsigned char my_low_pass_filter_acc;
 
     //float randomstuffs[3];
 
