@@ -1,8 +1,20 @@
 #include "Init.h"
 #include <uart.h>
 #include <ecan.h>
+#include <timer.h>
 // for info on using the peripheral libraries look up
 // xc16/v1.22/docs/periph_libs/16-bit Peripheral Libraries.htm
+
+unsigned char o[2] = {'0', '\0'};
+char hex[3]={ '0', '0', '\0'};
+char tick=0;
+
+void __attribute__((__interrupt__)) _T1Interrupt(void)
+{
+    tick=1;
+    WriteTimer1(0);
+    IFS0bits.T1IF = 0;    /* Clear Timer interrupt flag */
+}
 
 int main(void)
 {
@@ -12,14 +24,17 @@ int main(void)
     CANTransmit(0, 0, 0);
      */
 
-    unsigned char o[2] = {'0', '\0'};
-    char hex[3]={ '0', '0', '\0'};
-
     TRISDbits.TRISD2 = 0;
-    UARTInit();
+    UART1Init();
+    Timer1Init();
     putsUART1((unsigned int *)"Start\n");
     while (1)
     {
+        if (tick)
+        {
+            tick=0;
+            putsUART1((unsigned int *)"tick\n");
+        }
         if (DataRdyUART1())
         {
             o[0] = ReadUART1();

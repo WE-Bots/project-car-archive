@@ -52,7 +52,8 @@ extern "C" {
 
 
     //Public functions
-    void UARTInit();
+    void UART1Init();
+    void Timer1Init();
 
 #ifdef	__cplusplus
 }
