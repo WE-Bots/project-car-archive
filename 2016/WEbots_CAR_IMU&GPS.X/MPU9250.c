@@ -560,19 +560,28 @@ void calibrate(float *dest1, float *dest2){
 void select() {
     //Set CS low to start transmission (interrupts conversion)
     SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
+    OpenSPI1(mpu.spi_Config1, mpu_spi_Config2);
+
+/*
+//This needs to be removed and replaced with the PIC equivalent
+// of digitalWrite
 #ifdef CORE_TEENSY
 
     digitalWriteFast(my_cs, LOW);
 #else
     digitalWrite(my_cs, LOW);
-#endif
+#endif*/
 }
 void deselect() {
     //Set CS high to stop transmission (restarts conversion)
+/*
+//This needs to be removed and replaced with the PIC equivalent
+// of digitalWrite
 #ifdef CORE_TEENSY
     digitalWriteFast(my_cs, HIGH);
 #else
     digitalWrite(my_cs, HIGH);
 #endif
+*/
     SPI.endTransaction();
 }
