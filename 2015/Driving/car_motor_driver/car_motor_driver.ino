@@ -1,7 +1,7 @@
 /*
 *	Author:		Kevin McLean
 *	Project:	Project C.A.R. Brain board
-*	Board:		MediaTek LinkIt™ ONE
+*	Board:		MediaTek LinkItï¿½ ONE
 *	Pinouts:	D9-Drive motor
 *				D3-Stearing servo
 *				Serial1(D0,D1)-Bluetooth
@@ -19,12 +19,12 @@
 */
 
 //uncomment for control type
-#define AUTONOMOUS
-//#define REMOTE_CONTROL
-//#define DEBUG
+//#define AUTONOMOUS
+#define REMOTE_CONTROL
+#define DEBUG
 
 //uncomment for active communications while debugging
-#define I2C
+//#define I2C
 //#define USB
 #define BLUETOOTH
 #define MOTORS
@@ -77,7 +77,7 @@ void setup()
 {
 	//Collision avoidance config
 	pinMode(2, INPUT);
-	attachInterrupt(0, pause, CHANGE);
+	//attachInterrupt(0, pause, CHANGE);
 	pinMode(4, INPUT);
 	pinMode(5, INPUT);
 
@@ -98,7 +98,7 @@ void setup()
 	pinMode(6, INPUT_PULLUP);
 	pinMode(7, OUTPUT);
 	pinMode(13, OUTPUT);
-	pinMode(12,OUTPUT);
+	pinMode(12, OUTPUT);
 
 	//start button selection
 	while (!race_mode)
@@ -226,8 +226,8 @@ void loop()
 #ifdef BLUETOOTH
 	if (Serial1.available() > 1)
 	{
-		base_speed = (Serial1.parseInt() / 5 - 2000);
-		if ((base_speed < -2000) || (base_speed>2000))
+		base_speed = (Serial1.parseInt() / 5 - 100);
+		if ((base_speed < -100) || (base_speed>100))
 		{
 			base_speed = 0;
 		}
@@ -236,9 +236,9 @@ void loop()
 		Serial1.print(",");
 		Serial1.print(battery_current);
 		Serial1.print(",");
-		Serial1.print(real_speed);
+		Serial1.print(base_speed);
 		Serial1.print(",");
-		Serial1.println(distance);
+		Serial1.println(steering_angle);
 		emergency_stop = false;
 		timer = millis();
 	}
@@ -255,6 +255,7 @@ void loop()
 #endif
 #endif
 
+#ifdef AUTONOMOUS
 	//collision avoidance steering
 	if (digitalRead(4))
 	{
@@ -266,7 +267,6 @@ void loop()
 	}
 
 	//communicate with the remote emergency stop app
-#ifdef AUTONOMOUS
 #ifdef BLUETOOTH
 	if (Serial1.available() > 0)
 	{
@@ -297,7 +297,7 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 + constrain((base_speed + speed_error)/25, -100, 100)); //add conversion for pulse period to servo control
+		motor.writeMicroseconds(1500 + constrain((base_speed), -100, 100)); //add conversion for pulse period to servo control
 		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif
