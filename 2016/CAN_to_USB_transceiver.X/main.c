@@ -17,6 +17,7 @@ int main(void)
 
     TRISDbits.TRISD2 = 0;
     UARTInit();
+    putsUART1((unsigned int *)"Start\n");
     while (1)
     {
         if (DataRdyUART1())
