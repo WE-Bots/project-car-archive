@@ -10,6 +10,7 @@
 #define MPU9250_h
 #include <p33EP256MU806.h>
 #include <spi.h>
+#include <stdlib.h>
 
 // #define AK8963FASTMODE
 

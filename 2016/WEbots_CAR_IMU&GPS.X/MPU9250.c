@@ -9,14 +9,16 @@
  */
 #include "MPU9250.h"
 
-void MPU9250(MPU9250 mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
-    mpu.my_clock = clock;
-    mpu.my_cs = cs;
-    mpu.my_low_pass_filter = low_pass_filter;
-    mpu.my_low_pass_filter_acc = low_pass_filter_acc;
+void *new_MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
+    MPU9250 *mpu = (MPU9250) malloc(sizeof(MPU9250));
+    mpu->my_clock = clock;
+    mpu->my_cs = cs;
+    mpu->my_low_pass_filter = low_pass_filter;
+    mpu->my_low_pass_filter_acc = low_pass_filter_acc;
+    return mpu;
 }
 
-unsigned int MPU9250::WriteReg( unsigned char WriteAddr, unsigned char WriteData )
+unsigned int WriteReg( unsigned char WriteAddr, unsigned char WriteData )
 {
     unsigned int temp_val;
 
@@ -555,10 +557,11 @@ void MPU9250::calibrate(float *dest1, float *dest2){
     dest2[2] = (float)accel_bias[2]/(float)accelsensitivity;
 }
 
-void MPU9250::select() {
+void select() {
     //Set CS low to start transmission (interrupts conversion)
     SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
 #ifdef CORE_TEENSY
+
     digitalWriteFast(my_cs, LOW);
 #else
     digitalWrite(my_cs, LOW);
