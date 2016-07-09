@@ -249,7 +249,12 @@ typedef struct MPU9250 {
 
   float g_bias[3];
   float a_bias[3];      // Bias corrections for gyro and accelerometer
+  
 };
+
+typedef int bool;
+#define true 1
+#define false 0
 
     // constructor. Default low pass filter of 188Hz
     void MPU9250(MPU9250 mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ);

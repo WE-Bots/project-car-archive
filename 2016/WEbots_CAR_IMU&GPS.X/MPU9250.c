@@ -64,7 +64,7 @@ void MPU9250::ReadRegs( unsigned char ReadAddr, unsigned char *ReadBuf, unsigned
 
 #define MPU_InitRegNum 17
 
-bool MPU9250::init(bool calib_gyro, bool calib_acc){
+bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
     pinMode(my_cs, OUTPUT);
 #ifdef CORE_TEENSY
     digitalWriteFast(my_cs, HIGH);
@@ -414,7 +414,7 @@ void read_all(){
 
 void calibrate(float *dest1, float *dest2){
     unsigned char data[12]; // data array to hold accelerometer and gyro x, y, z, data
-    usigned int ii, packet_count, fifo_count;
+    unsigned int ii, packet_count, fifo_count;
     signed long gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
 
     // reset device
@@ -522,7 +522,7 @@ void calibrate(float *dest1, float *dest2){
     unsigned long mask = 1uL; // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
     unsigned char mask_bit[3] = {0, 0, 0}; // Define array to hold mask bit for each accelerometer bias axis
 
-    for(ii = 0; ii < 3; ii++) {
+    for(int ii = 0; ii < 3; ii++) {
       if((accel_bias_reg[ii] & mask)) mask_bit[ii] = 0x01; // If temperature compensation bit is set, record that fact in mask_bit
     }
 
@@ -557,11 +557,11 @@ void calibrate(float *dest1, float *dest2){
     dest2[2] = (float)accel_bias[2]/(float)accelsensitivity;
 }
 
-void select() {
+void select(MPU9250 mpu) {
     //Set CS low to start transmission (interrupts conversion)
     SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
-    OpenSPI1(mpu.spi_Config1, mpu_spi_Config2);
-
+    OpenSPI1(mpu.spi_Config1, mpu.spi_Config2);
+    
 /*
 //This needs to be removed and replaced with the PIC equivalent
 // of digitalWrite
