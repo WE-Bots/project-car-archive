@@ -74,13 +74,13 @@ bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
     float temp[3];
 
     if(calib_gyro && calib_acc){
-        calibrate(g_bias, a_bias);
+        calibrate(mpu.g_bias, mpu.a_bias);
     }
     else if(calib_gyro){
-        calibrate(g_bias, temp);
+        calibrate(mpu.g_bias, temp);
     }
     else if(calib_acc){
-        calibrate(temp, a_bias);
+        calibrate(temp, mpu.a_bias);
     }
 
     unsigned char i = 0;
@@ -88,10 +88,10 @@ bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
         {BIT_H_RESET, MPUREG_PWR_MGMT_1},     // Reset Device
         {0x01, MPUREG_PWR_MGMT_1},     // Clock Source
         {0x00, MPUREG_PWR_MGMT_2},     // Enable Acc & Gyro
-        {my_low_pass_filter, MPUREG_CONFIG},         // Use DLPF set Gyroscope bandwidth 184Hz, temperature bandwidth 188Hz
+        {mpu.my_low_pass_filter, MPUREG_CONFIG},         // Use DLPF set Gyroscope bandwidth 184Hz, temperature bandwidth 188Hz
         {BITS_FS_250DPS, MPUREG_GYRO_CONFIG},    // +-250dps
         {BITS_FS_2G, MPUREG_ACCEL_CONFIG},   // +-2G
-        {my_low_pass_filter_acc, MPUREG_ACCEL_CONFIG_2}, // Set Acc Data Rates, Enable Acc LPF , Bandwidth 184Hz
+        {mpu.my_low_pass_filter_acc, MPUREG_ACCEL_CONFIG_2}, // Set Acc Data Rates, Enable Acc LPF , Bandwidth 184Hz
         {0x30, MPUREG_INT_PIN_CFG},    //
         //{0x40, MPUREG_I2C_MST_CTRL},   // I2C Speed 348 kHz
         //{0x20, MPUREG_USER_CTRL},      // Enable AUX
@@ -144,16 +144,16 @@ unsigned int set_acc_scale(MPU9250 mpu, int scale){
 
     switch (scale){
         case BITS_FS_2G:
-            acc_divider=16384;
+            mpu.acc_divider=16384;
         break;
         case BITS_FS_4G:
-            acc_divider=8192;
+            mpu.acc_divider=8192;
         break;
         case BITS_FS_8G:
-            acc_divider=4096;
+            mpu.acc_divider=4096;
         break;
         case BITS_FS_16G:
-            acc_divider=2048;
+            mpu.acc_divider=2048;
         break;
     }
     temp_scale = WriteReg(MPUREG_ACCEL_CONFIG|READ_FLAG, 0x00);
@@ -192,10 +192,10 @@ unsigned int set_gyro_scale(MPU9250 mpu, int scale){
     WriteReg(MPUREG_GYRO_CONFIG, scale);
 
     switch (scale){
-        case BITS_FS_250DPS:   gyro_divider = 131;  break;
-        case BITS_FS_500DPS:   gyro_divider = 65.5; break;
-        case BITS_FS_1000DPS:  gyro_divider = 32.8; break;
-        case BITS_FS_2000DPS:  gyro_divider = 16.4; break;
+        case BITS_FS_250DPS:   mpu.mpu.gyro_divider = 131;  break;
+        case BITS_FS_500DPS:   mpu.mpu.gyro_divider = 65.5; break;
+        case BITS_FS_1000DPS:  mpu.mpu.gyro_divider = 32.8; break;
+        case BITS_FS_2000DPS:  mpu.mpu.gyro_divider = 16.4; break;
     }
 
     temp_scale = WriteReg(MPUREG_GYRO_CONFIG|READ_FLAG, 0x00);
@@ -241,7 +241,7 @@ void read_acc(MPU9250 mpu)
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8)|response[i*2+1];
         data = (float)bit_data;
-        accel_data[i] = data/acc_divider - a_bias[i];
+        mpu.accel_data[i] = data/mpu.acc_divider - mpu.a_bias[i];
     }
 
 }
@@ -263,7 +263,7 @@ void read_gyro(MPU9250 mpu)
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        gyro_data[i] = data/gyro_divider - g_bias[i];
+        mpu.gyro_data[i] = data/(mpu.mpu.gyro_divider) - mpu.g_bias[i];
     }
 
 }
@@ -282,7 +282,7 @@ void read_temp(MPU9250 mpu){
 
     bit_data = ((signed int)response[0]<<8)|response[1];
     data = (float)bit_data;
-    temperature = (data/340)+36.53;
+    mpu.temperature = (data/340)+36.53;
     deselect();
 }
 
@@ -305,9 +305,9 @@ void calib_acc(MPU9250 mpu)
     //temp_scale=WriteReg(MPUREG_ACCEL_CONFIG, 0x80>>axis);
 
     ReadRegs(MPUREG_SELF_TEST_X,response,4);
-    calib_data[0] = ((response[0]&11100000)>>3) | ((response[3]&00110000)>>4);
-    calib_data[1] = ((response[1]&11100000)>>3) | ((response[3]&00001100)>>2);
-    calib_data[2] = ((response[2]&11100000)>>3) | ((response[3]&00000011));
+    mpu.calib_data[0] = ((response[0]&11100000)>>3) | ((response[3]&00110000)>>4);
+    mpu.calib_data[1] = ((response[1]&11100000)>>3) | ((response[3]&00001100)>>2);
+    mpu.calib_data[2] = ((response[2]&11100000)>>3) | ((response[3]&00000011));
 
     set_acc_scale(temp_scale);
 }
@@ -344,7 +344,7 @@ void calib_mag(MPU9250 mpu){
     //response=WriteReg(MPUREG_I2C_SLV0_DO, 0x00);    //Read I2C
     for(i = 0; i < 3; i++) {
         data=response[i];
-        Magnetometer_ASA[i] = ((data-128)/256+1)*Magnetometer_Sensitivity_Scale_Factor;
+        mpu.Magnetometer_ASA[i] = ((data-128)/256+1)*Magnetometer_Sensitivity_Scale_Factor;
     }
 }
 void read_mag(MPU9250 mpu){
@@ -360,9 +360,9 @@ void read_mag(MPU9250 mpu){
     ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
     //must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
     for(i = 0; i < 3; i++) {
-        mag_data_raw[i] = ((signed int)response[i*2+1]<<8)|response[i*2];
-        data = (float)mag_data_raw[i];
-        mag_data[i] = data*Magnetometer_ASA[i];
+        mpu.mag_data_raw[i] = ((signed int)response[i*2+1]<<8)|response[i*2];
+        data = (float) mpu.mag_data_raw[i];
+        mpu.mag_data[i] = data*(mpu.Magnetometer_ASA[i]);
     }
 }
 
@@ -392,23 +392,23 @@ void read_all(MPU9250 mpu){
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        accel_data[i] = data/acc_divider - a_bias[i];
+        mpu.accel_data[i] = data/mpu.acc_divider - mpu.a_bias[i];
     }
     //Get temperature
     bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
     data = (float)bit_data;
-    temperature = ((data-21)/333.87)+21;
+    mpu.temperature = ((data-21)/333.87)+21;
     //Get gyroscope value
     for(i=4; i < 7; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        gyro_data[i-4] = data/gyro_divider - g_bias[i-4];
+        mpu.gyro_data[i-4] = data/mpu.gyro_divider - mpu.g_bias[i-4];
     }
     //Get Magnetometer value
     for(i=7; i < 10; i++) {
-        mag_data_raw[i] = ((signed int)response[i*2+1]<<8) | response[i*2];
-        data = (float)mag_data_raw[i];
-        mag_data[i-7] = data * Magnetometer_ASA[i-7];
+        mpu.mag_data_raw[i] = ((signed int)response[i*2+1]<<8) | response[i*2];
+        data = (float) mpu.mag_data_raw[i];
+        mpu.mag_data[i-7] = data * mpu.Magnetometer_ASA[i-7];
     }
 }
 
@@ -453,7 +453,7 @@ void calibrate(MPU9250 mpu, float *dest1, float *dest2){
     // At end of sample accumulation, turn off FIFO sensor read
     WriteReg(MPUREG_FIFO_EN, 0x00);        // Disable gyro and accelerometer sensors for FIFO
     ReadRegs(MPUREG_FIFO_COUNTH, data, 2); // read FIFO sample count
-    fifo_count = ((usigned int)data[0] << 8) | data[1];
+    fifo_count = ((unsigned int)data[0] << 8) | data[1];
     packet_count = fifo_count/12;// How many sets of full gyro and accelerometer data for averaging
 
     for (ii = 0; ii < packet_count; ii++) {
@@ -561,7 +561,7 @@ void select(MPU9250 mpu) {
     //Set CS low to start transmission (interrupts conversion)
     SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
     OpenSPI1(mpu.spi_Config1, mpu.spi_Config2);
-    
+
 /*
 //This needs to be removed and replaced with the PIC equivalent
 // of digitalWrite
