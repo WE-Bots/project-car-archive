@@ -11,6 +11,7 @@
 #include <p33EP256MU806.h>
 #include <spi.h>
 #include <stdlib.h>
+#include <libpic30.h>
 
 // #define AK8963FASTMODE
 

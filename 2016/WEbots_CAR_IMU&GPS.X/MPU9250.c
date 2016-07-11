@@ -10,7 +10,7 @@
 #include "MPU9250.h"
 
 void *new_MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
-    MPU9250 *mpu = (MPU9250) malloc(sizeof(MPU9250));
+    MPU9250 *mpu = (MPU9250 *) malloc(sizeof(MPU9250));
     mpu->my_clock = clock;
     mpu->my_cs = cs;
     mpu->my_low_pass_filter = low_pass_filter;
@@ -18,7 +18,7 @@ void *new_MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = 
     return mpu;
 }
 
-unsigned int WriteReg(MPU9250 mpu, unsigned char WriteAddr, unsigned char WriteData )
+unsigned int WriteReg(MPU9250 mpu, unsigned char WriteAddr, unsigned int WriteData )
 {
     unsigned int temp_val;
 
@@ -118,7 +118,9 @@ bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
 
     for(i = 0; i < MPU_InitRegNum; i++) {
         WriteReg(MPU_Init_Data[i][1], MPU_Init_Data[i][0]);
-        delayMicroseconds(1000);  //I2C must slow down the write speed, otherwise it won't work
+        //delayMicroseconds(1000);  
+        //I2C must slow down the write speed, otherwise it won't work
+        __delay_us(1000);
     }
 
     set_acc_scale(BITS_FS_2G);
@@ -192,10 +194,10 @@ unsigned int set_gyro_scale(MPU9250 mpu, int scale){
     WriteReg(MPUREG_GYRO_CONFIG, scale);
 
     switch (scale){
-        case BITS_FS_250DPS:   mpu.mpu.gyro_divider = 131;  break;
-        case BITS_FS_500DPS:   mpu.mpu.gyro_divider = 65.5; break;
-        case BITS_FS_1000DPS:  mpu.mpu.gyro_divider = 32.8; break;
-        case BITS_FS_2000DPS:  mpu.mpu.gyro_divider = 16.4; break;
+        case BITS_FS_250DPS:   mpu.gyro_divider = 131;  break;
+        case BITS_FS_500DPS:   mpu.gyro_divider = 65.5; break;
+        case BITS_FS_1000DPS:  mpu.gyro_divider = 32.8; break;
+        case BITS_FS_2000DPS:  mpu.gyro_divider = 16.4; break;
     }
 
     temp_scale = WriteReg(MPUREG_GYRO_CONFIG|READ_FLAG, 0x00);
@@ -263,7 +265,7 @@ void read_gyro(MPU9250 mpu)
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        mpu.gyro_data[i] = data/(mpu.mpu.gyro_divider) - mpu.g_bias[i];
+        mpu.gyro_data[i] = data/(mpu.gyro_divider) - mpu.g_bias[i];
     }
 
 }
@@ -319,7 +321,8 @@ unsigned char AK8963_whoami(MPU9250 mpu){
     WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81); //Read 1 byte from the magnetometer
 
     //WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81);    //Enable I2C and set bytes
-    delayMicroseconds(100);
+    //delayMicroseconds(100);
+    __delay_ms(100);
     response = WriteReg(MPUREG_EXT_SENS_DATA_00|READ_FLAG, 0x00);    //Read I2C
     //ReadRegs(MPUREG_EXT_SENS_DATA_00,response,1);
     //response=WriteReg(MPUREG_I2C_SLV0_DO, 0x00);    //Read I2C
@@ -419,13 +422,15 @@ void calibrate(MPU9250 mpu, float *dest1, float *dest2){
 
     // reset device
     WriteReg(MPUREG_PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
-    delay(100);
+    //delay(100);
+    __delay_ms(100);
 
     // get stable time source; Auto select clock source to be PLL gyroscope reference if ready
     // else use the internal oscillator, bits 2:0 = 001
     WriteReg(MPUREG_PWR_MGMT_1, 0x01);
     WriteReg(MPUREG_PWR_MGMT_2, 0x00);
-    delay(200);
+    //delay(200);
+    __delay_ms(200);
 
     // Configure device for bias calculation
     WriteReg(MPUREG_INT_ENABLE, 0x00);   // Disable all interrupts
@@ -434,7 +439,8 @@ void calibrate(MPU9250 mpu, float *dest1, float *dest2){
     WriteReg(MPUREG_I2C_MST_CTRL, 0x00); // Disable I2C master
     WriteReg(MPUREG_USER_CTRL, 0x00);    // Disable FIFO and I2C master modes
     WriteReg(MPUREG_USER_CTRL, 0x0C);    // Reset FIFO and DMP
-    delay(15);
+    //delay(15);
+    __delay_ms(15);
 
     // Configure MPU6050 gyro and accelerometer for bias calculation
     WriteReg(MPUREG_CONFIG, 0x01);      // Set low-pass filter to 188 Hz
@@ -442,13 +448,15 @@ void calibrate(MPU9250 mpu, float *dest1, float *dest2){
     WriteReg(MPUREG_GYRO_CONFIG, 0x00);  // Set gyro full-scale to 250 degrees per second, maximum sensitivity
     WriteReg(MPUREG_ACCEL_CONFIG, 0x00); // Set accelerometer full-scale to 2 g, maximum sensitivity
 
-    unsigned int  mpu.gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
-    unsigned int  mpu.accelsensitivity = 16384;  // = 16384 LSB/g
+    unsigned int  gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
+    unsigned int  accelsensitivity = 16384;  // = 16384 LSB/g
 
       // Configure FIFO to capture accelerometer and gyro data for bias calculation
     WriteReg(MPUREG_USER_CTRL, 0x40);   // Enable FIFO
     WriteReg(MPUREG_FIFO_EN, 0x78);     // Enable gyro and accelerometer sensors for FIFO  (max size 512 bytes in MPU-9150)
-    delay(40); // accumulate 40 samples in 40 milliseconds = 480 bytes
+    // accumulate 40 samples in 40 milliseconds = 480 bytes
+    //delay(40); 
+    __delay_ms(40);
 
     // At end of sample accumulation, turn off FIFO sensor read
     WriteReg(MPUREG_FIFO_EN, 0x00);        // Disable gyro and accelerometer sensors for FIFO
@@ -559,8 +567,12 @@ void calibrate(MPU9250 mpu, float *dest1, float *dest2){
 
 void select(MPU9250 mpu) {
     //Set CS low to start transmission (interrupts conversion)
-    SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
+    //SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
     OpenSPI1(mpu.spi_Config1, mpu.spi_Config2);
+    
+    //Assuming my_cs from the original was a clock signal needing to be sent from
+    //one of the spi ports
+    WriteSPI1(mpu.my_cs);
 
 /*
 //This needs to be removed and replaced with the PIC equivalent
