@@ -9,7 +9,7 @@
  */
 #include "MPU9250.h"
 
-void *new_MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
+MPU9250* *new_MPU9250(long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
     MPU9250 *mpu = (MPU9250 *) malloc(sizeof(MPU9250));
     mpu->my_clock = clock;
     mpu->my_cs = cs;
@@ -140,22 +140,22 @@ bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
  * returns the range set (2,4,8 or 16)
  */
 
-unsigned int set_acc_scale(MPU9250 mpu, int scale){
+unsigned int set_acc_scale(MPU9250 *mpu, int scale){
     unsigned int temp_scale;
     WriteReg(MPUREG_ACCEL_CONFIG, scale);
 
     switch (scale){
         case BITS_FS_2G:
-            mpu.acc_divider=16384;
+            mpu->acc_divider=16384;
         break;
         case BITS_FS_4G:
-            mpu.acc_divider=8192;
+            mpu->acc_divider=8192;
         break;
         case BITS_FS_8G:
-            mpu.acc_divider=4096;
+            mpu->acc_divider=4096;
         break;
         case BITS_FS_16G:
-            mpu.acc_divider=2048;
+            mpu->acc_divider=2048;
         break;
     }
     temp_scale = WriteReg(MPUREG_ACCEL_CONFIG|READ_FLAG, 0x00);
@@ -189,15 +189,15 @@ unsigned int set_acc_scale(MPU9250 mpu, int scale){
  * returns the range set (250,500,1000 or 2000)
  */
 
-unsigned int set_gyro_scale(MPU9250 mpu, int scale){
+unsigned int set_gyro_scale(MPU9250* mpu, int scale){
     unsigned int temp_scale;
     WriteReg(MPUREG_GYRO_CONFIG, scale);
 
     switch (scale){
-        case BITS_FS_250DPS:   mpu.gyro_divider = 131;  break;
-        case BITS_FS_500DPS:   mpu.gyro_divider = 65.5; break;
-        case BITS_FS_1000DPS:  mpu.gyro_divider = 32.8; break;
-        case BITS_FS_2000DPS:  mpu.gyro_divider = 16.4; break;
+        case BITS_FS_250DPS:   mpu->gyro_divider = 131;  break;
+        case BITS_FS_500DPS:   mpu->gyro_divider = 65.5; break;
+        case BITS_FS_1000DPS:  mpu->gyro_divider = 32.8; break;
+        case BITS_FS_2000DPS:  mpu->gyro_divider = 16.4; break;
     }
 
     temp_scale = WriteReg(MPUREG_GYRO_CONFIG|READ_FLAG, 0x00);
@@ -218,7 +218,7 @@ unsigned int set_gyro_scale(MPU9250 mpu, int scale){
  * mpu9250 which should be 0x71
  */
 
-unsigned int whoami(MPU9250 mpu){
+unsigned int whoami(MPU9250* mpu){
     unsigned int response;
     response = WriteReg(MPUREG_WHOAMI|READ_FLAG, 0x00);
     return response;
@@ -233,7 +233,7 @@ unsigned int whoami(MPU9250 mpu){
  * 2 -> Z axis
  */
 
-void read_acc(MPU9250 mpu)
+void read_acc(MPU9250* mpu)
 {
     unsigned char response[6];
     signed int bit_data;
@@ -243,7 +243,7 @@ void read_acc(MPU9250 mpu)
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8)|response[i*2+1];
         data = (float)bit_data;
-        mpu.accel_data[i] = data/mpu.acc_divider - mpu.a_bias[i];
+        mpu->accel_data[i] = data/mpu->acc_divider - mpu->a_bias[i];
     }
 
 }
@@ -255,7 +255,7 @@ void read_acc(MPU9250 mpu)
  * 2 -> Z axis
  */
 
-void read_gyro(MPU9250 mpu)
+void read_gyro(MPU9250* mpu)
 {
     unsigned char response[6];
     signed int bit_data;
@@ -265,7 +265,7 @@ void read_gyro(MPU9250 mpu)
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        mpu.gyro_data[i] = data/(mpu.gyro_divider) - mpu.g_bias[i];
+        mpu->gyro_data[i] = data/(mpu->gyro_divider) - mpu->g_bias[i];
     }
 
 }
@@ -276,7 +276,7 @@ void read_gyro(MPU9250 mpu)
  * returns the value in °C
  */
 
-void read_temp(MPU9250 mpu){
+void read_temp(MPU9250* mpu){
     unsigned char response[2];
     signed int bit_data;
     float data;
@@ -284,7 +284,7 @@ void read_temp(MPU9250 mpu){
 
     bit_data = ((signed int)response[0]<<8)|response[1];
     data = (float)bit_data;
-    mpu.temperature = (data/340)+36.53;
+    mpu->temperature = (data/340)+36.53;
     deselect();
 }
 
@@ -296,7 +296,7 @@ void read_temp(MPU9250 mpu){
  * returns Factory Trim value
  */
 
-void calib_acc(MPU9250 mpu)
+void calib_acc(MPU9250* mpu)
 {
     unsigned char response[4];
     int temp_scale;
@@ -307,14 +307,14 @@ void calib_acc(MPU9250 mpu)
     //temp_scale=WriteReg(MPUREG_ACCEL_CONFIG, 0x80>>axis);
 
     ReadRegs(MPUREG_SELF_TEST_X,response,4);
-    mpu.calib_data[0] = ((response[0]&11100000)>>3) | ((response[3]&00110000)>>4);
-    mpu.calib_data[1] = ((response[1]&11100000)>>3) | ((response[3]&00001100)>>2);
-    mpu.calib_data[2] = ((response[2]&11100000)>>3) | ((response[3]&00000011));
+    mpu->calib_data[0] = ((response[0]&11100000)>>3) | ((response[3]&00110000)>>4);
+    mpu->calib_data[1] = ((response[1]&11100000)>>3) | ((response[3]&00001100)>>2);
+    mpu->calib_data[2] = ((response[2]&11100000)>>3) | ((response[3]&00000011));
 
     set_acc_scale(temp_scale);
 }
 
-unsigned char AK8963_whoami(MPU9250 mpu){
+unsigned char AK8963_whoami(MPU9250* mpu){
     unsigned char response;
     WriteReg(MPUREG_I2C_SLV0_ADDR,AK8963_I2C_ADDR|READ_FLAG); //Set the I2C slave addres of AK8963 and set for read.
     WriteReg(MPUREG_I2C_SLV0_REG, AK8963_WIA); //I2C slave 0 register address from where to begin data transfer
@@ -330,7 +330,7 @@ unsigned char AK8963_whoami(MPU9250 mpu){
     return response;
 }
 
-void calib_mag(MPU9250 mpu){
+void calib_mag(MPU9250* mpu){
     unsigned char response[3];
     float data;
     int i;
@@ -347,10 +347,10 @@ void calib_mag(MPU9250 mpu){
     //response=WriteReg(MPUREG_I2C_SLV0_DO, 0x00);    //Read I2C
     for(i = 0; i < 3; i++) {
         data=response[i];
-        mpu.Magnetometer_ASA[i] = ((data-128)/256+1)*Magnetometer_Sensitivity_Scale_Factor;
+        mpu->Magnetometer_ASA[i] = ((data-128)/256+1)*Magnetometer_Sensitivity_Scale_Factor;
     }
 }
-void read_mag(MPU9250 mpu){
+void read_mag(MPU9250* mpu){
     unsigned char response[7];
     float data;
     int i;
@@ -363,13 +363,13 @@ void read_mag(MPU9250 mpu){
     ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
     //must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
     for(i = 0; i < 3; i++) {
-        mpu.mag_data_raw[i] = ((signed int)response[i*2+1]<<8)|response[i*2];
-        data = (float) mpu.mag_data_raw[i];
-        mpu.mag_data[i] = data*(mpu.Magnetometer_ASA[i]);
+        mpu->mag_data_raw[i] = ((signed int)response[i*2+1]<<8)|response[i*2];
+        data = (float) mpu->mag_data_raw[i];
+        mpu->mag_data[i] = data*(mpu->Magnetometer_ASA[i]);
     }
 }
 
-unsigned char get_CNTL1(MPU9250 mpu){
+unsigned char get_CNTL1(MPU9250* mpu){
     WriteReg(MPUREG_I2C_SLV0_ADDR,AK8963_I2C_ADDR|READ_FLAG); //Set the I2C slave addres of AK8963 and set for read.
     WriteReg(MPUREG_I2C_SLV0_REG, AK8963_CNTL1); //I2C slave 0 register address from where to begin data transfer
     WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81); //Read 1 byte from the magnetometer
@@ -378,7 +378,7 @@ unsigned char get_CNTL1(MPU9250 mpu){
     return WriteReg(MPUREG_EXT_SENS_DATA_00|READ_FLAG, 0x00);    //Read I2C
 }
 
-void read_all(MPU9250 mpu){
+void read_all(MPU9250* mpu){
     unsigned char response[21];
     signed int bit_data;
     float data;
@@ -395,27 +395,27 @@ void read_all(MPU9250 mpu){
     for(i = 0; i < 3; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        mpu.accel_data[i] = data/mpu.acc_divider - mpu.a_bias[i];
+        mpu->accel_data[i] = data/mpu->acc_divider - mpu->a_bias[i];
     }
     //Get temperature
     bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
     data = (float)bit_data;
-    mpu.temperature = ((data-21)/333.87)+21;
+    mpu->temperature = ((data-21)/333.87)+21;
     //Get gyroscope value
     for(i=4; i < 7; i++) {
         bit_data = ((signed int)response[i*2]<<8) | response[i*2+1];
         data = (float)bit_data;
-        mpu.gyro_data[i-4] = data/mpu.gyro_divider - mpu.g_bias[i-4];
+        mpu->gyro_data[i-4] = data/mpu->gyro_divider - mpu->g_bias[i-4];
     }
     //Get Magnetometer value
     for(i=7; i < 10; i++) {
-        mpu.mag_data_raw[i] = ((signed int)response[i*2+1]<<8) | response[i*2];
-        data = (float) mpu.mag_data_raw[i];
-        mpu.mag_data[i-7] = data * mpu.Magnetometer_ASA[i-7];
+        mpu->mag_data_raw[i] = ((signed int)response[i*2+1]<<8) | response[i*2];
+        data = (float) mpu->mag_data_raw[i];
+        mpu->mag_data[i-7] = data * mpu->Magnetometer_ASA[i-7];
     }
 }
 
-void calibrate(MPU9250 mpu, float *dest1, float *dest2){
+void calibrate(MPU9250* mpu, float *dest1, float *dest2){
     unsigned char data[12]; // data array to hold accelerometer and gyro x, y, z, data
     unsigned int ii, packet_count, fifo_count;
     signed long gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
@@ -565,14 +565,14 @@ void calibrate(MPU9250 mpu, float *dest1, float *dest2){
     dest2[2] = (float)accel_bias[2]/(float)accelsensitivity;
 }
 
-void select(MPU9250 mpu) {
+void select(MPU9250* mpu) {
     //Set CS low to start transmission (interrupts conversion)
     //SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
-    OpenSPI1(mpu.spi_Config1, mpu.spi_Config2);
+    OpenSPI1(mpu->spi_Config1, mpu->spi_Config2);
     
     //Assuming my_cs from the original was a clock signal needing to be sent from
     //one of the spi ports
-    WriteSPI1(mpu.my_cs);
+    WriteSPI1(mpu->my_cs);
 
 /*
 //This needs to be removed and replaced with the PIC equivalent
@@ -584,7 +584,7 @@ void select(MPU9250 mpu) {
     digitalWrite(my_cs, LOW);
 #endif*/
 }
-void deselect(MPU9250 mpu) {
+void deselect(MPU9250* mpu) {
     //Set CS high to stop transmission (restarts conversion)
 /*
 //This needs to be removed and replaced with the PIC equivalent
