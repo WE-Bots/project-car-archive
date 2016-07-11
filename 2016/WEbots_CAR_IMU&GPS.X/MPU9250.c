@@ -18,7 +18,7 @@ MPU9250* *new_MPU9250(long clock, unsigned char cs, unsigned char low_pass_filte
     return mpu;
 }
 
-unsigned int WriteReg(MPU9250 mpu, unsigned char WriteAddr, unsigned int WriteData )
+unsigned int WriteReg(MPU9250* mpu, unsigned char WriteAddr, unsigned int WriteData )
 {
     unsigned int temp_val;
 
@@ -30,11 +30,11 @@ unsigned int WriteReg(MPU9250 mpu, unsigned char WriteAddr, unsigned int WriteDa
     //delayMicroseconds(50);
     return temp_val;
 }
-unsigned int ReadReg(MPU9250 mpu, unsigned char WriteAddr, unsigned char WriteData )
+unsigned int ReadReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData )
 {
     return WriteReg(WriteAddr | READ_FLAG,WriteData);
 }
-void ReadRegs(MPU9250 mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes )
+void ReadRegs(MPU9250* mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes )
 {
     unsigned int  i = 0;
 
@@ -64,7 +64,7 @@ void ReadRegs(MPU9250 mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsig
 
 #define MPU_InitRegNum 17
 
-bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
+bool init(MPU9250* mpu, bool calib_gyro, bool calib_acc){
     pinMode(my_cs, OUTPUT);
 #ifdef CORE_TEENSY
     digitalWriteFast(my_cs, HIGH);
@@ -74,13 +74,13 @@ bool init(MPU9250 mpu, bool calib_gyro, bool calib_acc){
     float temp[3];
 
     if(calib_gyro && calib_acc){
-        calibrate(mpu.g_bias, mpu.a_bias);
+        calibrate(mpu->g_bias, mpu->a_bias);
     }
     else if(calib_gyro){
-        calibrate(mpu.g_bias, temp);
+        calibrate(mpu->g_bias, temp);
     }
     else if(calib_acc){
-        calibrate(temp, mpu.a_bias);
+        calibrate(temp, mpu->a_bias);
     }
 
     unsigned char i = 0;

@@ -258,26 +258,26 @@ typedef int bool;
 #define false 0
 
     // constructor. Default low pass filter of 188Hz
-    void MPU9250(MPU9250 mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ);
-    unsigned int WriteReg(MPU9250 mpu, unsigned char WriteAddr, unsigned char WriteData );
-    unsigned int ReadReg(MPU9250 mpu, unsigned char WriteAddr, unsigned char WriteData );
-    void ReadRegs(MPU9250 mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
+    void MPU9250(MPU9250* mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ);
+    unsigned int WriteReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData );
+    unsigned int ReadReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData );
+    void ReadRegs(MPU9250* mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
 
-    bool init(MPU9250 mpu, bool calib_gyro = true, bool calib_acc = true);
-    void read_temp(MPU9250 mpu);
-    void read_acc(MPU9250 mpu);
-    void read_gyro(MPU9250 mpu);
-    unsigned int set_gyro_scale(MPU9250 mpu, int scale);
-    unsigned int set_acc_scale(MPU9250 mpu, int scale);
-    void calib_acc(MPU9250 mpu);
-    void calib_mag(MPU9250 mpu);
-    void select(MPU9250 mpu);
-    void deselect(MPU9250 mpu);
-    unsigned int whoami(MPU9250 mpu);
-    unsigned char AK8963_whoami(MPU9250 mpu);
-    unsigned char get_CNTL1(MPU9250 mpu);
-    void read_mag(MPU9250 mpu);
-    void read_all(MPU9250 mpu);
-    void calibrate(MPU9250 mpu, float *dest1, float *dest2);
+    bool init(MPU9250* mpu, bool calib_gyro = true, bool calib_acc = true);
+    void read_temp(MPU9250* mpu);
+    void read_acc(MPU9250* mpu);
+    void read_gyro(MPU9250* mpu);
+    unsigned int set_gyro_scale(MPU9250* mpu, int scale);
+    unsigned int set_acc_scale(MPU9250* mpu, int scale);
+    void calib_acc(MPU9250* mpu);
+    void calib_mag(MPU9250* mpu);
+    void select(MPU9250* mpu);
+    void deselect(MPU9250* mpu);
+    unsigned int whoami(MPU9250* mpu);
+    unsigned char AK8963_whoami(MPU9250* mpu);
+    unsigned char get_CNTL1(MPU9250* mpu);
+    void read_mag(MPU9250* mpu);
+    void read_all(MPU9250* mpu);
+    void calibrate(MPU9250* mpu, float *dest1, float *dest2);
 
 #endif
