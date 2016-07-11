@@ -27,7 +27,7 @@ unsigned int WriteReg(MPU9250* mpu, unsigned char WriteAddr, unsigned int WriteD
     temp_val=SPI.transfer(WriteData);
     deselect();
 
-    //delayMicroseconds(50);
+    __delay_ms(50);
     return temp_val;
 }
 unsigned int ReadReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData )
@@ -44,7 +44,7 @@ void ReadRegs(MPU9250* mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsi
         ReadBuf[i] = SPI.transfer(0x00);
     deselect();
 
-    //delayMicroseconds(50);
+    __delay_ms(50);
 }
 
 
@@ -118,7 +118,6 @@ bool init(MPU9250* mpu, bool calib_gyro, bool calib_acc){
 
     for(i = 0; i < MPU_InitRegNum; i++) {
         WriteReg(MPU_Init_Data[i][1], MPU_Init_Data[i][0]);
-        //delayMicroseconds(1000);  
         //I2C must slow down the write speed, otherwise it won't work
         __delay_us(1000);
     }
@@ -321,7 +320,6 @@ unsigned char AK8963_whoami(MPU9250* mpu){
     WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81); //Read 1 byte from the magnetometer
 
     //WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81);    //Enable I2C and set bytes
-    //delayMicroseconds(100);
     __delay_ms(100);
     response = WriteReg(MPUREG_EXT_SENS_DATA_00|READ_FLAG, 0x00);    //Read I2C
     //ReadRegs(MPUREG_EXT_SENS_DATA_00,response,1);
@@ -340,7 +338,7 @@ void calib_mag(MPU9250* mpu){
     WriteReg(MPUREG_I2C_SLV0_CTRL, 0x83); //Read 3 bytes from the magnetometer
 
     //WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81);    //Enable I2C and set bytes
-    //delayMicroseconds(1000);
+    __delay_ms(1000);
     //response[0]=WriteReg(MPUREG_EXT_SENS_DATA_01|READ_FLAG, 0x00);    //Read I2C
     ReadRegs(MPUREG_EXT_SENS_DATA_00,response,3);
 
@@ -359,7 +357,7 @@ void read_mag(MPU9250* mpu){
     WriteReg(MPUREG_I2C_SLV0_REG, AK8963_HXL); //I2C slave 0 register address from where to begin data transfer
     WriteReg(MPUREG_I2C_SLV0_CTRL, 0x87); //Read 6 bytes from the magnetometer
 
-    //delayMicroseconds(1000);
+    __delay_ms(1000);
     ReadRegs(MPUREG_EXT_SENS_DATA_00,response,7);
     //must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
     for(i = 0; i < 3; i++) {
@@ -374,7 +372,7 @@ unsigned char get_CNTL1(MPU9250* mpu){
     WriteReg(MPUREG_I2C_SLV0_REG, AK8963_CNTL1); //I2C slave 0 register address from where to begin data transfer
     WriteReg(MPUREG_I2C_SLV0_CTRL, 0x81); //Read 1 byte from the magnetometer
 
-    // delayMicroseconds(1000);
+    __delay_ms(1000);
     return WriteReg(MPUREG_EXT_SENS_DATA_00|READ_FLAG, 0x00);    //Read I2C
 }
 
@@ -455,7 +453,7 @@ void calibrate(MPU9250* mpu, float *dest1, float *dest2){
     WriteReg(MPUREG_USER_CTRL, 0x40);   // Enable FIFO
     WriteReg(MPUREG_FIFO_EN, 0x78);     // Enable gyro and accelerometer sensors for FIFO  (max size 512 bytes in MPU-9150)
     // accumulate 40 samples in 40 milliseconds = 480 bytes
-    //delay(40); 
+    //delay(40);
     __delay_ms(40);
 
     // At end of sample accumulation, turn off FIFO sensor read
@@ -569,7 +567,7 @@ void select(MPU9250* mpu) {
     //Set CS low to start transmission (interrupts conversion)
     //SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
     OpenSPI1(mpu->spi_Config1, mpu->spi_Config2);
-    
+
     //Assuming my_cs from the original was a clock signal needing to be sent from
     //one of the spi ports
     WriteSPI1(mpu->my_cs);
