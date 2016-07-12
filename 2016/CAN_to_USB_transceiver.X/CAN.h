@@ -16,10 +16,10 @@ extern "C" {
 #endif
 #include <p33Exxxx.h>
 
-#define NUM_OF_ECAN_BUFFERS 16
-    //This is the ECAN message buffer declaration. Note the buffer alignment.
-    unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8];
-    //__attribute__((aligned(NUM_OF_ECAN_BUFFERS * 16)));
+#define NUM_OF_ECAN_BUFFERS 16  //only used for memory allocation
+
+    //This is the ECAN message buffer declaration.
+    extern unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8];
 
     //Public functions
     void CAN1Init();

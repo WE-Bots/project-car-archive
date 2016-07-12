@@ -1,5 +1,9 @@
 #include "CAN.h"
 
+//This is the ECAN message buffer declaration. Note the buffer alignment and the start address.
+unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
+__attribute__((address(0x7000),aligned(NUM_OF_ECAN_BUFFERS * 16)));
+
 void CAN1Init()
 {
     //remap IO for CAN module
@@ -92,9 +96,8 @@ void CAN1Init()
     DMA0REQ = 0b01000110;
     DMA0CNT = 7;
     DMA0PAD = (volatile unsigned int) &C1TXD;
-    unsigned long address=0;//unsigned long)ecan1MsgBuffer;
-    DMA0STAL = (unsigned int) address;
-    DMA0STAH = (unsigned int) (address >> 8);
+    DMA0STAL = (unsigned int) ecan1MsgBuffer;
+    DMA0STAH = 0;
     DMA0CONbits.CHEN = 1;
     IEC0bits.DMA0IE = 1;
     DMA1CONbits.SIZE = 0;
@@ -104,8 +107,8 @@ void CAN1Init()
     DMA1REQ = 0b00100010;
     DMA1CNT = 7;
     DMA1PAD = (volatile unsigned int) &C1RXD;
-    DMA1STAL = (unsigned int) address;
-    DMA1STAH = (unsigned int) (address >> 8);
+    DMA1STAL = (unsigned int) ecan1MsgBuffer;
+    DMA1STAH = 0;
     DMA1CONbits.CHEN = 1;
     IEC0bits.DMA1IE = 1;
     /*Setup Tx buffer*/
