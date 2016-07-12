@@ -50,7 +50,6 @@ extern "C" {
 #pragma config APL = OFF                // Auxiliary Segment Code-protect bit (Aux Flash Code protect is disabled)
 #pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled)
 
-
     //Public functions
     void UART1Init();
     void Timer1Init();

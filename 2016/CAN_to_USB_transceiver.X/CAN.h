@@ -16,16 +16,16 @@ extern "C" {
 #endif
 #include <p33Exxxx.h>
 
-#define NUM_OF_ECAN_BUFFERS 32
+#define NUM_OF_ECAN_BUFFERS 16
     //This is the ECAN message buffer declaration. Note the buffer alignment.
-    unsigned int ecan1MsgBuf[NUM_OF_ECAN_BUFFERS][8]
-    __attribute__((aligned(NUM_OF_ECAN_BUFFERS * 16)));
+    unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8];
+    //__attribute__((aligned(NUM_OF_ECAN_BUFFERS * 16)));
 
     //Public functions
-    void CANInit();
-    int CANIsTransmitComplete();
-    void CANTransmit(unsigned int SID, unsigned int length, unsigned int* data);
-    void CANTransmitRemote(unsigned int SID);
+    void CAN1Init();
+    int CAN1IsTransmitComplete();
+    void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data);
+    void CAN1TransmitRemote(unsigned int SID);
 
 
 

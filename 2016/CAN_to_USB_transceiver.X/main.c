@@ -1,20 +1,30 @@
+/*
+ * File:   main.c
+ * Author: Kevin McLean
+ *
+ * Description: Main program for the CAN to USB tranciever for the 2016 CAR for WE Bots.
+ */
+
 #include "Init.h"
 #include <uart.h>
-#include <ecan.h>
+#include "CAN.h"
 #include <timer.h>
-// for info on using the peripheral libraries look up
-// xc16/v1.22/docs/periph_libs/16-bit Peripheral Libraries.htm
+/* for info on using the peripheral libraries look up
+ * xc16/v1.22/docs/periph_libs/16-bit Peripheral Libraries.htm
+ * in the xc16 compiler install files
+ */
 
 unsigned char o[2] = {'0', '\0'};
-char hex[3]={ '0', '0', '\0'};
-char tick=0;
+char hex[3] = {'0', '0', '\0'};
+char tick = 0;
 
-void __attribute__((__interrupt__)) _T1Interrupt(void)
-{
-    tick=1;
-    WriteTimer1(0);
-    IFS0bits.T1IF = 0;    /* Clear Timer interrupt flag */
-}
+/*Timer1 ISR*/
+//void __attribute__((__interrupt__)) _T1Interrupt(void)
+//{
+//    tick = 1;
+//    WriteTimer1(0);
+//    IFS0bits.T1IF = 0; /* Clear Timer interrupt flag */
+//}
 
 int main(void)
 {
@@ -27,13 +37,13 @@ int main(void)
     TRISDbits.TRISD2 = 0;
     UART1Init();
     Timer1Init();
-    putsUART1((unsigned int *)"Start\n");
+    putsUART1((unsigned int *) "Start\n");
     while (1)
     {
         if (tick)
         {
-            tick=0;
-            putsUART1((unsigned int *)"tick\n");
+            tick = 0;
+            putsUART1((unsigned int *) "tick\n");
         }
         if (DataRdyUART1())
         {
@@ -58,7 +68,7 @@ int main(void)
                     putsUART1((unsigned int *) "Unknown: ");
                     putsUART1((unsigned int *) o);
                     putsUART1((unsigned int *) "\n");
-                    sprintf (hex, "%x", o[0]);
+                    //sprintf(hex, "%x", o[0]);
                     putsUART1((unsigned int *) "0x");
                     putsUART1((unsigned int *) hex);
                     putsUART1((unsigned int *) "\n");
