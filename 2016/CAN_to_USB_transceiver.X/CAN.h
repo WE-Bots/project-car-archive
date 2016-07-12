@@ -25,7 +25,7 @@ extern "C" {
     void CAN1Init();
     int CAN1IsTransmitComplete();
     void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data);
-    void CAN1TransmitRemote(unsigned int SID);
+    void CAN1TransmitRemote(unsigned int SID, unsigned int length);
 
 
 

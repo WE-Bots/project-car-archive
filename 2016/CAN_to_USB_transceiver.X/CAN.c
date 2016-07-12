@@ -2,7 +2,7 @@
 
 //This is the ECAN message buffer declaration. Note the buffer alignment and the start address.
 unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
-__attribute__((address(0x7000),aligned(NUM_OF_ECAN_BUFFERS * 16)));
+__attribute__((address(0x7000), aligned(NUM_OF_ECAN_BUFFERS * 16)));
 
 void CAN1Init()
 {
@@ -129,12 +129,17 @@ int CAN1IsTransmitComplete()
 
 void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
 {
+    /*check the length is within range*/
+    if (length > 8 || !CAN1IsTransmitComplete())
+    {
+        return;
+    }
     /* Write to message buffer 0 */
     /* CiTRBnSID = 0bxxx1 0010 0011 1100
     IDE = 0b0
     SRR = 0b0
     SID<10:0>= 0b100 1000 1111 */
-    //ecan1MsgBuffer[0][0] = (SID&0x07ff)<<2
+    //    ecan1MsgBuffer[0][0] = ((SID & 0x07ff) << 2) & 0xFFFC;
     ecan1MsgBuffer[0][0] = 0x123C;
     /* CiTRBnEID = 0bxxxx 0000 0000 0000
     EID<17:6> = 0b0000 0000 0000 */
@@ -145,13 +150,13 @@ void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
     RB1 = 0b0
     RB0 = 0b0
     DLC = 0b1111 */
-    //ecan1MsgBuffer[0][2] = length&0x0008
+    //    ecan1MsgBuffer[0][2] = (length - 1) & 0x000F;
     ecan1MsgBuffer[0][2] = 0x0008;
     /* Write message data bytes */
-    /*for (int i = 0; i < (length+1)/2; i)
-    {
-        ecan1MsgBuffer[0][i+3] = data[i];
-    }*/
+    //    for (int i = 0; i < length / 2; i++)
+    //    {
+    //        ecan1MsgBuffer[0][i + 3] = data[i];
+    //    }
     ecan1MsgBuffer[0][3] = 0xabcd;
     ecan1MsgBuffer[0][4] = 0xabcd;
     ecan1MsgBuffer[0][5] = 0xabcd;
@@ -160,25 +165,31 @@ void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
     C1TR01CONbits.TXREQ0 = 0x1;
 }
 
-void CAN1TransmitRemote(unsigned int SID)
+void CAN1TransmitRemote(unsigned int SID, unsigned int length)
 {
+    /*check the length is within range*/
+    if (length > 8)
+    {
+        length = 8;
+    }
     /* Write to message buffer 0 */
     /* CiTRBnSID = 0bxxx1 0010 0011 1100
     IDE = 0b0
-    SRR = 0b0
+    SRR = 0b1
     SID<10:0>= 0b100 1000 1111 */
-    //ecan1MsgBuffer[0][0] = (SID&0x07ff)<<2;
-    ecan1MsgBuffer[0][0] = 0x123C;
+    //    ecan1MsgBuffer[0][0] = ((SID & 0x07ff) << 2) | 0x2 & 0xFFFE;
+    ecan1MsgBuffer[0][0] = 0x123E;
     /* CiTRBnEID = 0bxxxx 0000 0000 0000
     EID<17:6> = 0b0000 0000 0000 */
     ecan1MsgBuffer[0][1] = 0x0000;
-    /* CiTRBnDLC = 0b0000 0000 xxx0 1111
+    /* CiTRBnDLC = 0b0000 0000 xxx0 0000
     EID<17:6> = 0b000000
-    RTR = 0b1
+    RTR = 0b0
     RB1 = 0b0
     RB0 = 0b0
     DLC = 0b0000 */
-    ecan1MsgBuffer[0][2] = 0x0200;
+    //    ecan1MsgBuffer[0][2] = length & 0x000F;
+    ecan1MsgBuffer[0][2] = 0x0000;
     /* Request message buffer 0 transmission */
     C1TR01CONbits.TXREQ0 = 0x1;
 }

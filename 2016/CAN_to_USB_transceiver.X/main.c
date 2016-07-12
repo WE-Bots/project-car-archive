@@ -19,12 +19,12 @@ char hex[3] = {'0', '0', '\0'};
 char tick = 0;
 
 /*Timer1 ISR*/
-//void __attribute__((__interrupt__)) _T1Interrupt(void)
-//{
-//    tick = 1;
-//    WriteTimer1(0);
-//    IFS0bits.T1IF = 0; /* Clear Timer interrupt flag */
-//}
+void __attribute__((__interrupt__)) _T1Interrupt(void)
+{
+    tick = 1;
+    WriteTimer1(0);
+    IFS0bits.T1IF = 0; /* Clear Timer interrupt flag */
+}
 
 int main(void)
 {
