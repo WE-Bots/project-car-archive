@@ -24,10 +24,12 @@ extern "C" {
     //Public functions
     void CAN1Init();
     int CAN1IsTransmitComplete();
-    void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data);
-    void CAN1TransmitRemote(unsigned int SID, unsigned int length);
+    int CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data);
+    int CAN1TransmitRemote(unsigned int SID, unsigned int length);
+    void CAN1EmptyReceiveBuffer();
 
-
+    //ISRs
+    void __attribute__((__interrupt__)) _DMA1Interrupt(void);
 
 #ifdef	__cplusplus
 }

@@ -1,8 +1,19 @@
 #include "CAN.h"
+#include <uart.h>
 
 //This is the ECAN message buffer declaration. Note the buffer alignment and the start address.
 unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
 __attribute__((address(0x7000), aligned(NUM_OF_ECAN_BUFFERS * 16)));
+
+volatile unsigned int CANRecieveCount=0;
+
+/*DMA Channel 1 ISR*/
+void __attribute__((__interrupt__)) _DMA1Interrupt(void)
+{
+    //init uart transfer
+    CANRecieveCount++;
+    IFS0bits.DMA1IF = 0; /* Clear interrupt flag */
+}
 
 void CAN1Init()
 {
@@ -99,7 +110,6 @@ void CAN1Init()
     DMA0STAL = (unsigned int) ecan1MsgBuffer;
     DMA0STAH = 0;
     DMA0CONbits.CHEN = 1;
-    IEC0bits.DMA0IE = 1;
     DMA1CONbits.SIZE = 0;
     DMA1CONbits.DIR = 0;
     DMA1CONbits.AMODE = 2;
@@ -110,12 +120,17 @@ void CAN1Init()
     DMA1STAL = (unsigned int) ecan1MsgBuffer;
     DMA1STAH = 0;
     DMA1CONbits.CHEN = 1;
-    IEC0bits.DMA1IE = 1;
+    
     /*Setup Tx buffer*/
     C1CTRL1bits.WIN = 0;
     C1TR01CONbits.TXEN0 = 1; //Set beffure 0 to Tx
     C1TR01CONbits.RTREN0 = 0; //No auto remote transmit
     C1TR01CONbits.TX0PRI = 3; //Set priority to highest
+
+    /*Initialize the interrupts*/
+    IEC0bits.DMA0IE = 0;
+    IEC0bits.DMA1IE = 1;
+
 
     /*Put module in normal mode*/
     C1CTRL1bits.REQOP = 0;
@@ -127,12 +142,12 @@ int CAN1IsTransmitComplete()
     return (C1TR01CONbits.TXREQ0 != 1);
 }
 
-void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
+int CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
 {
-    /*check the length is within range*/
+    /*check the length is within range and if the buffer is free*/
     if (length > 8 || !CAN1IsTransmitComplete())
     {
-        return;
+        return 0;
     }
     /* Write to message buffer 0 */
     /* CiTRBnSID = 0bxxx1 0010 0011 1100
@@ -163,10 +178,16 @@ void CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
     ecan1MsgBuffer[0][6] = 0xabcd;
     /* Request message buffer 0 transmission */
     C1TR01CONbits.TXREQ0 = 0x1;
+    return 1;
 }
 
-void CAN1TransmitRemote(unsigned int SID, unsigned int length)
+int CAN1TransmitRemote(unsigned int SID, unsigned int length)
 {
+    /*check if the buffer is free*/
+    if (!CAN1IsTransmitComplete())
+    {
+        return 0;
+    }
     /*check the length is within range*/
     if (length > 8)
     {
@@ -192,4 +213,25 @@ void CAN1TransmitRemote(unsigned int SID, unsigned int length)
     ecan1MsgBuffer[0][2] = 0x0000;
     /* Request message buffer 0 transmission */
     C1TR01CONbits.TXREQ0 = 0x1;
+    return 1;
+}
+
+void CAN1EmptyReveiveBuffer()
+{
+    while(CANRecieveCount--)
+    {
+        unsigned char str[13];
+        if (C1RXFUL1bits.RXFUL1)
+        {
+            str[0]='<';
+            str[1]=(ecan1MsgBuffer[1][0] & 0x1FFC)>>2;
+            str[2]=(ecan1MsgBuffer[1][0] & 0x1FFC)>>10;
+            str[3]=ecan1MsgBuffer[1][3];
+            str[4]=ecan1MsgBuffer[1][3]>>8;
+            str[5]='>';
+            str[6]='\0';
+            C1RXFUL1bits.RXFUL1=0;
+            putsUART1((unsigned int *)str);
+        }
+    }
 }
