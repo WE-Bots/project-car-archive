@@ -16,7 +16,7 @@
 
 unsigned char o[2] = {'0', '\0'};
 char hex[3] = {'0', '0', '\0'};
-char tick = 0;
+volatile char tick = 0;
 
 /*Timer1 ISR*/
 void __attribute__((__interrupt__)) _T1Interrupt(void)
@@ -34,12 +34,14 @@ int main(void)
     CANTransmit(0, 0, 0);
      */
 
-    TRISDbits.TRISD2 = 0;
+    //TRISDbits.TRISD2 = 0;
     UART1Init();
     Timer1Init();
+    CAN1Init();
     putsUART1((unsigned int *) "Start\n");
     while (1)
     {
+        CAN1CheckReceiveBuffer();
         if (tick)
         {
             tick = 0;
@@ -51,17 +53,17 @@ int main(void)
             switch (o[0])
             {
                 case '1':
-                    if (!BusyUART1())
+                    //if (!BusyUART1())
                     {
                         putsUART1((unsigned int *) "1\n");
-                        LATDbits.LATD2 = 1;
+                        //LATDbits.LATD2 = 1;
                     }
                     break;
                 case '0':
-                    if (!BusyUART1())
+                    //if (!BusyUART1())
                     {
                         putsUART1((unsigned int *) "0\n");
-                        LATDbits.LATD2 = 0;
+                        //LATDbits.LATD2 = 0;
                     }
                     break;
                 default:

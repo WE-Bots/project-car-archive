@@ -26,7 +26,8 @@ extern "C" {
     int CAN1IsTransmitComplete();
     int CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data);
     int CAN1TransmitRemote(unsigned int SID, unsigned int length);
-    void CAN1EmptyReceiveBuffer();
+    void CAN1EmptyReceiveBuffer(int index);
+    void CAN1CheckReceiveBuffer();
 
     //ISRs
     void __attribute__((__interrupt__)) _DMA1Interrupt(void);

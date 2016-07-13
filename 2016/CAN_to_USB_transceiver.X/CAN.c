@@ -22,13 +22,13 @@
 unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
 __attribute__((address(0x7000), aligned(NUM_OF_ECAN_BUFFERS * 16)));
 
-volatile unsigned int CANRecieveCount=0;
+volatile unsigned int CANReceiveCount = 0;
 
 /*DMA Channel 1 ISR*/
 void __attribute__((__interrupt__)) _DMA1Interrupt(void)
 {
     //init uart transfer
-    CANRecieveCount++;
+    CANReceiveCount++;
     IFS0bits.DMA1IF = 0; /* Clear interrupt flag */
 }
 
@@ -37,6 +37,8 @@ void CAN1Init()
     //remap IO for CAN module
     RPINR26bits.C1RXR = 0b1000011;
     RPOR1bits.RP66R = 0b001110;
+    TRISDbits.TRISD1=0;
+    LATDbits.LATD1=1;   //put tranceiver in standby mode
 
     //put module in configuration mode
     C1CTRL1bits.REQOP = 4;
@@ -60,21 +62,21 @@ void CAN1Init()
     /*Set acceptance filter mask 0 to use all filter bits*/
     C1RXM0SIDbits.SID = 0x7FF;
     /*Set acceptance filters to match SIDs*/
-    C1RXF1SIDbits.SID = 1;
-    C1RXF2SIDbits.SID = 2;
-    C1RXF3SIDbits.SID = 3;
-    C1RXF4SIDbits.SID = 4;
-    C1RXF5SIDbits.SID = 5;
-    C1RXF6SIDbits.SID = 6;
-    C1RXF7SIDbits.SID = 7;
-    C1RXF8SIDbits.SID = 8;
-    C1RXF9SIDbits.SID = 9;
-    C1RXF10SIDbits.SID = 10;
-    C1RXF11SIDbits.SID = 11;
-    C1RXF12SIDbits.SID = 12;
-    C1RXF13SIDbits.SID = 13;
-    C1RXF14SIDbits.SID = 14;
-    C1RXF15SIDbits.SID = 15;
+    C1RXF1SIDbits.SID = CANMSG_ESTOP;
+    C1RXF2SIDbits.SID = CANMSG_COLLEMERG;
+    C1RXF3SIDbits.SID = CANMSG_BRNOUTWARN;
+    C1RXF4SIDbits.SID = CANMSG_TEMPWARN;
+    C1RXF5SIDbits.SID = CANMSG_WHEELSPD;
+    C1RXF6SIDbits.SID = CANMSG_WHEELANG;
+    C1RXF7SIDbits.SID = CANMSG_ODOMETRY;
+    C1RXF8SIDbits.SID = CANMSG_OBSDIST;
+    C1RXF9SIDbits.SID = CANMSG_DESTRAJ;
+    C1RXF10SIDbits.SID = CANMSG_BATTWARN;
+    C1RXF11SIDbits.SID = CANMSG_NAVRPY;
+    C1RXF12SIDbits.SID = CANMSG_NAVLONLAT;
+    C1RXF13SIDbits.SID = 0x07FF; //unused
+    C1RXF14SIDbits.SID = 0x07FF; //unused
+    C1RXF15SIDbits.SID = 0x07FF; //unused
     /*Set filters to check for for standard frames*/
     C1RXM0SIDbits.MIDE = 1;
     C1RXF1SIDbits.EXIDE = 0;
@@ -108,8 +110,8 @@ void CAN1Init()
     C1BUFPNT4bits.F13BP = 13;
     C1BUFPNT4bits.F14BP = 14;
     C1BUFPNT4bits.F15BP = 15;
-    /*Enable the filters*/
-    C1FEN1 = 0xFFFE;
+    /*Enable the first 12 filters*/
+    C1FEN1 = 0x1FFE;
     /*Use 16 DMA buffers*/
     C1FCTRLbits.DMABS = 4;
     /*No FIFO buffers*/
@@ -137,7 +139,7 @@ void CAN1Init()
     DMA1STAL = (unsigned int) ecan1MsgBuffer;
     DMA1STAH = 0;
     DMA1CONbits.CHEN = 1;
-    
+
     /*Setup Tx buffer*/
     C1CTRL1bits.WIN = 0;
     C1TR01CONbits.TXEN0 = 1; //Set beffure 0 to Tx
@@ -152,6 +154,7 @@ void CAN1Init()
     /*Put module in normal mode*/
     C1CTRL1bits.REQOP = 0;
     while (C1CTRL1bits.OPMODE != 0);
+    LATDbits.LATD1=0;   //put tranceiver in normal mode
 }
 
 int CAN1IsTransmitComplete()
@@ -171,8 +174,8 @@ int CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
     IDE = 0b0
     SRR = 0b0
     SID<10:0>= 0b100 1000 1111 */
-    //    ecan1MsgBuffer[0][0] = ((SID & 0x07ff) << 2) & 0xFFFC;
-    ecan1MsgBuffer[0][0] = 0x123C;
+    ecan1MsgBuffer[0][0] = ((SID & 0x07FF) << 2) & 0xFFFC;
+    //ecan1MsgBuffer[0][0] = 0x123C;
     /* CiTRBnEID = 0bxxxx 0000 0000 0000
     EID<17:6> = 0b0000 0000 0000 */
     ecan1MsgBuffer[0][1] = 0x0000;
@@ -182,17 +185,18 @@ int CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
     RB1 = 0b0
     RB0 = 0b0
     DLC = 0b1111 */
-    //    ecan1MsgBuffer[0][2] = (length - 1) & 0x000F;
-    ecan1MsgBuffer[0][2] = 0x0008;
+    ecan1MsgBuffer[0][2] = (length) & 0x000F;
+    //ecan1MsgBuffer[0][2] = 0x0008;
     /* Write message data bytes */
-    //    for (int i = 0; i < length / 2; i++)
-    //    {
-    //        ecan1MsgBuffer[0][i + 3] = data[i];
-    //    }
-    ecan1MsgBuffer[0][3] = 0xabcd;
-    ecan1MsgBuffer[0][4] = 0xabcd;
-    ecan1MsgBuffer[0][5] = 0xabcd;
-    ecan1MsgBuffer[0][6] = 0xabcd;
+    int i;
+    for (i = 0; i <= (length - 1) / 2; i++)
+    {
+        ecan1MsgBuffer[0][i + 3] = data[i];
+    }
+    //    ecan1MsgBuffer[0][3] = 0xabcd;
+    //    ecan1MsgBuffer[0][4] = 0xabcd;
+    //    ecan1MsgBuffer[0][5] = 0xabcd;
+    //    ecan1MsgBuffer[0][6] = 0xabcd;
     /* Request message buffer 0 transmission */
     C1TR01CONbits.TXREQ0 = 0x1;
     return 1;
@@ -233,22 +237,107 @@ int CAN1TransmitRemote(unsigned int SID, unsigned int length)
     return 1;
 }
 
-void CAN1EmptyReveiveBuffer()
+void CAN1EmptyReveiveBuffer(int index)
 {
-    while(CANRecieveCount--)
+    unsigned char str[13];
+    if (index > 0 && index < 16)
     {
-        unsigned char str[13];
+        str[0] = '<';
+        str[1] = (ecan1MsgBuffer[index][0] & 0x1FFC) >> 2;
+        str[2] = (ecan1MsgBuffer[index][0] & 0x1FFC) >> 10;
+        int i;
+        for (i = 0; i < (ecan1MsgBuffer[index][2] & 0x000F); i++)
+        {
+            if (i & 1)
+                str[3 + i] = ecan1MsgBuffer[index][3 + i / 2] >> 8;
+            else
+                str[3 + i] = ecan1MsgBuffer[index][3 + i / 2];
+        }
+        str[3 + i] = '>';
+        str[4 + i] = '\0';
+        putsUART1((unsigned int *) str);
+    }
+}
+
+void CAN1CheckReceiveBuffer()
+{
+    while (CANReceiveCount)
+    {
+        CANReceiveCount--;
         if (C1RXFUL1bits.RXFUL1)
         {
-            str[0]='<';
-            str[1]=(ecan1MsgBuffer[1][0] & 0x1FFC)>>2;
-            str[2]=(ecan1MsgBuffer[1][0] & 0x1FFC)>>10;
-            str[3]=ecan1MsgBuffer[1][3];
-            str[4]=ecan1MsgBuffer[1][3]>>8;
-            str[5]='>';
-            str[6]='\0';
-            C1RXFUL1bits.RXFUL1=0;
-            putsUART1((unsigned int *)str);
+            CAN1EmptyReveiveBuffer(1);
+            C1RXFUL1bits.RXFUL1 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL2)
+        {
+            CAN1EmptyReveiveBuffer(2);
+            C1RXFUL1bits.RXFUL2 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL3)
+        {
+            CAN1EmptyReveiveBuffer(3);
+            C1RXFUL1bits.RXFUL3 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL4)
+        {
+            CAN1EmptyReveiveBuffer(4);
+            C1RXFUL1bits.RXFUL4 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL5)
+        {
+            CAN1EmptyReveiveBuffer(5);
+            C1RXFUL1bits.RXFUL5 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL6)
+        {
+            CAN1EmptyReveiveBuffer(6);
+            C1RXFUL1bits.RXFUL6 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL7)
+        {
+            CAN1EmptyReveiveBuffer(7);
+            C1RXFUL1bits.RXFUL7 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL8)
+        {
+            CAN1EmptyReveiveBuffer(8);
+            C1RXFUL1bits.RXFUL8 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL9)
+        {
+            CAN1EmptyReveiveBuffer(9);
+            C1RXFUL1bits.RXFUL9 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL10)
+        {
+            CAN1EmptyReveiveBuffer(10);
+            C1RXFUL1bits.RXFUL10 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL11)
+        {
+            CAN1EmptyReveiveBuffer(11);
+            C1RXFUL1bits.RXFUL11 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL12)
+        {
+            CAN1EmptyReveiveBuffer(12);
+            C1RXFUL1bits.RXFUL12 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL13)
+        {
+            CAN1EmptyReveiveBuffer(13);
+            C1RXFUL1bits.RXFUL13 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL14)
+        {
+            CAN1EmptyReveiveBuffer(14);
+            C1RXFUL1bits.RXFUL14 = 0;
+        }
+        else if (C1RXFUL1bits.RXFUL15)
+        {
+            CAN1EmptyReveiveBuffer(5);
+            C1RXFUL1bits.RXFUL15 = 0;
         }
     }
 }
