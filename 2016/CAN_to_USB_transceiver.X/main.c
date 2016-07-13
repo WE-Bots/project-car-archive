@@ -56,6 +56,8 @@ int main(void)
                     //if (!BusyUART1())
                     {
                         putsUART1((unsigned int *) "1\n");
+                        o[0]='a';
+                        CAN1Transmit(CANMSG_ESTOP,1,(unsigned int *)o);
                         //LATDbits.LATD2 = 1;
                     }
                     break;

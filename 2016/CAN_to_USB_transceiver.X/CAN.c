@@ -1,22 +1,5 @@
 #include "CAN.h"
 #include <uart.h>
-#include "CAN_Msg_Priorities.h"
-
-#define CANMSG_ESTOP            CLB_PRTY01 // E-Stop sent received over Bluetooth at Motor board
-#define CANMSG_COLLEMERG        CLB_PRTY02 // Immenent Collision detected on Collision Avoidance board
-#define CANMSG_BRNOUTWARN       CLB_PRTY03 // Main power brown-out warning from Power board
-#define CANMSG_TEMPWARN         CLB_PRTY04 // Over temp warning from Power board
-
-#define CANMSG_WHEELSPD         CLC_PRTY01 // Wheel speeds reported by Motors board
-#define CANMSG_WHEELANG         CLC_PRTY02 // Wheel (steering) angle reported by Motors board
-#define CANMSG_ODOMETRY         CLC_PRTY03 // Odometry reported by Motors board
-#define CANMSG_OBSDIST          CLC_PRTY04 // Distance to in path obstacles reported by Collision Avoidance board
-#define CANMSG_DESTRAJ          CLC_PRTY05 // Desired Wheel-Angle and Wheel-Speed reported by Jetson
-
-#define CANMSG_BATTWARN         CLD_PRTY01 // Low battery warning reported by power board
-#define CANMSG_NAVRPY           CLD_PRTY02 // Roll-Pitch-Yaw navigation data reported by IMU/GPS board
-#define CANMSG_NAVLONLAT        CLD_PRTY03 // Longitude-Latitude navigation data reported by IMU/GPS board
-
 
 //This is the ECAN message buffer declaration. Note the buffer alignment and the start address.
 unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
@@ -152,8 +135,8 @@ void CAN1Init()
 
 
     /*Put module in normal mode*/
-    C1CTRL1bits.REQOP = 0;
-    while (C1CTRL1bits.OPMODE != 0);
+    C1CTRL1bits.REQOP = 2;
+    while (C1CTRL1bits.OPMODE != 2);
     LATDbits.LATD1=0;   //put tranceiver in normal mode
 }
 
@@ -243,15 +226,15 @@ void CAN1EmptyReveiveBuffer(int index)
     if (index > 0 && index < 16)
     {
         str[0] = '<';
-        str[1] = (ecan1MsgBuffer[index][0] & 0x1FFC) >> 2;
-        str[2] = (ecan1MsgBuffer[index][0] & 0x1FFC) >> 10;
+        str[1] = (unsigned char)((ecan1MsgBuffer[index][0] & 0x1FFC) >> 2);
+        str[2] = (unsigned char)((ecan1MsgBuffer[index][0] & 0x1FFC) >> 10);
         int i;
         for (i = 0; i < (ecan1MsgBuffer[index][2] & 0x000F); i++)
         {
             if (i & 1)
-                str[3 + i] = ecan1MsgBuffer[index][3 + i / 2] >> 8;
+                str[3 + i] = (unsigned char)(ecan1MsgBuffer[index][3 + i / 2] >> 8);
             else
-                str[3 + i] = ecan1MsgBuffer[index][3 + i / 2];
+                str[3 + i] = (unsigned char)ecan1MsgBuffer[index][3 + i / 2];
         }
         str[3 + i] = '>';
         str[4 + i] = '\0';
