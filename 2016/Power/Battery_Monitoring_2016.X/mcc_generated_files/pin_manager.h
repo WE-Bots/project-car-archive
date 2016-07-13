@@ -656,11 +656,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Set RA4 high (1)
-    IO_RA4_NC_SetHigh();
+    currentMeasEN_SetHigh();
     </code>
 
  */
-#define IO_RA4_NC_SetHigh()          _LATA4 = 1
+#define currentMeasEN_SetHigh()          _LATA4 = 1
 /**
   @Summary
     Sets the GPIO pin, RA4, low using LATA4.
@@ -680,11 +680,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Set RA4 low (0)
-    IO_RA4_NC_SetLow();
+    currentMeasEN_SetLow();
     </code>
 
  */
-#define IO_RA4_NC_SetLow()           _LATA4 = 0
+#define currentMeasEN_SetLow()           _LATA4 = 0
 /**
   @Summary
     Toggles the GPIO pin, RA4, using LATA4.
@@ -704,11 +704,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Toggle RA4
-    IO_RA4_NC_SetToggle();
+    currentMeasEN_SetToggle();
     </code>
 
  */
-#define IO_RA4_NC_Toggle()           _LATA4 ^= 1
+#define currentMeasEN_Toggle()           _LATA4 ^= 1
 /**
   @Summary
     Reads the value of the GPIO pin, RA4.
@@ -730,11 +730,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     uint16_t portValue;
 
     // Read RA4
-    postValue = IO_RA4_NC_GetValue();
+    postValue = currentMeasEN_GetValue();
     </code>
 
  */
-#define IO_RA4_NC_GetValue()         _RA4
+#define currentMeasEN_GetValue()         _RA4
 /**
   @Summary
     Configures the GPIO pin, RA4, as an input.
@@ -754,11 +754,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Sets the RA4 as an input
-    IO_RA4_NC_SetDigitalInput();
+    currentMeasEN_SetDigitalInput();
     </code>
 
  */
-#define IO_RA4_NC_SetDigitalInput()  _TRISA4 = 1
+#define currentMeasEN_SetDigitalInput()  _TRISA4 = 1
 /**
   @Summary
     Configures the GPIO pin, RA4, as an output.
@@ -778,11 +778,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Sets the RA4 as an output
-    IO_RA4_NC_SetDigitalOutput();
+    currentMeasEN_SetDigitalOutput();
     </code>
 
  */
-#define IO_RA4_NC_SetDigitalOutput() _TRISA4 = 0
+#define currentMeasEN_SetDigitalOutput() _TRISA4 = 0
 /**
   @Summary
     Sets the GPIO pin, RA7, high using LATA7.

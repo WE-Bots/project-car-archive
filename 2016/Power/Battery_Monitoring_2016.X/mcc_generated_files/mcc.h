@@ -56,7 +56,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "debug_LED.h"
 #include "tmr5.h"
 
-#define _XTAL_FREQ  31000
+#define _XTAL_FREQ  500000
 
 /**
  * @Param

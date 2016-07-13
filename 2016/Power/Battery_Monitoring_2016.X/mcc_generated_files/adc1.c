@@ -80,9 +80,9 @@ static ADC_OBJECT adc1_obj;
 
 
 void ADC1_Initialize(void) {
-    // ADSIDL disabled; ASAM disabled; FORM Absolute decimal result, unsigned, right-justified; MODE12 enabled; ADON enabled; DONE disabled; SAMP disabled; SSRC Clearing sample bit ends sampling and starts conversion; 
+    // ADSIDL disabled; ASAM disabled; FORM Absolute decimal result, unsigned, right-justified; MODE12 enabled; ADON disabled; DONE disabled; SAMP disabled; SSRC Clearing sample bit ends sampling and starts conversion; 
 
-    AD1CON1 = 0x8400;
+    AD1CON1 = 0x0400;
 
     // OFFCAL disabled; ALTS disabled; PVCFG AVDD; BUFM disabled; BUFREGEN disabled; SMPI 1; CSCNA disabled; NVCFG AVSS; 
 

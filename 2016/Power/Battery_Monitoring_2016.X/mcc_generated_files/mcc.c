@@ -57,7 +57,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // FOSCSEL
 #pragma config LPRCSEL = LP    // LPRC Oscillator Power and Accuracy->Low Power, Low Accuracy Mode
 #pragma config IESO = OFF    // Internal External Switch Over bit->Internal External Switchover mode disabled (Two-speed Start-up disabled)
-#pragma config FNOSC = LPRC    // Oscillator Select->Low Power RC oscillator (LPRC)
+#pragma config FNOSC = LPFRC    // Oscillator Select->500kHz Low-Power FRC oscillator with Postscaler(LPFRCDIV)
 #pragma config SOSCSRC = DIG    // SOSC Source Type->Digital Mode for use with external source
 
 // FOSC
@@ -103,8 +103,8 @@ void SYSTEM_Initialize(void) {
 }
 
 void OSCILLATOR_Initialize(void) {
-    // DOZEN disabled; DOZE 1:8; RCDIV FRC/2; ROI disabled; 
-    CLKDIV = 0x3100;
+    // DOZEN disabled; DOZE 1:8; RCDIV FRC/1; ROI disabled; 
+    CLKDIV = 0x3000;
     // Set the secondary oscillator
 
 }

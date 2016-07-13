@@ -61,18 +61,17 @@ int main(void)
     
     // On circuitry disabling and holding itself on 
     // Wait for the power to stabalize 
-    __delay_ms(500);
+    __delay_ms(300);
     // Turn on power connect to the first cell 
     cell1PowerEn_SetHigh();
     // Disable the ON circuitry 
     disableOnCircuit_SetHigh();    
-    
-    Set_Debug_Message(DEBUG_LED_MESSAGE_3);
-    
+           
+    char i = 0;
     while (1) 
     {
-        UART1_Write('A');
-        __delay_ms(100);
+        UART1_Write(i++);
+        __delay_ms(300);
     }
 
     return -1;

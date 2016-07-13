@@ -90,8 +90,8 @@ void TMR5_Initialize(void) {
     T5CON = 0x8000;
     //TMR5 0; 
     TMR5 = 0x0000;
-    //Period Value = 100.000 ms; PR5 1550; 
-    PR5 = 0x060E;
+    //Period Value = 100.000 ms; PR5 25000; 
+    PR5 = 0x61A8;
 
     IFS1bits.T5IF = false;
     IEC1bits.T5IE = true;
@@ -113,7 +113,7 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt() {
     //***User Area Begin
     static volatile unsigned int CountCallBack = 0;
 
-    // callback function - called every 3th pass
+    // callback function - called every 2th pass
     if (++CountCallBack >= TMR5_INTERRUPT_TICKER_FACTOR) {
         // ticker function call
         TMR5_CallBack();
@@ -180,7 +180,7 @@ uint16_t DRV_TMR5_Counter16BitGet(void) {
 }
 
 void TMR5_CallBack(void) {
-    // Add your custom callback code here
+    // Add your custom callback code heres
     Debug_Message_Update();
 }
 

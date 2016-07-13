@@ -62,7 +62,7 @@ extern "C"
 
 #endif
 
-#define TMR5_INTERRUPT_TICKER_FACTOR    3
+#define TMR5_INTERRUPT_TICKER_FACTOR    2
 
     /**
       Section: Interface Routines

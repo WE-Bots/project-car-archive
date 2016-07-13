@@ -142,7 +142,7 @@ void UART1_Initialize(void) {
     U1TXREG = 0x0000;
     // U1RXREG 0x0000; 
     U1RXREG = 0x0000;
-    // Baud Rate = 9600; BRG 51; 
+    // Baud Rate = 1200; BRG 51; 
     U1BRG = 0x0033;
 
     IEC0bits.U1RXIE = 1;
