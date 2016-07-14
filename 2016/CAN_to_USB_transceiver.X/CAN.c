@@ -229,7 +229,7 @@ int CAN1TransmitRemote(unsigned int SID, unsigned int length)
 
 void CAN1EmptyReveiveBuffer(int index)
 {
-    char str[12];
+    char str[13];
     if (index > 0 && index < 16)
     {
         str[0] = '<';
@@ -243,7 +243,13 @@ void CAN1EmptyReveiveBuffer(int index)
             else
                 str[3 + i] = (char) ecan1MsgBuffer[index][3 + i / 2];
         }
-        str[3 + i] = '>';
+        /*Calculate checksum*/
+        int j;
+        for (j=0;j<i+2;j++)
+        {
+            str[3+i]=str[j+1];
+        }
+        str[4 + i] = '>';
         UART1WriteStr(str,i+4);
     }
 }

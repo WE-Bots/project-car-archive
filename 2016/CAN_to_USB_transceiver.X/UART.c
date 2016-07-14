@@ -6,6 +6,7 @@
  */
 
 #include "UART.h"
+#include "CAN.h"
 
 /*UART1 ISRs*/
 void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
@@ -98,4 +99,54 @@ void UART1DisableInterrupts()
 {
     IEC0bits.U1RXIE = 1;
     IEC0bits.U1TXIE = 1;
+}
+
+void UART1CheckReceiveBuffer()
+{
+    static char buffer [6]; //4 byte data, 1 byte checksum, 1 byte buffer to store frame close char
+    static int bufferIndex=0;
+    static int started=0;
+
+    while (UART1ReadReady())
+    {
+        buffer[bufferIndex]=UART1Read();
+        /*Check for start of frame*/
+        if (buffer[bufferIndex]=='<')
+        {
+            started=1;
+            bufferIndex=0;
+            continue;
+        }
+        /*Read data*/
+        if (started)
+        {
+            /*Check for end of frame*/
+            if (bufferIndex==5 && buffer[5]=='>')
+            {
+                /*Check checksum*/
+                if(buffer[0]+buffer[1]+buffer[2]+buffer[3]!=buffer[4])
+                {
+                    started=0;
+                    continue;
+                }
+                /*Transmit over CAN*/
+                while(!CAN1IsTransmitComplete())
+                {}
+                CAN1Transmit(CANMSG_DESTRAJ, 4, (unsigned int*) buffer);
+                started=0;
+                continue;
+            }
+            /*check for frame error*/
+            else if (bufferIndex==5 || buffer[bufferIndex]=='>')
+            {
+                started=0;
+                continue;
+            }
+            /*Must be valid data*/
+            else
+            {
+                bufferIndex++;
+            }
+        }
+    }
 }

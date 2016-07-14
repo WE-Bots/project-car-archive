@@ -8,9 +8,6 @@
 #include "UART.h"
 #include "CAN.h"
 
-char o[2] = {'0', '\0'};
-char hex[3] = {'0', '0', '\0'};
-
 int main(void)
 {
     UART1Init(9600);
@@ -19,31 +16,7 @@ int main(void)
     while (1)
     {
         CAN1CheckReceiveBuffer();
-
-        if (UART1ReadReady())
-        {
-            o[0] = UART1Read();
-            switch (o[0])
-            {
-                case '1':
-                    UART1WriteStrNT("1\n");
-                    o[0] = 'a';
-                    CAN1Transmit(CANMSG_ESTOP, 1, (unsigned int *) o);
-                    break;
-                case '0':
-                    UART1WriteStrNT("0\n");
-                    break;
-                default:
-                    UART1WriteStrNT("Unknown: ");
-                    UART1WriteStrNT(o);
-                    UART1WriteStrNT("\n");
-                    //sprintf(hex, "%x", o[0]);
-                    UART1WriteStrNT("0x");
-                    UART1WriteStrNT(hex);
-                    UART1WriteStrNT("\n");
-                    break;
-            }
-        }
+        UART1CheckReceiveBuffer();
     }
     return 0;
 }

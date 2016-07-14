@@ -27,6 +27,8 @@ extern "C" {
     void UART1EnableInterrupts();
     void UART1DisableInterrupts();
 
+    void UART1CheckReceiveBuffer();
+
     /*UART1 ISRs*/
     void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void);
     void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void);
