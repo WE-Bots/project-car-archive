@@ -1,5 +1,9 @@
-#include "Init.h"
-#include <timer.h>
+/*
+ * File:   Config.c
+ * Author: Kevin
+ *
+ * Created on July 14, 2016, 1:07 PM
+ */
 
 // Configuration bits
     // FGS
@@ -38,12 +42,3 @@
 #pragma config AWRP = OFF               // Auxiliary Segment Write-protect bit (Aux Flash may be written)
 #pragma config APL = OFF                // Auxiliary Segment Code-protect bit (Aux Flash Code protect is disabled)
 #pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled)
-
-void Timer1Init()
-{
-    //Enable Timer1 Interrupt and set priority to "1"
-    EnableIntT1;
-    SetPriorityIntT1(1);
-    WriteTimer1(0);
-    OpenTimer1(0x8020, 0xFFFF); //about 1 second period
-}

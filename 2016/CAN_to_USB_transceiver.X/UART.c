@@ -26,17 +26,17 @@ void UART1Init(unsigned int baud)
 
     //UART configuration
     //8-bit data, no parity, one stop bit, no interruts
-    U1MODE = 0;
-    U1STA = 0xA400;
     U1BRG = (unsigned int) (230312.5 / baud - 0.5);
     IEC0bits.U1RXIE = 1;
     IEC0bits.U1TXIE = 1;
-    U1MODEbits.UARTEN = 1;
+    U1MODE = 0x8000;
+    U1STA = 0xA400;
 }
 
 void UART1Enable()
 {
     U1MODEbits.UARTEN = 1;
+    U1STAbits.UTXEN=1;
 }
 
 void UART1Disable()
@@ -61,7 +61,7 @@ void UART1Write(unsigned int data)
 
 unsigned int UART1WriteReady()
 {
-    return U1STAbits.UTXBF;
+    return !U1STAbits.UTXBF;
 }
 
 void UART1WriteStr(char * data, unsigned int length)
@@ -84,7 +84,7 @@ void UART1WriteStrNT(char * data)
         while (!UART1WriteReady())
         {
         }
-        UART1Write((unsigned int) data[i]);
+        UART1Write((unsigned int) data[i++]);
     }
 }
 
