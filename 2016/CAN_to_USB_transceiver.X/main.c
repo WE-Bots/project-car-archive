@@ -6,7 +6,7 @@
  */
 
 #include "Init.h"
-#include <uart.h>
+#include "UART.h"
 #include "CAN.h"
 #include <timer.h>
 /* for info on using the peripheral libraries look up
@@ -14,12 +14,12 @@
  * in the xc16 compiler install files
  */
 
-unsigned char o[2] = {'0', '\0'};
+char o[2] = {'0', '\0'};
 char hex[3] = {'0', '0', '\0'};
 volatile char tick = 0;
 
 /*Timer1 ISR*/
-void __attribute__((__interrupt__)) _T1Interrupt(void)
+void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
 {
     tick = 1;
     WriteTimer1(0);
@@ -28,54 +28,39 @@ void __attribute__((__interrupt__)) _T1Interrupt(void)
 
 int main(void)
 {
-    /*
-    CANInit();
-    while (CANIsTransmitComplete());
-    CANTransmit(0, 0, 0);
-     */
-
-    //TRISDbits.TRISD2 = 0;
-    UART1Init();
+    UART1Init(9600);
     Timer1Init();
     CAN1Init();
-    putsUART1((unsigned int *) "Start\n");
+    UART1WriteStrNT("Start\n");
     while (1)
     {
         CAN1CheckReceiveBuffer();
         if (tick)
         {
             tick = 0;
-            putsUART1((unsigned int *) "tick\n");
+            UART1WriteStrNT("tick\n");
         }
-        if (DataRdyUART1())
+        if (UART1ReadReady())
         {
-            o[0] = ReadUART1();
+            o[0] = UART1Read();
             switch (o[0])
             {
                 case '1':
-                    //if (!BusyUART1())
-                {
-                    putsUART1((unsigned int *) "1\n");
+                    UART1WriteStrNT("1\n");
                     o[0] = 'a';
                     CAN1Transmit(CANMSG_ESTOP, 1, (unsigned int *) o);
-                    //LATDbits.LATD2 = 1;
-                }
                     break;
                 case '0':
-                    //if (!BusyUART1())
-                {
-                    putsUART1((unsigned int *) "0\n");
-                    //LATDbits.LATD2 = 0;
-                }
+                    UART1WriteStrNT("0\n");
                     break;
                 default:
-                    putsUART1((unsigned int *) "Unknown: ");
-                    putsUART1((unsigned int *) o);
-                    putsUART1((unsigned int *) "\n");
+                    UART1WriteStrNT("Unknown: ");
+                    UART1WriteStrNT(o);
+                    UART1WriteStrNT("\n");
                     //sprintf(hex, "%x", o[0]);
-                    putsUART1((unsigned int *) "0x");
-                    putsUART1((unsigned int *) hex);
-                    putsUART1((unsigned int *) "\n");
+                    UART1WriteStrNT("0x");
+                    UART1WriteStrNT(hex);
+                    UART1WriteStrNT("\n");
                     break;
             }
         }

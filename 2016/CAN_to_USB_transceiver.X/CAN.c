@@ -1,5 +1,12 @@
+/*
+ * File:   CAN.c
+ * Author: Kevin
+ *
+ * Created on May 15, 2016, 12:37 PM
+ */
+
 #include "CAN.h"
-#include <uart.h>
+#include "UART.h"
 
 //This is the ECAN message buffer declaration. Note the buffer alignment and the start address.
 unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
@@ -222,23 +229,22 @@ int CAN1TransmitRemote(unsigned int SID, unsigned int length)
 
 void CAN1EmptyReveiveBuffer(int index)
 {
-    unsigned char str[13];
+    char str[12];
     if (index > 0 && index < 16)
     {
         str[0] = '<';
-        str[1] = (unsigned char) ((ecan1MsgBuffer[index][0] & 0x1FFC) >> 2);
-        str[2] = (unsigned char) ((ecan1MsgBuffer[index][0] & 0x1FFC) >> 10);
+        str[1] = (char) ((ecan1MsgBuffer[index][0] & 0x1FFC) >> 2);
+        str[2] = (char) ((ecan1MsgBuffer[index][0] & 0x1FFC) >> 10);
         int i;
         for (i = 0; i < (ecan1MsgBuffer[index][2] & 0x000F); i++)
         {
             if (i & 1)
-                str[3 + i] = (unsigned char) (ecan1MsgBuffer[index][3 + i / 2] >> 8);
+                str[3 + i] = (char) (ecan1MsgBuffer[index][3 + i / 2] >> 8);
             else
-                str[3 + i] = (unsigned char) ecan1MsgBuffer[index][3 + i / 2];
+                str[3 + i] = (char) ecan1MsgBuffer[index][3 + i / 2];
         }
         str[3 + i] = '>';
-        str[4 + i] = '\0';
-        putsUART1((unsigned int *) str);
+        UART1WriteStr(str,i+4);
     }
 }
 

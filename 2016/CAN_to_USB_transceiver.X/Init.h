@@ -53,7 +53,6 @@ extern "C" {
 #pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled)
 
     //Public functions
-    void UART1Init();
     void Timer1Init();
 
 #ifdef	__cplusplus
