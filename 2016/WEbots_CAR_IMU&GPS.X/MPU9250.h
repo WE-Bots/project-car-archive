@@ -237,8 +237,6 @@ typedef int bool;
 #define true 1
 #define false 0
 
-    // constructor. Default low pass filter of 188Hz
-    void MPU9250(MPU9250* mpu, long clock, unsigned char cs, unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ);
     unsigned int WriteReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData );
     unsigned int ReadReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData );
     void ReadRegs(MPU9250* mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
