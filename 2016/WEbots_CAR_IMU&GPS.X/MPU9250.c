@@ -26,10 +26,11 @@ unsigned int WriteReg(signed int WriteData)
     PORTBbits.RB7 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
     SPI1BUF = WriteData;    //Write data to SPI which will be sent to MPU9250
-    while( !SPI1STATbits.SPITBF )               // wait for the data to be sent out
-        ;
+    while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
+    
+    while( !SPI1STATbits.SPIRBF);   // wait for MPU9250 to return data
     temp_val = SPI1BUF;     //Read value returned over SPI
-    PORTBbits.RB7 = 1;                          // raise the slave select line
+    PORTBbits.RB7 = 1;      // raise the slave select line
 
     //__delay_ms(50);
     return temp_val;
