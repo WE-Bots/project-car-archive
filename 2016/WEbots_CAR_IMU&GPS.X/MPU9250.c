@@ -562,36 +562,3 @@ void calibrate(MPU9250* mpu, float *dest1, float *dest2){
     dest2[1] = (float)accel_bias[1]/(float)accelsensitivity;
     dest2[2] = (float)accel_bias[2]/(float)accelsensitivity;
 }
-
-void select(MPU9250* mpu) {
-    //Set CS low to start transmission (interrupts conversion)
-    //SPI.beginTransaction(SPISettings(my_clock, MSBFIRST, SPI_MODE3));
-    OpenSPI1(mpu->spi_Config1, mpu->spi_Config2);
-
-    //Assuming my_cs from the original was a clock signal needing to be sent from
-    //one of the spi ports
-    WriteSPI1(mpu->my_cs);
-
-/*
-//This needs to be removed and replaced with the PIC equivalent
-// of digitalWrite
-#ifdef CORE_TEENSY
-
-    digitalWriteFast(my_cs, LOW);
-#else
-    digitalWrite(my_cs, LOW);
-#endif*/
-}
-void deselect(MPU9250* mpu) {
-    //Set CS high to stop transmission (restarts conversion)
-/*
-//This needs to be removed and replaced with the PIC equivalent
-// of digitalWrite
-#ifdef CORE_TEENSY
-    digitalWriteFast(my_cs, HIGH);
-#else
-    digitalWrite(my_cs, HIGH);
-#endif
-*/
-    SPI.endTransaction();
-}

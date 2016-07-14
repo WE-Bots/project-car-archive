@@ -8,8 +8,7 @@
 
 #ifndef MPU9250_h
 #define MPU9250_h
-#include <p33EP256MU806.h>
-#include <spi.h>
+#include <xc.h>
 #include <stdlib.h>
 #include <libpic30.h>
 
@@ -229,25 +228,6 @@ typedef struct MPU9250 {
   unsigned char my_low_pass_filter;
   unsigned char my_low_pass_filter_acc;
   
-  unsigned int spi_Config1 =    FRAME_ENABLE_OFF &
-                                FRAME_SYNC_OUTPUT &
-                                DISABLE_SDO_PIN &
-                                SPI_MODE16_OFF &
-                                SPI_SMP_OFF &
-                                SPI_CKE_ON &           
-                                SLAVE_SELECT_ENABLE_ON & //TODO Find out why MPLAB doesn't like this
-                                CLK_POL_ACTIVE_LOW &
-                                MASTER_ENABLE_ON &
-                                SEC_PRESCAL_1_1 &
-                                PRI_PRESCAL_1_1;
-  
-  unsigned int spi_Config2 =    SPI_ENABLE &
-                                SPI_IDLE_CON &
-                                SPI_RX_OVFLOW_CLR;
-  
-  
-  
-
   float g_bias[3];
   float a_bias[3];      // Bias corrections for gyro and accelerometer
   
@@ -271,8 +251,6 @@ typedef int bool;
     unsigned int set_acc_scale(MPU9250* mpu, int scale);
     void calib_acc(MPU9250* mpu);
     void calib_mag(MPU9250* mpu);
-    void select(MPU9250* mpu);
-    void deselect(MPU9250* mpu);
     unsigned int whoami(MPU9250* mpu);
     unsigned char AK8963_whoami(MPU9250* mpu);
     unsigned char get_CNTL1(MPU9250* mpu);
