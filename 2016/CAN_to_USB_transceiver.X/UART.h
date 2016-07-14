@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   UART.h
  * Author: Kevin
  *
