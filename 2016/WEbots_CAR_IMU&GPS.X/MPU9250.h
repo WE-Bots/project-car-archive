@@ -238,8 +238,8 @@ typedef int bool;
 #define false 0
 
     //Functions part of original library
-    unsigned int WriteReg(signed int WriteData );
-    unsigned int ReadReg(signed int WriteData );
+    unsigned int WriteReg(signed int WriteAddr, signed int WriteData );
+    unsigned int ReadReg(signed int WriteAddr, signed int WriteData );
     void ReadRegs(MPU9250* mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
 
     bool init(MPU9250* mpu, bool calib_gyro = true, bool calib_acc = true);

@@ -10,6 +10,21 @@
 #include "MPU9250.h"
 
 /**
+ * new_MPU9250: Creates a new MPU struct which saves incoming data from the MPU9250
+ * mostly useful for calibration.
+ * 
+ * @param low_pass_filter
+ * @param low_pass_filter_acc
+ * @return 
+ */
+MPU9250* *new_MPU9250(unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
+    MPU9250 *mpu = (MPU9250 *) malloc(sizeof(MPU9250));
+    mpu->my_low_pass_filter = low_pass_filter;
+    mpu->my_low_pass_filter_acc = low_pass_filter_acc;
+    return mpu;
+}
+
+/**
  * WriteReg: Write out commands to the MPU9250 using 
  *           SPI communication and return data returned
  *           by the MPU9250 into the SPI buffer
@@ -17,7 +32,7 @@
  * @param WriteData Command to be sent to MPU9250
  * @return Data received in SPI buffer
  */
-unsigned int WriteReg(signed int WriteData)
+unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
 {
     //Used to clear out SPI buffer
     signed int temp_val;
@@ -25,6 +40,10 @@ unsigned int WriteReg(signed int WriteData)
     //TODO: Switch SPI constants to proper SPI port (currently SPI1)
     PORTBbits.RB7 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
+    
+    SPI1BUF = WriteAddr;    //Write address to SPI which will be sent to MPU9250
+    while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
+    
     SPI1BUF = WriteData;    //Write data to SPI which will be sent to MPU9250
     while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
     
@@ -35,10 +54,20 @@ unsigned int WriteReg(signed int WriteData)
     //__delay_ms(50);
     return temp_val;
 }
-unsigned int ReadReg(, unsigned char WriteAddr, unsigned char WriteData )
+
+/**
+ * ReadReg(): 
+ * 
+ * @param WriteAddr
+ * @param WriteData
+ * @return 
+ */
+unsigned int ReadReg(signed int WriteAddr, signed int WriteData)
 {
-    return WriteReg(WriteAddr | READ_FLAG,WriteData);
+    return WriteReg(WriteAddr | READ_FLAG, WriteData);
 }
+
+
 void ReadRegs(, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes )
 {
     unsigned int  i = 0;
