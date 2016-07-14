@@ -8,7 +8,7 @@ __attribute__((address(0x7000), aligned(NUM_OF_ECAN_BUFFERS * 16)));
 volatile unsigned int CANReceiveCount = 0;
 
 /*DMA Channel 1 ISR*/
-void __attribute__((__interrupt__)) _DMA1Interrupt(void)
+void __attribute__((__interrupt__, no_auto_psv)) _DMA1Interrupt(void)
 {
     //init uart transfer
     CANReceiveCount++;
@@ -20,8 +20,8 @@ void CAN1Init()
     //remap IO for CAN module
     RPINR26bits.C1RXR = 0b1000011;
     RPOR1bits.RP66R = 0b001110;
-    TRISDbits.TRISD1=0;
-    LATDbits.LATD1=1;   //put tranceiver in standby mode
+    TRISDbits.TRISD1 = 0;
+    LATDbits.LATD1 = 1; //put tranceiver in standby mode
 
     //put module in configuration mode
     C1CTRL1bits.REQOP = 4;
@@ -137,7 +137,7 @@ void CAN1Init()
     /*Put module in normal mode*/
     C1CTRL1bits.REQOP = 2;
     while (C1CTRL1bits.OPMODE != 2);
-    LATDbits.LATD1=0;   //put tranceiver in normal mode
+    LATDbits.LATD1 = 0; //put tranceiver in normal mode
 }
 
 int CAN1IsTransmitComplete()
@@ -226,15 +226,15 @@ void CAN1EmptyReveiveBuffer(int index)
     if (index > 0 && index < 16)
     {
         str[0] = '<';
-        str[1] = (unsigned char)((ecan1MsgBuffer[index][0] & 0x1FFC) >> 2);
-        str[2] = (unsigned char)((ecan1MsgBuffer[index][0] & 0x1FFC) >> 10);
+        str[1] = (unsigned char) ((ecan1MsgBuffer[index][0] & 0x1FFC) >> 2);
+        str[2] = (unsigned char) ((ecan1MsgBuffer[index][0] & 0x1FFC) >> 10);
         int i;
         for (i = 0; i < (ecan1MsgBuffer[index][2] & 0x000F); i++)
         {
             if (i & 1)
-                str[3 + i] = (unsigned char)(ecan1MsgBuffer[index][3 + i / 2] >> 8);
+                str[3 + i] = (unsigned char) (ecan1MsgBuffer[index][3 + i / 2] >> 8);
             else
-                str[3 + i] = (unsigned char)ecan1MsgBuffer[index][3 + i / 2];
+                str[3 + i] = (unsigned char) ecan1MsgBuffer[index][3 + i / 2];
         }
         str[3 + i] = '>';
         str[4 + i] = '\0';

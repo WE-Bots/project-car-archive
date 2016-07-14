@@ -46,7 +46,7 @@ extern "C" {
     void CAN1CheckReceiveBuffer();
 
     //ISRs
-    void __attribute__((__interrupt__)) _DMA1Interrupt(void);
+    void __attribute__((__interrupt__, no_auto_psv)) _DMA1Interrupt(void);
 
 #ifdef	__cplusplus
 }
