@@ -237,8 +237,9 @@ typedef int bool;
 #define true 1
 #define false 0
 
-    unsigned int WriteReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData );
-    unsigned int ReadReg(MPU9250* mpu, unsigned char WriteAddr, unsigned char WriteData );
+    //Functions part of original library
+    unsigned int WriteReg(signed int WriteData );
+    unsigned int ReadReg(signed int WriteData );
     void ReadRegs(MPU9250* mpu, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes );
 
     bool init(MPU9250* mpu, bool calib_gyro = true, bool calib_acc = true);
@@ -255,5 +256,7 @@ typedef int bool;
     void read_mag(MPU9250* mpu);
     void read_all(MPU9250* mpu);
     void calibrate(MPU9250* mpu, float *dest1, float *dest2);
+    
+    void delay();
 
 #endif

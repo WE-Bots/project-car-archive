@@ -9,20 +9,29 @@
  */
 #include "MPU9250.h"
 
-unsigned int WriteReg(unsigned char WriteAddr, unsigned int WriteData )
+/**
+ * WriteReg: Write out commands to the MPU9250 using 
+ *           SPI communication and return data returned
+ *           by the MPU9250 into the SPI buffer
+ * 
+ * @param WriteData Command to be sent to MPU9250
+ * @return Data received in SPI buffer
+ */
+unsigned int WriteReg(signed int WriteData)
 {
-    unsigned int temp_val;
+    //Used to clear out SPI buffer
+    signed int temp_val;
 
-    /*
-    select();
-    SPI.transfer(WriteAddr);
-    temp_val=SPI.transfer(WriteData);
-    deselect();
-     */
-    
-    
+    //TODO: Switch SPI constants to proper SPI port (currently SPI1)
+    PORTBbits.RB7 = 0;      //Set slave select to low
+    temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
+    SPI1BUF = WriteData;    //Write data to SPI which will be sent to MPU9250
+    while( !SPI1STATbits.SPITBF )               // wait for the data to be sent out
+        ;
+    temp_val = SPI1BUF;     //Read value returned over SPI
+    PORTBbits.RB7 = 1;                          // raise the slave select line
 
-    __delay_ms(50);
+    //__delay_ms(50);
     return temp_val;
 }
 unsigned int ReadReg(, unsigned char WriteAddr, unsigned char WriteData )
