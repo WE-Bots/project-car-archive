@@ -51,7 +51,7 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
     temp_val = SPI1BUF;     //Read value returned over SPI
     PORTBbits.RB7 = 1;      // raise the slave select line
 
-    //__delay_ms(50);
+    delay();
     return temp_val;
 }
 
@@ -68,17 +68,19 @@ unsigned int ReadReg(signed int WriteAddr, signed int WriteData)
 }
 
 
-void ReadRegs(, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Bytes )
+void ReadRegs(unsigned int ReadAddr, unsigned char *ReadBuf, unsigned int Bytes )
 {
     unsigned int  i = 0;
 
-    select();
+    PORTBbits.RB7 = 0;      //Set slave select to low
+    temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
+    
     SPI.transfer(ReadAddr | READ_FLAG);
     for(i = 0; i < Bytes; i++)
         ReadBuf[i] = SPI.transfer(0x00);
     deselect();
 
-    __delay_ms(50);
+    delay();
 }
 
 
@@ -98,7 +100,7 @@ void ReadRegs(, unsigned char ReadAddr, unsigned char *ReadBuf, unsigned int Byt
 
 #define MPU_InitRegNum 17
 
-bool init(, bool calib_gyro, bool calib_acc){
+bool init(MPU9250* mpu, bool calib_gyro, bool calib_acc){
     pinMode(my_cs, OUTPUT);
 #ifdef CORE_TEENSY
     digitalWriteFast(my_cs, HIGH);
@@ -173,7 +175,7 @@ bool init(, bool calib_gyro, bool calib_acc){
  * returns the range set (2,4,8 or 16)
  */
 
-unsigned int set_acc_scale(MPU9250 *mpu, int scale){
+unsigned int set_acc_scale(MPU9250* mpu, int scale){
     unsigned int temp_scale;
     WriteReg(MPUREG_ACCEL_CONFIG, scale);
 
@@ -222,7 +224,7 @@ unsigned int set_acc_scale(MPU9250 *mpu, int scale){
  * returns the range set (250,500,1000 or 2000)
  */
 
-unsigned int set_gyro_scale(, int scale){
+unsigned int set_gyro_scale(MPU9250* mpu, int scale){
     unsigned int temp_scale;
     WriteReg(MPUREG_GYRO_CONFIG, scale);
 
@@ -266,7 +268,7 @@ unsigned int whoami(){
  * 2 -> Z axis
  */
 
-void read_acc()
+void read_acc(MPU9250* mpu)
 {
     unsigned char response[6];
     signed int bit_data;
@@ -288,7 +290,7 @@ void read_acc()
  * 2 -> Z axis
  */
 
-void read_gyro()
+void read_gyro(MPU9250* mpu)
 {
     unsigned char response[6];
     signed int bit_data;
@@ -309,7 +311,7 @@ void read_gyro()
  * returns the value in °C
  */
 
-void read_temp(){
+void read_temp(MPU9250* mpu){
     unsigned char response[2];
     signed int bit_data;
     float data;
@@ -329,7 +331,7 @@ void read_temp(){
  * returns Factory Trim value
  */
 
-void calib_acc()
+void calib_acc(MPU9250* mpu)
 {
     unsigned char response[4];
     int temp_scale;
@@ -362,7 +364,7 @@ unsigned char AK8963_whoami(){
     return response;
 }
 
-void calib_mag(){
+void calib_mag(MPU9250* mpu){
     unsigned char response[3];
     float data;
     int i;
@@ -382,7 +384,7 @@ void calib_mag(){
         mpu->Magnetometer_ASA[i] = ((data-128)/256+1)*Magnetometer_Sensitivity_Scale_Factor;
     }
 }
-void read_mag(){
+void read_mag(MPU9250* mpu){
     unsigned char response[7];
     float data;
     int i;
@@ -410,7 +412,7 @@ unsigned char get_CNTL1(){
     return WriteReg(MPUREG_EXT_SENS_DATA_00|READ_FLAG, 0x00);    //Read I2C
 }
 
-void read_all(){
+void read_all(MPU9250 *mpu){
     unsigned char response[21];
     signed int bit_data;
     float data;
@@ -447,7 +449,7 @@ void read_all(){
     }
 }
 
-void calibrate(, float *dest1, float *dest2){
+void calibrate(float *dest1, float *dest2){
     unsigned char data[12]; // data array to hold accelerometer and gyro x, y, z, data
     unsigned int ii, packet_count, fifo_count;
     signed long gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
@@ -595,4 +597,9 @@ void calibrate(, float *dest1, float *dest2){
     dest2[0] = (float)accel_bias[0]/(float)accelsensitivity;
     dest2[1] = (float)accel_bias[1]/(float)accelsensitivity;
     dest2[2] = (float)accel_bias[2]/(float)accelsensitivity;
+}
+
+void delay() {
+    signed int count;
+    for(count = 0; count < 255; count++);
 }
