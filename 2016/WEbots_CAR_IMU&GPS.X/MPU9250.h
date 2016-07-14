@@ -257,6 +257,6 @@ typedef int bool;
     void read_all(MPU9250* mpu);
     void calibrate(MPU9250* mpu, float *dest1, float *dest2);
     
-    void delay();
-
+    //dsPIC necessary functions
+    void init_SPI();
 #endif

@@ -25,6 +25,48 @@ MPU9250* *new_MPU9250(unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsig
 }
 
 /**
+ * init_SPI: Startup SPI communications to the MPU9250, must be run
+ * before attempting to send or receive over SPI
+ */
+void init_SPI (void) {
+    // setup the SPI peripheral
+    SPI1STAT = 0x0;                             // disable the SPI module (just in case)
+    SPI1CON1 = 0x0161;                          // FRAMEN = 0, SPIFSD = 0, DISSDO = 0, MODE16 = 0; SMP = 0; CKP = 1; CKE = 1; SSEN = 0; MSTEN = 1; SPRE = 0b000, PPRE = 0b01
+    SPI1CON1bits.CKE = 0x01;
+    SPI1CON1bits.CKP = 0x00;
+    SPI1STAT = 0x8000;                          // enable the SPI module
+    
+    
+    // Configure Oscillator to operate the device at 60Mhz
+    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+    // Fosc= 8M*60/(2*2)=120Mhz for 8M input clock
+    PLLFBD = 58;                                // M=60
+    CLKDIVbits.PLLPOST = 0;                     // N1=2
+    CLKDIVbits.PLLPRE = 0;                      // N2=2
+    OSCTUN = 0;                                 // Tune FRC oscillator, if FRC is used
+
+    // Disable Watch Dog Timer
+    RCONbits.SWDTEN = 0;
+
+    // Clock switching to incorporate PLL
+    __builtin_write_OSCCONH( 0x03 );            // Initiate Clock Switch to Primary
+
+    // Oscillator(XT) with PLL (NOSC=0b011)
+    __builtin_write_OSCCONL( OSCCON || 0x01 );  // Start clock switching
+    while( OSCCONbits.COSC != 0b011 );
+
+    // Wait for Clock switch to occur
+    // Wait for PLL to lock
+    while( OSCCONbits.LOCK != 1 )
+    { };
+
+    ANSELAbits.ANSA4 = 0;                       //make port pins as digital
+    TRISAbits.TRISA4 = 0;                       //port pis as input/output
+    TRISAbits.TRISA9 = 1;
+    TRISCbits.TRISC3 = 0;
+}
+
+/**
  * WriteReg: Write out commands to the MPU9250 using 
  *           SPI communication and return data returned
  *           by the MPU9250 into the SPI buffer
@@ -43,6 +85,7 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
     
     SPI1BUF = WriteAddr;    //Write address to SPI which will be sent to MPU9250
     while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
+    __delay_ms(50);         //Wait before sending data
     
     SPI1BUF = WriteData;    //Write data to SPI which will be sent to MPU9250
     while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
@@ -68,18 +111,23 @@ unsigned int ReadReg(signed int WriteAddr, signed int WriteData)
 }
 
 
-void ReadRegs(unsigned int ReadAddr, unsigned char *ReadBuf, unsigned int Bytes )
+void ReadRegs(signed int ReadAddr, signed int *ReadBuf, signed int Bytes )
 {
-    unsigned int  i = 0;
+    unsigned int  i = 0;    //Counter variable
+    signed int temp_val;    //
 
     PORTBbits.RB7 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
     
-    SPI.transfer(ReadAddr | READ_FLAG);
-    for(i = 0; i < Bytes; i++)
-        ReadBuf[i] = SPI.transfer(0x00);
-    deselect();
-
+    SPI1BUF = (ReadAddr | READ_FLAG);    //Write address to SPI which will be sent to MPU9250
+    while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
+    for(i = 0; i < Bytes; i++) {
+        SPI1BUF = 0x00;    //Write data to SPI which will be sent to MPU9250
+        while( !SPI1STATbits.SPITBF);  // wait for the data to be sent out
+        while( !SPI1STATbits.SPIRBF);   // wait for MPU9250 to return data
+        temp_val = SPI1BUF;     //Read value returned over SPI
+    }
+    PORTBbits.RB7 = 1;      // raise the slave select line
     __delay_ms(50);
 }
 
@@ -101,12 +149,15 @@ void ReadRegs(unsigned int ReadAddr, unsigned char *ReadBuf, unsigned int Bytes 
 #define MPU_InitRegNum 17
 
 bool init(MPU9250* mpu, bool calib_gyro, bool calib_acc){
+
+/*    
     pinMode(my_cs, OUTPUT);
 #ifdef CORE_TEENSY
     digitalWriteFast(my_cs, HIGH);
 #else
     digitalWrite(my_cs, HIGH);
 #endif
+ */
     float temp[3];
 
     if(calib_gyro && calib_acc){
@@ -320,7 +371,7 @@ void read_temp(MPU9250* mpu){
     bit_data = ((signed int)response[0]<<8)|response[1];
     data = (float)bit_data;
     mpu->temperature = (data/340)+36.53;
-    deselect();
+    //deselect();
 }
 
 /*                                 READ ACCELEROMETER CALIBRATION
