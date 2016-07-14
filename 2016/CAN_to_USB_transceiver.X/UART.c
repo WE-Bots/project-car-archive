@@ -55,7 +55,7 @@ unsigned int UART1ReadReady()
     return U1STAbits.URXDA;
 }
 
-void UART1Write(unsigned int data)
+void UART1Write(char data)
 {
     U1TXREG = data;
 }
@@ -73,7 +73,7 @@ void UART1WriteStr(char * data, unsigned int length)
         while (!UART1WriteReady())
         {
         }
-        UART1Write((unsigned int) data[i]);
+        UART1Write(data[i]);
     }
 }
 
@@ -85,7 +85,7 @@ void UART1WriteStrNT(char * data)
         while (!UART1WriteReady())
         {
         }
-        UART1Write((unsigned int) data[i++]);
+        UART1Write(data[i++]);
     }
 }
 

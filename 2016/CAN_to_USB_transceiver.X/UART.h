@@ -20,7 +20,7 @@ extern "C" {
     void UART1Disable();
     unsigned int UART1Read();
     unsigned int UART1ReadReady();
-    void UART1Write(unsigned int data);
+    void UART1Write(char data);
     unsigned int UART1WriteReady();
     void UART1WriteStr(char * data, unsigned int length);
     void UART1WriteStrNT(char * data);
