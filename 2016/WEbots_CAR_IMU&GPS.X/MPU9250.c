@@ -51,7 +51,7 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
     temp_val = SPI1BUF;     //Read value returned over SPI
     PORTBbits.RB7 = 1;      // raise the slave select line
 
-    delay();
+    __delay_ms(50);
     return temp_val;
 }
 
@@ -80,7 +80,7 @@ void ReadRegs(unsigned int ReadAddr, unsigned char *ReadBuf, unsigned int Bytes 
         ReadBuf[i] = SPI.transfer(0x00);
     deselect();
 
-    delay();
+    __delay_ms(50);
 }
 
 
@@ -597,9 +597,4 @@ void calibrate(float *dest1, float *dest2){
     dest2[0] = (float)accel_bias[0]/(float)accelsensitivity;
     dest2[1] = (float)accel_bias[1]/(float)accelsensitivity;
     dest2[2] = (float)accel_bias[2]/(float)accelsensitivity;
-}
-
-void delay() {
-    signed int count;
-    for(count = 0; count < 255; count++);
 }
