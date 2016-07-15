@@ -4,6 +4,12 @@
  * @brief: Node for serial communications between Arduino controller and Pi.
  */
 
+ /** Expected strings: '<4 bytes of data, 1 byte checksum>'
+ * Create an array of bytes, add first four and store in the fifth
+ * Expect from Kevin: '<2 byte identifier, between 0 and 8 bytes, checksum>'
+ * 2 byte identififier used to determine number of incoming bytes, 
+ **/
+
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
