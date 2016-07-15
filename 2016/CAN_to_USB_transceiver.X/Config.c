@@ -1,20 +1,11 @@
-/* 
- * File:   Init.h
+/*
+ * File:   Config.c
  * Author: Kevin
  *
- * Created on May 15, 2016, 12:38 PM
+ * Created on July 14, 2016, 1:07 PM
  */
 
-#ifndef INIT_H
-#define	INIT_H
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
-#include <xc.h>
-
-    //Set configuration bits
+// Configuration bits
     // FGS
 #pragma config GWRP = OFF               // General Segment Write-Protect bit (General Segment may be written)
 #pragma config GSS = OFF                // General Segment Code-Protect bit (General Segment Code protect is disabled)
@@ -51,12 +42,3 @@ extern "C" {
 #pragma config AWRP = OFF               // Auxiliary Segment Write-protect bit (Aux Flash may be written)
 #pragma config APL = OFF                // Auxiliary Segment Code-protect bit (Aux Flash Code protect is disabled)
 #pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled)
-
-
-
-#ifdef	__cplusplus
-}
-#endif
-
-#endif	/* INIT_H */
-
