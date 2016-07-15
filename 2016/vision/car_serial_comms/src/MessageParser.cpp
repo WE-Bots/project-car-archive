@@ -70,11 +70,17 @@ bool MessageParser::next_int(int &retval, uint8_t *buffer, int &idx, int length)
          (idx<=(length-1))  &&
          (parse_idx<4))
          {
-           parse_buffer[++parse_idx] = buffer[idx++];
+           parse_idx += inc;
+           parse_buffer[parse_idx] = buffer[idx++];
          }
   // Check if a valid number (only invalid if "-", otherwise OK)
+  #ifdef __MSB_FIRST_MODE__
   if (parse_idx==0 && parse_buffer[0]=='-')
     return false;
+  #elif __LSB_FIRST_MODE__
+  if (parse_idx==(parse_buffer.length - 1) && parse_buffer[parse_buffer.length-1]=='-')
+    return false;
+  #endif
 
   // Add null terminator
   parse_buffer[++parse_idx] = '\0';
