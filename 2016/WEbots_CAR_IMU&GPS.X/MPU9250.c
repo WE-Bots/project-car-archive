@@ -82,7 +82,6 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
     signed int temp_val;
 
     //TODO: Switch SPI constants to proper SPI port (currently SPI1)
-    PORTDbits.RD2 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
 
     SPI1BUF = WriteAddr;    //Write address to SPI which will be sent to MPU9250
@@ -94,7 +93,6 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
 
     while( !SPI1STATbits.SPIRBF);   // wait for MPU9250 to return data
     temp_val = SPI1BUF;     //Read value returned over SPI
-    PORTDbits.RD2 = 1;      // raise the slave select line
 
     __delay_ms(50);
     return temp_val;
@@ -118,7 +116,6 @@ void ReadRegs(signed int ReadAddr, signed int *ReadBuf, signed int Bytes )
     unsigned int  i = 0;    //Counter variable
     signed int temp_val;    //
 
-    PORTDbits.RD2 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
 
     SPI1BUF = (ReadAddr | READ_FLAG);    //Write address to SPI which will be sent to MPU9250
@@ -129,7 +126,6 @@ void ReadRegs(signed int ReadAddr, signed int *ReadBuf, signed int Bytes )
         while( !SPI1STATbits.SPIRBF);  // wait for MPU9250 to return data
         temp_val = SPI1BUF;     //Read value returned over SPI
     }
-    PORTDbits.RD2 = 1;      // raise the slave select line
     __delay_ms(50);
 }
 
@@ -361,7 +357,7 @@ void read_gyro(MPU9250* mpu)
 
 /*                                 READ temperature
  * usage: call this function to read temperature data.
- * returns the value in �C
+ * returns the value in ?C
  */
 
 void read_temp(MPU9250* mpu){
