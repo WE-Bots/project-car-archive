@@ -8,11 +8,31 @@
 #include "CAN.h"
 #include "UART.h"
 
+/*Uncomment the board being used*/
+#define CAN2USB
+//#define MOTOR_CONTROLLER
+//#define COLLISION_AVOIDANCE
+//#define IMU_GPS
+
+
+
 //This is the ECAN message buffer declaration. Note the buffer alignment and the start address.
 unsigned int ecan1MsgBuffer[NUM_OF_ECAN_BUFFERS][8]
 __attribute__((address(0x7000), aligned(NUM_OF_ECAN_BUFFERS * 16)));
 
 volatile unsigned int CANReceiveCount = 0;
+#ifdef MOTOR_CONTROLLER
+extern char manualEStop;
+extern char collisionEmergency;
+extern float desSpeed;
+extern float desAngle;
+extern char start;
+#endif
+#ifdef COLLISION_AVOIDANCE
+extern char manualEStop;
+extern char remoteEStop;
+extern char start;
+#endif
 
 /*DMA Channel 1 ISR*/
 void __attribute__((__interrupt__, no_auto_psv)) _DMA1Interrupt(void)
@@ -25,10 +45,24 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA1Interrupt(void)
 void CAN1Init()
 {
     //remap IO for CAN module
+#ifdef CAN2USB
     RPINR26bits.C1RXR = 0b1000011;
     RPOR1bits.RP66R = 0b001110;
     TRISDbits.TRISD1 = 0;
     LATDbits.LATD1 = 1; //put tranceiver in standby mode
+#endif
+#ifdef MOTOR_CONTROLLER
+    RPINR26bits.C1RXR = 0b1001001;
+    RPOR0bits.RP65R = 0b001110;
+    TRISDbits.TRISD8 = 0;
+    LATDbits.LATD8 = 1; //put tranceiver in standby mode
+#endif
+#ifdef COLLISION_AVOIDANCE
+    RPINR26bits.C1RXR = 0b1010011;
+    RPOR5bits.RP84R = 0b001110;
+    TRISEbits.TRISE0 = 0;
+    LATEbits.LATE0 = 1; //put tranceiver in standby mode
+#endif
 
     //put module in configuration mode
     C1CTRL1bits.REQOP = 4;
@@ -64,7 +98,7 @@ void CAN1Init()
     C1RXF10SIDbits.SID = CANMSG_BATTWARN;
     C1RXF11SIDbits.SID = CANMSG_NAVRPY;
     C1RXF12SIDbits.SID = CANMSG_NAVLONLAT;
-    C1RXF13SIDbits.SID = 0x07FF; //unused
+    C1RXF13SIDbits.SID = CANMSG_START;
     C1RXF14SIDbits.SID = 0x07FF; //unused
     C1RXF15SIDbits.SID = 0x07FF; //unused
     /*Set filters to check for for standard frames*/
@@ -101,12 +135,12 @@ void CAN1Init()
     C1BUFPNT4bits.F14BP = 14;
     C1BUFPNT4bits.F15BP = 15;
     /*Enable the first 12 filters*/
-    C1FEN1 = 0x1FFE;
+    C1FEN1 = 0x3FFE;
     /*Use 16 DMA buffers*/
     C1FCTRLbits.DMABS = 4;
     /*No FIFO buffers*/
     C1FCTRLbits.FSA = 15;
-    /*No cevicenet filtering*/
+    /*No devicenet filtering*/
     C1CTRL2bits.DNCNT = 0;
     /*Set up DMA module*/
     DMA0CONbits.SIZE = 0;
@@ -132,7 +166,7 @@ void CAN1Init()
 
     /*Setup Tx buffer*/
     C1CTRL1bits.WIN = 0;
-    C1TR01CONbits.TXEN0 = 1; //Set beffure 0 to Tx
+    C1TR01CONbits.TXEN0 = 1; //Set buffer 0 to Tx
     C1TR01CONbits.RTREN0 = 0; //No auto remote transmit
     C1TR01CONbits.TX0PRI = 3; //Set priority to highest
 
@@ -140,11 +174,18 @@ void CAN1Init()
     IEC0bits.DMA0IE = 0;
     IEC0bits.DMA1IE = 1;
 
-
     /*Put module in normal mode*/
     C1CTRL1bits.REQOP = 2;
     while (C1CTRL1bits.OPMODE != 2);
+#ifdef CAN2USB
     LATDbits.LATD1 = 0; //put tranceiver in normal mode
+#endif
+#ifdef MOTOR_CONTROLLER
+    LATDbits.LATD8 = 0; //put tranceiver in normal mode
+#endif
+#ifdef COLLISION_AVOIDANCE
+    LATEbits.LATE0 = 0; //put tranceiver in normal mode
+#endif
 }
 
 int CAN1IsTransmitComplete()
@@ -229,6 +270,7 @@ int CAN1TransmitRemote(unsigned int SID, unsigned int length)
 
 void CAN1EmptyReveiveBuffer(int index)
 {
+#ifdef CAN2USB
     char str[13];
     if (index > 0 && index < 16)
     {
@@ -245,13 +287,14 @@ void CAN1EmptyReveiveBuffer(int index)
         }
         /*Calculate checksum*/
         int j;
-        for (j=0;j<i+2;j++)
+        for (j = 0; j < i + 2; j++)
         {
-            str[3+i]=str[j+1];
+            str[3 + i] = str[j + 1];
         }
         str[4 + i] = '>';
-        UART1WriteStr(str,i+4);
+        UART1WriteStr(str, i + 4);
     }
+#endif
 }
 
 void CAN1CheckReceiveBuffer()
@@ -261,77 +304,127 @@ void CAN1CheckReceiveBuffer()
         CANReceiveCount--;
         if (C1RXFUL1bits.RXFUL1)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(1);
+#endif
+#ifdef MOTOR_CONTROLLER
+            manualEStop = ecan1MsgBuffer[1][3] & 0x1;
+#endif
+#ifdef COLLISION_AVOIDANCE
+            manualEStop = ecan1MsgBuffer[1][3] & 0x1;
+            remoteEStop = ecan1MsgBuffer[1][3] & 0x2;
+#endif
             C1RXFUL1bits.RXFUL1 = 0;
         }
         else if (C1RXFUL1bits.RXFUL2)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(2);
+#endif
+#ifdef MOTOR_CONTROLLER
+            collisionEmergency = ecan1MsgBuffer[2][3]&0xff;
+#endif
             C1RXFUL1bits.RXFUL2 = 0;
         }
         else if (C1RXFUL1bits.RXFUL3)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(3);
+#endif
             C1RXFUL1bits.RXFUL3 = 0;
         }
         else if (C1RXFUL1bits.RXFUL4)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(4);
+#endif
             C1RXFUL1bits.RXFUL4 = 0;
         }
         else if (C1RXFUL1bits.RXFUL5)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(5);
+#endif
             C1RXFUL1bits.RXFUL5 = 0;
         }
         else if (C1RXFUL1bits.RXFUL6)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(6);
+#endif
             C1RXFUL1bits.RXFUL6 = 0;
         }
         else if (C1RXFUL1bits.RXFUL7)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(7);
+#endif
             C1RXFUL1bits.RXFUL7 = 0;
         }
         else if (C1RXFUL1bits.RXFUL8)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(8);
+#endif
             C1RXFUL1bits.RXFUL8 = 0;
         }
         else if (C1RXFUL1bits.RXFUL9)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(9);
+#endif
+#ifdef MOTOR_CONTROLLER
+            desSpeed = ecan1MsgBuffer[9][3];
+            desAngle = ecan1MsgBuffer[9][4];
+#endif
             C1RXFUL1bits.RXFUL9 = 0;
         }
         else if (C1RXFUL1bits.RXFUL10)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(10);
+#endif
             C1RXFUL1bits.RXFUL10 = 0;
         }
         else if (C1RXFUL1bits.RXFUL11)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(11);
+#endif
             C1RXFUL1bits.RXFUL11 = 0;
         }
         else if (C1RXFUL1bits.RXFUL12)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(12);
+#endif
             C1RXFUL1bits.RXFUL12 = 0;
         }
         else if (C1RXFUL1bits.RXFUL13)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(13);
+#endif
+#ifdef MOTOR_CONTROLLER
+            start = 1;
+#endif
+#ifdef COLLISION_AVOIDANCE
+            start = 1;
+#endif
             C1RXFUL1bits.RXFUL13 = 0;
         }
         else if (C1RXFUL1bits.RXFUL14)
         {
+#ifdef CAN2USB
             CAN1EmptyReveiveBuffer(14);
+#endif
             C1RXFUL1bits.RXFUL14 = 0;
         }
         else if (C1RXFUL1bits.RXFUL15)
         {
-            CAN1EmptyReveiveBuffer(5);
+#ifdef CAN2USB
+            CAN1EmptyReveiveBuffer(15);
+#endif
             C1RXFUL1bits.RXFUL15 = 0;
         }
     }
