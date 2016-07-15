@@ -9,12 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
   # cv_bridge
   car_serial_comms
   # image_transport
-  compressed_image_transport
+  image_transport
   roscpp
   std_msgs
 )
 
-find_package(OpenCV)
+find_package(OpenCV 2.4.13 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## System dependencies are found with CMake's conventions
@@ -90,10 +90,10 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES iarrcMlVision
   CATKIN_DEPENDS
-  compressed_image_transport
   roscpp
   std_msgs
   sensor_msgs
+  image_transport
   car_serial_comms
 #  DEPENDS system_lib
 )
@@ -108,7 +108,10 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
+
+link_directories(${OpenCV_LIBRARY_DIRS})
 
 ## Declare a cpp executable
 add_executable(iarrcMlVision_node src/iarrcMlVision_node.cpp)
@@ -121,6 +124,7 @@ add_executable(iarrcMlVision_node src/iarrcMlVision_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(iarrcMlVision_node
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 #############
