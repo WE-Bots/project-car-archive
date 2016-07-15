@@ -12,10 +12,10 @@
 /**
  * new_MPU9250: Creates a new MPU struct which saves incoming data from the MPU9250
  * mostly useful for calibration.
- * 
+ *
  * @param low_pass_filter
  * @param low_pass_filter_acc
- * @return 
+ * @return
  */
 MPU9250* *new_MPU9250(unsigned char low_pass_filter = BITS_DLPF_CFG_188HZ, unsigned char low_pass_filter_acc = BITS_DLPF_CFG_188HZ) {
     MPU9250 *mpu = (MPU9250 *) malloc(sizeof(MPU9250));
@@ -35,8 +35,9 @@ void init_SPI (void) {
     SPI1CON1bits.CKE = 0x01;
     SPI1CON1bits.CKP = 0x00;
     SPI1STAT = 0x8000;                          // enable the SPI module
-    
-    
+
+
+    //TODO: Set clock to synchronize with Michael's hardware settings
     // Configure Oscillator to operate the device at 60Mhz
     // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
     // Fosc= 8M*60/(2*2)=120Mhz for 8M input clock
@@ -60,17 +61,18 @@ void init_SPI (void) {
     while( OSCCONbits.LOCK != 1 )
     { };
 
-    ANSELAbits.ANSA4 = 0;                       //make port pins as digital
-    TRISAbits.TRISA4 = 0;                       //port pis as input/output
-    TRISAbits.TRISA9 = 1;
-    TRISCbits.TRISC3 = 0;
+    //TODO: Map RPn bits according to Michael's used pins
+    RPINR20 = 75;           //SPI data input is mapped to pin 45
+    RPOR0bits.RP64R = 5;    //SPI data output mapped to pin 46
+    RPOR0bits.RP65R = 6;    //SPI clock output mapped to pin 49
+    RPOR1bits.RP66R = 7;    //SPI slave select mapped to pin 50
 }
 
 /**
- * WriteReg: Write out commands to the MPU9250 using 
+ * WriteReg: Write out commands to the MPU9250 using
  *           SPI communication and return data returned
  *           by the MPU9250 into the SPI buffer
- * 
+ *
  * @param WriteData Command to be sent to MPU9250
  * @return Data received in SPI buffer
  */
@@ -82,14 +84,14 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
     //TODO: Switch SPI constants to proper SPI port (currently SPI1)
     PORTBbits.RB7 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
-    
+
     SPI1BUF = WriteAddr;    //Write address to SPI which will be sent to MPU9250
     while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
     __delay_ms(50);         //Wait before sending data
-    
+
     SPI1BUF = WriteData;    //Write data to SPI which will be sent to MPU9250
     while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
-    
+
     while( !SPI1STATbits.SPIRBF);   // wait for MPU9250 to return data
     temp_val = SPI1BUF;     //Read value returned over SPI
     PORTBbits.RB7 = 1;      // raise the slave select line
@@ -99,11 +101,11 @@ unsigned int WriteReg(signed int WriteAddr, signed int WriteData)
 }
 
 /**
- * ReadReg(): 
- * 
+ * ReadReg():
+ *
  * @param WriteAddr
  * @param WriteData
- * @return 
+ * @return
  */
 unsigned int ReadReg(signed int WriteAddr, signed int WriteData)
 {
@@ -118,7 +120,7 @@ void ReadRegs(signed int ReadAddr, signed int *ReadBuf, signed int Bytes )
 
     PORTBbits.RB7 = 0;      //Set slave select to low
     temp_val = SPI1BUF;     //Dummy read to clear SPIRBF flag
-    
+
     SPI1BUF = (ReadAddr | READ_FLAG);    //Write address to SPI which will be sent to MPU9250
     while( !SPI1STATbits.SPITBF );  // wait for the data to be sent out
     for(i = 0; i < Bytes; i++) {
@@ -150,7 +152,7 @@ void ReadRegs(signed int ReadAddr, signed int *ReadBuf, signed int Bytes )
 
 bool init(MPU9250* mpu, bool calib_gyro, bool calib_acc){
 
-/*    
+/*
     pinMode(my_cs, OUTPUT);
 #ifdef CORE_TEENSY
     digitalWriteFast(my_cs, HIGH);
@@ -359,7 +361,7 @@ void read_gyro(MPU9250* mpu)
 
 /*                                 READ temperature
  * usage: call this function to read temperature data.
- * returns the value in Â°C
+ * returns the value in °C
  */
 
 void read_temp(MPU9250* mpu){

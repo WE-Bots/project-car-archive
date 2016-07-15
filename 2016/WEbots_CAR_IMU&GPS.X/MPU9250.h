@@ -207,7 +207,6 @@
 
 #define     Magnetometer_Sensitivity_Scale_Factor ((float)0.15f)
 
-
 typedef struct MPU9250 {
   float acc_divider;
   float gyro_divider;
