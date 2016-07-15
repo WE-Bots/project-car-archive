@@ -52,13 +52,14 @@ bool MessageParser::next_int(int &retval, uint8_t *buffer, int &idx, int length)
   // Move subsequent chars into parse buffer
   if (buffer[idx]!='-' && (buffer[idx]<48 || buffer[idx]>57))
     return false;
-
+  int inc = 0;
+  
   #ifdef __LSB_FIRST_MODE__
   int parse_idx=parse_buffer.length - 1;
-  int inc=-1;
+  inc=-1;
   #elif __MSB_FIRST_MODE__
   int parse_idx=0;
-  int inc=1;
+  inc=1;
   #endif
 
   parse_buffer[parse_idx] = buffer[idx];
