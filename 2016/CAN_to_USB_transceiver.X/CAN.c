@@ -46,10 +46,12 @@ void CAN1Init()
 {
     //remap IO for CAN module
 #ifdef CAN2USB
-    RPINR26bits.C1RXR = 0b1000011;
-    RPOR1bits.RP66R = 0b001110;
     TRISDbits.TRISD1 = 0;
     LATDbits.LATD1 = 1; //put tranceiver in standby mode
+    RPINR26bits.C1RXR = 0b1000011;
+    RPOR1bits.RP66R = 0b001110;
+    TRISDbits.TRISD2=0;
+    
 #endif
 #ifdef MOTOR_CONTROLLER
     RPINR26bits.C1RXR = 0b1001001;
@@ -134,7 +136,7 @@ void CAN1Init()
     C1BUFPNT4bits.F13BP = 13;
     C1BUFPNT4bits.F14BP = 14;
     C1BUFPNT4bits.F15BP = 15;
-    /*Enable the first 12 filters*/
+    /*Enable the first 13 filters*/
     C1FEN1 = 0x3FFE;
     /*Use 16 DMA buffers*/
     C1FCTRLbits.DMABS = 4;
@@ -175,8 +177,8 @@ void CAN1Init()
     IEC0bits.DMA1IE = 1;
 
     /*Put module in normal mode*/
-    C1CTRL1bits.REQOP = 2;
-    while (C1CTRL1bits.OPMODE != 2);
+    C1CTRL1bits.REQOP = 0;
+    while (C1CTRL1bits.OPMODE != 0);
 #ifdef CAN2USB
     LATDbits.LATD1 = 0; //put tranceiver in normal mode
 #endif
@@ -220,7 +222,7 @@ int CAN1Transmit(unsigned int SID, unsigned int length, unsigned int* data)
     //ecan1MsgBuffer[0][2] = 0x0008;
     /* Write message data bytes */
     int i;
-    for (i = 0; i <= (length - 1) / 2; i++)
+    for (i = 0; i < (length+1) / 2; i++)
     {
         ecan1MsgBuffer[0][i + 3] = data[i];
     }
@@ -292,7 +294,7 @@ void CAN1EmptyReveiveBuffer(int index)
             str[3 + i] = str[j + 1];
         }
         str[4 + i] = '>';
-        UART1WriteStr(str, i + 4);
+        UART1WriteStr(str, i + 5);
     }
 #endif
 }
