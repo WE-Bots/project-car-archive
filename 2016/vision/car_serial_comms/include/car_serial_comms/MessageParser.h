@@ -6,11 +6,12 @@
  #define _STDINT_H_
 
  #define _EMSTOP_ 0x21  //Emergency stop message
- //bit0 = 0: stop | bit0 = 1: start/restart
+ /**1 byte message; If any bits are set then trigger an
+ *emergency stop, otherwise if the byte sent is 0 then
+ *proceed as normal.
+ **/
  #define _COLEMG_ 0x22  //Imminent collision detected
- //0xFFFF: stop | 0x0000: go
- #define _BRNOUT_ 0x23  //Main power brown out warning
- #define _OVRHT_ 0x24   //Over temp warning from power board
+ //1 byte message; 0xFFFF: stop | 0x0000: go
  #define _WHLSPD_ 0x31  //Wheel speed
  /** 8 byte message; 2 byte float for each wheel; each float
  *represents speed in m/s; bytes are received in order
