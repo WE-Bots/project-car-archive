@@ -12,10 +12,26 @@
  #define _BRNOUT_ 0x23  //Main power brown out warning
  #define _OVRHT_ 0x24   //Over temp warning from power board
  #define _WHLSPD_ 0x31  //Wheel speed
- //8 byte message, 2 byte float for each wheel, bytes are
- //received in the order Front-Right wheel, Front-Left wheel,
- //Back-Right wheel, Back-Left wheel
- #define _ODOMET_ 0x33  //Odometry
+ /** 8 byte message; 2 byte float for each wheel; each float
+ *represents speed in m/s; bytes are received in order
+ *Front-Right wheel, Front-Left wheel, Back-Right wheel,
+ *Back-Left wheel.
+ **/
+ #define _ODOMET_ 0x33  //Odometry message
+ /** 8 byte message; 2 byte float for each wheel; each float
+ *represents distance in meters; received in order Front-Right
+ *wheel, Front-Left wheel, Back-Right wheel, Back-Left wheel.
+ **/
+ #define _OBSDIST_ 0x34 //Distance of obstacles message
+/** 7 byte message; ONLY READ FIRST 3 bytes; 1 byte int for
+*each ultrasonic sensor (three ultrasonic sensors); each int
+*represents distance in cm from obstacle; bytes are received
+*in order front, right, left sensor.
+**/
+ #define _DESTRAJ_ 0x35 //Desired trajectory message sent out
+ /** 4 byte message; 2 byte float for speed in m/s and 2 byte
+ *float for angle in degrees; send order speed, angle.
+ **/
 
 //Macros to detect endianness when using gcc compiler
  #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN
