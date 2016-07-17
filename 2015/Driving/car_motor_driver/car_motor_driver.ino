@@ -19,12 +19,12 @@
 */
 
 //uncomment for control type
-//#define AUTONOMOUS
-#define REMOTE_CONTROL
-#define DEBUG
+#define AUTONOMOUS
+//#define REMOTE_CONTROL
+//#define DEBUG
 
 //uncomment for active communications while debugging
-//#define I2C
+#define I2C
 //#define USB
 #define BLUETOOTH
 #define MOTORS
@@ -108,11 +108,11 @@ void setup()
 		digitalWrite(12,LOW);
 		if (!digitalRead(6))
 		{
-			race_mode = 1;
+			race_mode = 2;
 			digitalWrite(7, HIGH);
 			digitalWrite(12,HIGH);
 			timer = millis();
-			while ((millis() - timer) < 2000)
+			/*while ((millis() - timer) < 2000)
 			{
 				if ((!digitalRead(6)) && ((millis() - timer) > 1000))
 				{
@@ -120,7 +120,7 @@ void setup()
 					digitalWrite(13, HIGH);
 					break;
 				}
-			}
+			}*/
 		}
 	}
 #endif
@@ -149,12 +149,12 @@ void loop()
 		serial_get_value(steering_angle, base_speed);
 #endif
 			base_speed = 2000;
-		steering_angle = 2;
+		//steering_angle = 2;
 		if ((distance % 100) < 15)
-			steering_angle = 1;
-		if (distance > 1690)	//need to figure out what this value should actually be
+			//steering_angle = 1;
+		if (distance > 13690)	//need to figure out what this value should actually be
 		{
-			base_speed = 0;
+			//base_speed = 0;
 		}
 	}
 	else if (race_mode == 2)
@@ -170,8 +170,8 @@ void loop()
 		//if (base_speed != 0)
 		steering_angle = battery_voltage;
 			base_speed = 2000;
-			if (base_speed < 4000)
-				base_speed++;
+			//if (base_speed < 4000)
+				//base_speed++;
 #endif
 	}
 #endif
@@ -183,7 +183,7 @@ void loop()
 	real_speed = 0;
 	if (!(emergency_stop||stop||base_speed==0))
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			int encoder_distance = 0;
 			new_timer[i] = micros();
@@ -209,8 +209,8 @@ void loop()
 			}
 		}
 		//average values
-		real_speed = real_speed/4;		//speed in mm/s
-		distance = (old_encoder_distance[0]+old_encoder_distance[1]+old_encoder_distance[2]+old_encoder_distance[3])/4;
+		real_speed = real_speed;		//speed in mm/s
+		distance = old_encoder_distance[0];//(old_encoder_distance[0]+old_encoder_distance[1]+old_encoder_distance[2]+old_encoder_distance[3])/4;
 
 		//calculate speed error
 		accumulated_speed_error += base_speed - real_speed;
@@ -257,14 +257,14 @@ void loop()
 
 #ifdef AUTONOMOUS
 	//collision avoidance steering
-	if (digitalRead(4))
+	/*if (digitalRead(4))
 	{
 		steering_angle += 10;
 	}
 	if (digitalRead(5))
 	{
 		steering_angle -= 10;
-	}
+	}*/
 
 	//communicate with the remote emergency stop app
 #ifdef BLUETOOTH
@@ -297,7 +297,7 @@ void loop()
 	}
 	else
 	{
-		motor.writeMicroseconds(1500 + constrain((base_speed), -100, 100)); //add conversion for pulse period to servo control
+		motor.writeMicroseconds(1500 + constrain((base_speed), -20, 20)); //add conversion for pulse period to servo control
 		steer.write(90 + constrain(steering_angle, -30, 40));
 	}
 #endif

@@ -124,15 +124,16 @@ void UART1CheckReceiveBuffer()
             if (bufferIndex==5 && buffer[5]=='>')
             {
                 /*Check checksum*/
-                if(buffer[0]+buffer[1]+buffer[2]+buffer[3]!=buffer[4])
-                {
-                    started=0;
-                    continue;
-                }
+                //if(buffer[0]+buffer[1]+buffer[2]+buffer[3]!=buffer[4])
+                //{
+                  //  started=0;
+                   // continue;
+               // }
                 /*Transmit over CAN*/
                 while(!CAN1IsTransmitComplete())
                 {}
-                CAN1Transmit(CANMSG_DESTRAJ, 4, (unsigned int*) buffer);
+                unsigned int temp=0xFFff;
+                CAN1Transmit(CANMSG_ESTOP, 1, &temp);
                 started=0;
                 continue;
             }

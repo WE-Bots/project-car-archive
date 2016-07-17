@@ -31,6 +31,7 @@ extern "C" {
 #define CANMSG_BATTWARN         CLD_PRTY01 // Low battery warning reported by power board
 #define CANMSG_NAVRPY           CLD_PRTY02 // Roll-Pitch-Yaw navigation data reported by IMU/GPS board
 #define CANMSG_NAVLONLAT        CLD_PRTY03 // Longitude-Latitude navigation data reported by IMU/GPS board
+#define CANMSG_START            CLD_PRTY04 // Start buton has been pushed. The CAR is ready to race.
 
 #define NUM_OF_ECAN_BUFFERS 16  //only used for memory allocation
 
