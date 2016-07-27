@@ -53,7 +53,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /**
     void PIN_MANAGER_Initialize(void)
  */
-void PIN_MANAGER_Initialize(void) {
+void PIN_MANAGER_Initialize(void)
+{
     /****************************************************************************
      * Setting the GPIO of PORTA
      ***************************************************************************/

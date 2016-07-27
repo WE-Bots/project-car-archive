@@ -510,11 +510,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Set RA3 high (1)
-    regulatorSwitch_SetHigh();
+    IO_RA3_NC_SetHigh();
     </code>
 
  */
-#define regulatorSwitch_SetHigh()          _LATA3 = 1
+#define IO_RA3_NC_SetHigh()          _LATA3 = 1
 /**
   @Summary
     Sets the GPIO pin, RA3, low using LATA3.
@@ -534,11 +534,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Set RA3 low (0)
-    regulatorSwitch_SetLow();
+    IO_RA3_NC_SetLow();
     </code>
 
  */
-#define regulatorSwitch_SetLow()           _LATA3 = 0
+#define IO_RA3_NC_SetLow()           _LATA3 = 0
 /**
   @Summary
     Toggles the GPIO pin, RA3, using LATA3.
@@ -558,11 +558,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Toggle RA3
-    regulatorSwitch_SetToggle();
+    IO_RA3_NC_SetToggle();
     </code>
 
  */
-#define regulatorSwitch_Toggle()           _LATA3 ^= 1
+#define IO_RA3_NC_Toggle()           _LATA3 ^= 1
 /**
   @Summary
     Reads the value of the GPIO pin, RA3.
@@ -584,11 +584,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     uint16_t portValue;
 
     // Read RA3
-    postValue = regulatorSwitch_GetValue();
+    postValue = IO_RA3_NC_GetValue();
     </code>
 
  */
-#define regulatorSwitch_GetValue()         _RA3
+#define IO_RA3_NC_GetValue()         _RA3
 /**
   @Summary
     Configures the GPIO pin, RA3, as an input.
@@ -608,11 +608,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Sets the RA3 as an input
-    regulatorSwitch_SetDigitalInput();
+    IO_RA3_NC_SetDigitalInput();
     </code>
 
  */
-#define regulatorSwitch_SetDigitalInput()  _TRISA3 = 1
+#define IO_RA3_NC_SetDigitalInput()  _TRISA3 = 1
 /**
   @Summary
     Configures the GPIO pin, RA3, as an output.
@@ -632,11 +632,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Sets the RA3 as an output
-    regulatorSwitch_SetDigitalOutput();
+    IO_RA3_NC_SetDigitalOutput();
     </code>
 
  */
-#define regulatorSwitch_SetDigitalOutput() _TRISA3 = 0
+#define IO_RA3_NC_SetDigitalOutput() _TRISA3 = 0
 /**
   @Summary
     Sets the GPIO pin, RA4, high using LATA4.
@@ -948,11 +948,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Set RA8 high (1)
-    IO_RA8_NC_SetHigh();
+    regulatorSwitch_SetHigh();
     </code>
 
  */
-#define IO_RA8_NC_SetHigh()          _LATA8 = 1
+#define regulatorSwitch_SetHigh()          _LATA8 = 1
 /**
   @Summary
     Sets the GPIO pin, RA8, low using LATA8.
@@ -972,11 +972,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Set RA8 low (0)
-    IO_RA8_NC_SetLow();
+    regulatorSwitch_SetLow();
     </code>
 
  */
-#define IO_RA8_NC_SetLow()           _LATA8 = 0
+#define regulatorSwitch_SetLow()           _LATA8 = 0
 /**
   @Summary
     Toggles the GPIO pin, RA8, using LATA8.
@@ -996,11 +996,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Toggle RA8
-    IO_RA8_NC_SetToggle();
+    regulatorSwitch_SetToggle();
     </code>
 
  */
-#define IO_RA8_NC_Toggle()           _LATA8 ^= 1
+#define regulatorSwitch_Toggle()           _LATA8 ^= 1
 /**
   @Summary
     Reads the value of the GPIO pin, RA8.
@@ -1022,11 +1022,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     uint16_t portValue;
 
     // Read RA8
-    postValue = IO_RA8_NC_GetValue();
+    postValue = regulatorSwitch_GetValue();
     </code>
 
  */
-#define IO_RA8_NC_GetValue()         _RA8
+#define regulatorSwitch_GetValue()         _RA8
 /**
   @Summary
     Configures the GPIO pin, RA8, as an input.
@@ -1046,11 +1046,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Sets the RA8 as an input
-    IO_RA8_NC_SetDigitalInput();
+    regulatorSwitch_SetDigitalInput();
     </code>
 
  */
-#define IO_RA8_NC_SetDigitalInput()  _TRISA8 = 1
+#define regulatorSwitch_SetDigitalInput()  _TRISA8 = 1
 /**
   @Summary
     Configures the GPIO pin, RA8, as an output.
@@ -1070,11 +1070,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
   @Example
     <code>
     // Sets the RA8 as an output
-    IO_RA8_NC_SetDigitalOutput();
+    regulatorSwitch_SetDigitalOutput();
     </code>
 
  */
-#define IO_RA8_NC_SetDigitalOutput() _TRISA8 = 0
+#define regulatorSwitch_SetDigitalOutput() _TRISA8 = 0
 /**
   @Summary
     Sets the GPIO pin, RA9, high using LATA9.

@@ -50,28 +50,54 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "mcc_generated_files/mcc.h"
 #include <libpic30.h>
 
-
 /*
                          Main application
  */
-int main(void) 
+int main(void)
 {
     // initialize the device
     SYSTEM_Initialize();
+
+    /** 
+    On circuitry disabling and holding itself on 
+    */
     
-    // On circuitry disabling and holding itself on 
     // Wait for the power to stabalize 
     __delay_ms(300);
+    
     // Turn on power connect to the first cell 
     cell1PowerEn_SetHigh();
+    
     // Disable the ON circuitry 
-    disableOnCircuit_SetHigh();    
-           
-    char i = 0;
-    while (1) 
+    disableOnCircuit_SetHigh();
+
+    /*
+    uint32_t prevTime = TMR3_ms_Timer();
+    uint16_t switchPeriod = 5000;
+    */
+    
+    while (1)
     {
-        UART1_Write(i++);
-        __delay_ms(300);
+        //regulatorSwitch_SetHigh();
+        // Handle the E-Stop
+        // Check if the normally open port of the E-Stop is pressed
+        //      -> The other normally closed connection is inline with the 
+        //          motor switch line
+        if (EStopSignal_GetValue() == 1)
+        {
+            // disengage the motor 
+            motorSwitch_SetLow(); 
+            regulatorSwitch_SetLow();
+            Set_Debug_Message(DEBUG_LED_MESSAGE_5);
+        }
+        // The E-Stop isn't pressed
+        else 
+        {
+            // engage the motor 
+            motorSwitch_SetHigh();
+            regulatorSwitch_SetHigh();
+            Set_Debug_Message(DEBUG_LED_MESSAGE_2);
+        }
     }
 
     return -1;

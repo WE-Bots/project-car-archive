@@ -90,9 +90,12 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #pragma config DSBOREN = ON    // Deep Sleep Zero-Power BOR Enable bit->Deep Sleep BOR enabled in Deep Sleep
 #pragma config DSWDTEN = OFF    // Deep Sleep Watchdog Timer Enable bit->DSWDT disabled
 
+// Global variables
+
 #include "mcc.h"
 
-void SYSTEM_Initialize(void) {
+void SYSTEM_Initialize(void)
+{
     OSCILLATOR_Initialize();
     PIN_MANAGER_Initialize();
     INTERRUPT_Initialize();
@@ -100,9 +103,11 @@ void SYSTEM_Initialize(void) {
     UART1_Initialize();
     Debug_Message_Initialize();
     TMR5_Initialize();
+    TMR3_Initialize();
 }
 
-void OSCILLATOR_Initialize(void) {
+void OSCILLATOR_Initialize(void)
+{
     // DOZEN disabled; DOZE 1:8; RCDIV FRC/1; ROI disabled; 
     CLKDIV = 0x3000;
     // Set the secondary oscillator

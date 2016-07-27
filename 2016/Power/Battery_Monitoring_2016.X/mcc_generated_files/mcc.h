@@ -55,6 +55,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "uart1.h"
 #include "debug_LED.h"
 #include "tmr5.h"
+#include "tmr3.h"
 
 #define _XTAL_FREQ  500000
 

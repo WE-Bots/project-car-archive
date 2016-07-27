@@ -57,10 +57,12 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
-extern "C" {
+extern "C"
+{
 
 #endif
 
+#define TMR3_INTERRUPT_TICKER_FACTOR    1
 
     /**
       Section: Interface Routines
@@ -114,31 +116,24 @@ extern "C" {
      */
     void DRV_TMR3_Initialize(void) __attribute__((deprecated("\nThis will be removed in future MCC releases. \nUse TMR3_Initialize instead. ")));
 
-
     /**
       @Summary
-        Used to maintain the driver's state machine and implement its ISR
+        Returns a running ms count
 
       @Description
-        This routine is used to maintain the driver's internal state machine and
-        implement its ISR for interrupt-driven implementations.
+        This routine counts the number of ms since the start the program 
 
       @Param
         None.
 
       @Returns
-        None
+        time in ms
  
       @Example 
-        Refer to the example of TMR3_Initialize();
+        
      */
-
-    void TMR3_Tasks_16BitOperation(void);
-    /**
-        void DRV_TMR3_Tasks_16BitOperation(void)
-     */
-    void DRV_TMR3_Tasks_16BitOperation(void) __attribute__((deprecated("\nThis will be removed in future MCC releases. \nUse TMR3_Tasks_16BitOperation instead. ")));
-
+    uint32_t TMR3_ms_Timer(void);
+    
     /**
       @Summary
         Updates 16-bit timer value
@@ -242,6 +237,22 @@ extern "C" {
      */
     uint16_t DRV_TMR3_Counter16BitGet(void) __attribute__((deprecated("\nThis will be removed in future MCC releases. \nUse TMR3_Counter16BitGet instead. ")));
 
+    /**
+      @Summary
+        Callback for timer interrupt.
+
+      @Description
+        This routine is callback for timer interrupt
+
+      @Param
+        None.
+
+      @Returns
+        None
+ 
+      @Example 
+        Refer to the example of TMR3_Initialize();
+     */
 
     void TMR3_CallBack(void);
 

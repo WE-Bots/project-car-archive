@@ -60,9 +60,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Defines the object required for the status of the queue.
  */
 
-typedef union {
+typedef union
+{
 
-    struct {
+    struct
+    {
         uint8_t full : 1;
         uint8_t empty : 1;
         uint8_t reserved : 6;
@@ -78,7 +80,8 @@ UART_BYTEQ_STATUS;
     Defines the object required for the maintenance of the hardware instance.
 
  */
-typedef struct {
+typedef struct
+{
     /* RX Byte Q */
     uint8_t *rxTail;
 
@@ -133,9 +136,10 @@ static uint8_t uart1_rxByteQ[UART1_CONFIG_RX_BYTEQ_LENGTH];
  */
 
 
-void UART1_Initialize(void) {
-    // RTSMD disabled; BRGH enabled; STSEL 1; UARTEN enabled; PDSEL 8N; LPBACK disabled; WAKE disabled; USIDL disabled; RXINV disabled; ABAUD disabled; IREN disabled; UEN TX_RX; 
-    U1MODE = 0x8008;
+void UART1_Initialize(void)
+{
+    // RTSMD disabled; BRGH enabled; STSEL 1; UARTEN disabled; PDSEL 8N; LPBACK disabled; WAKE disabled; USIDL disabled; RXINV disabled; ABAUD disabled; IREN disabled; UEN TX_RX; 
+    U1MODE = 0x0008;
     // UTXEN disabled; UTXINV disabled; URXISEL RX_ONE_CHAR; ADDEN disabled; UTXISEL0 TX_ONE_CHAR; UTXBRK COMPLETED; OERR NO_ERROR_cleared; 
     U1STA = 0x0000;
     // U1TXREG 0x0000; 
@@ -162,15 +166,18 @@ void UART1_Initialize(void) {
 /**
 void DRV_UART1_Initialize (void)
  */
-void DRV_UART1_Initialize(void) {
+void DRV_UART1_Initialize(void)
+{
     UART1_Initialize();
 }
 
 /**
     Maintains the driver's transmitter state machine and implements its ISR
  */
-void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void) {
-    if (uart1_obj.txStatus.s.empty) {
+void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void)
+{
+    if (uart1_obj.txStatus.s.empty)
+    {
         IEC0bits.U1TXIE = false;
         return;
     }
@@ -178,43 +185,50 @@ void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void) {
     IFS0bits.U1TXIF = false;
 
     int count = 0;
-    while ((count < UART1_TX_FIFO_LENGTH)&& !(U1STAbits.UTXBF == 1)) {
+    while ((count < UART1_TX_FIFO_LENGTH)&& !(U1STAbits.UTXBF == 1))
+    {
         count++;
 
         U1TXREG = *uart1_obj.txHead;
 
         uart1_obj.txHead++;
 
-        if (uart1_obj.txHead == (uart1_txByteQ + UART1_CONFIG_TX_BYTEQ_LENGTH)) {
+        if (uart1_obj.txHead == (uart1_txByteQ + UART1_CONFIG_TX_BYTEQ_LENGTH))
+        {
             uart1_obj.txHead = uart1_txByteQ;
         }
 
         uart1_obj.txStatus.s.full = false;
 
-        if (uart1_obj.txHead == uart1_obj.txTail) {
+        if (uart1_obj.txHead == uart1_obj.txTail)
+        {
             uart1_obj.txStatus.s.empty = true;
             break;
         }
     }
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void) {
+void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
+{
     int count = 0;
 
-    while ((count < UART1_RX_FIFO_LENGTH) && (U1STAbits.URXDA == 1)) {
+    while ((count < UART1_RX_FIFO_LENGTH) && (U1STAbits.URXDA == 1))
+    {
         count++;
 
         *uart1_obj.rxTail = U1RXREG;
 
         uart1_obj.rxTail++;
 
-        if (uart1_obj.rxTail == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
+        if (uart1_obj.rxTail == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH))
+        {
             uart1_obj.rxTail = uart1_rxByteQ;
         }
 
         uart1_obj.rxStatus.s.empty = false;
 
-        if (uart1_obj.rxTail == uart1_obj.rxHead) {
+        if (uart1_obj.rxTail == uart1_obj.rxHead)
+        {
             //Sets the flag RX full
             uart1_obj.rxStatus.s.full = true;
             break;
@@ -226,8 +240,10 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void) {
 
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U1ErrInterrupt(void) {
-    if ((U1STAbits.OERR == 1)) {
+void __attribute__((interrupt, no_auto_psv)) _U1ErrInterrupt(void)
+{
+    if ((U1STAbits.OERR == 1))
+    {
         U1STAbits.OERR = 0;
     }
 
@@ -238,18 +254,21 @@ void __attribute__((interrupt, no_auto_psv)) _U1ErrInterrupt(void) {
   Section: UART Driver Client Routines
  */
 
-uint8_t UART1_Read(void) {
+uint8_t UART1_Read(void)
+{
     uint8_t data = 0;
 
     data = *uart1_obj.rxHead;
 
     uart1_obj.rxHead++;
 
-    if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
+    if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH))
+    {
         uart1_obj.rxHead = uart1_rxByteQ;
     }
 
-    if (uart1_obj.rxHead == uart1_obj.rxTail) {
+    if (uart1_obj.rxHead == uart1_obj.rxTail)
+    {
         uart1_obj.rxStatus.s.empty = true;
     }
 
@@ -261,16 +280,22 @@ uint8_t UART1_Read(void) {
 /**
    uint8_t DRV_UART1_Read ( void )
  */
-uint8_t DRV_UART1_Read(void) {
+uint8_t DRV_UART1_Read(void)
+{
     return (UART1_Read());
 }
 
-unsigned int UART1_ReadBuffer(uint8_t *buffer, const unsigned int bufLen) {
+unsigned int UART1_ReadBuffer(uint8_t *buffer, const unsigned int bufLen)
+{
     unsigned int numBytesRead = 0;
-    while (numBytesRead < (bufLen)) {
-        if (uart1_obj.rxStatus.s.empty) {
+    while (numBytesRead < (bufLen))
+    {
+        if (uart1_obj.rxStatus.s.empty)
+        {
             break;
-        } else {
+        }
+        else
+        {
             buffer[numBytesRead++] = UART1_Read();
         }
     }
@@ -281,26 +306,31 @@ unsigned int UART1_ReadBuffer(uint8_t *buffer, const unsigned int bufLen) {
 /**
    unsigned int DRV_UART1_ReadBuffer( uint8_t *buffer, const unsigned int bufLen)
  */
-unsigned int DRV_UART1_ReadBuffer(uint8_t *buffer, const unsigned int bufLen) {
+unsigned int DRV_UART1_ReadBuffer(uint8_t *buffer, const unsigned int bufLen)
+{
     return (UART1_ReadBuffer(buffer, bufLen));
 }
 
-void UART1_Write(const uint8_t byte) {
+void UART1_Write(const uint8_t byte)
+{
     *uart1_obj.txTail = byte;
 
     uart1_obj.txTail++;
 
-    if (uart1_obj.txTail == (uart1_txByteQ + UART1_CONFIG_TX_BYTEQ_LENGTH)) {
+    if (uart1_obj.txTail == (uart1_txByteQ + UART1_CONFIG_TX_BYTEQ_LENGTH))
+    {
         uart1_obj.txTail = uart1_txByteQ;
     }
 
     uart1_obj.txStatus.s.empty = false;
 
-    if (uart1_obj.txHead == uart1_obj.txTail) {
+    if (uart1_obj.txHead == uart1_obj.txTail)
+    {
         uart1_obj.txStatus.s.full = true;
     }
 
-    if (IEC0bits.U1TXIE == false) {
+    if (IEC0bits.U1TXIE == false)
+    {
         IEC0bits.U1TXIE = true;
     }
 
@@ -309,17 +339,23 @@ void UART1_Write(const uint8_t byte) {
 /**
    void DRV_UART1_Write( const uint8_t byte)
  */
-void DRV_UART1_Write(const uint8_t byte) {
+void DRV_UART1_Write(const uint8_t byte)
+{
     UART1_Write(byte);
 }
 
-unsigned int UART1_WriteBuffer(const uint8_t *buffer, const unsigned int bufLen) {
+unsigned int UART1_WriteBuffer(const uint8_t *buffer, const unsigned int bufLen)
+{
     unsigned int numBytesWritten = 0;
 
-    while (numBytesWritten < (bufLen)) {
-        if ((uart1_obj.txStatus.s.full)) {
+    while (numBytesWritten < (bufLen))
+    {
+        if ((uart1_obj.txStatus.s.full))
+        {
             break;
-        } else {
+        }
+        else
+        {
             UART1_Write(buffer[numBytesWritten++]);
         }
     }
@@ -331,28 +367,36 @@ unsigned int UART1_WriteBuffer(const uint8_t *buffer, const unsigned int bufLen)
 /**
    unsigned int DRV_UART1_WriteBuffer( const uint8_t *buffer , const unsigned int bufLen )
  */
-unsigned int DRV_UART1_WriteBuffer(const uint8_t *buffer, const unsigned int bufLen) {
+unsigned int DRV_UART1_WriteBuffer(const uint8_t *buffer, const unsigned int bufLen)
+{
     return (UART1_WriteBuffer(buffer, bufLen));
 }
 
-UART1_TRANSFER_STATUS UART1_TransferStatusGet(void) {
+UART1_TRANSFER_STATUS UART1_TransferStatusGet(void)
+{
     UART1_TRANSFER_STATUS status = 0;
 
-    if (uart1_obj.txStatus.s.full) {
+    if (uart1_obj.txStatus.s.full)
+    {
         status |= UART1_TRANSFER_STATUS_TX_FULL;
     }
 
-    if (uart1_obj.txStatus.s.empty) {
+    if (uart1_obj.txStatus.s.empty)
+    {
         status |= UART1_TRANSFER_STATUS_TX_EMPTY;
     }
 
-    if (uart1_obj.rxStatus.s.full) {
+    if (uart1_obj.rxStatus.s.full)
+    {
         status |= UART1_TRANSFER_STATUS_RX_FULL;
     }
 
-    if (uart1_obj.rxStatus.s.empty) {
+    if (uart1_obj.rxStatus.s.empty)
+    {
         status |= UART1_TRANSFER_STATUS_RX_EMPTY;
-    } else {
+    }
+    else
+    {
         status |= UART1_TRANSFER_STATUS_RX_DATA_PRESENT;
     }
     return status;
@@ -361,14 +405,19 @@ UART1_TRANSFER_STATUS UART1_TransferStatusGet(void) {
 /**
    DRV_UART1_TRANSFER_STATUS UART1_TransferStatusGet (void )
  */
-DRV_UART1_TRANSFER_STATUS DRV_UART1_TransferStatusGet(void) {
+DRV_UART1_TRANSFER_STATUS DRV_UART1_TransferStatusGet(void)
+{
     return (UART1_TransferStatusGet());
 }
 
-uint8_t UART1_Peek(uint16_t offset) {
-    if ((uart1_obj.rxHead + offset) > (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
+uint8_t UART1_Peek(uint16_t offset)
+{
+    if ((uart1_obj.rxHead + offset) > (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH))
+    {
         return uart1_rxByteQ[offset - (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH - uart1_obj.rxHead)];
-    } else {
+    }
+    else
+    {
         return *(uart1_obj.rxHead + offset);
     }
 }
@@ -376,15 +425,21 @@ uint8_t UART1_Peek(uint16_t offset) {
 /**
   uint8_t DRV_UART1_Peek(uint16_t offset)
  */
-uint8_t DRV_UART1_Peek(uint16_t offset) {
+uint8_t DRV_UART1_Peek(uint16_t offset)
+{
     return (UART1_Peek(offset));
 }
 
-unsigned int UART1_ReceiveBufferSizeGet(void) {
-    if (!uart1_obj.rxStatus.s.full) {
-        if (uart1_obj.rxHead > uart1_obj.rxTail) {
+unsigned int UART1_ReceiveBufferSizeGet(void)
+{
+    if (!uart1_obj.rxStatus.s.full)
+    {
+        if (uart1_obj.rxHead > uart1_obj.rxTail)
+        {
             return (uart1_obj.rxHead - uart1_obj.rxTail);
-        } else {
+        }
+        else
+        {
             return (UART1_CONFIG_RX_BYTEQ_LENGTH - (uart1_obj.rxTail - uart1_obj.rxHead));
         }
     }
@@ -394,15 +449,21 @@ unsigned int UART1_ReceiveBufferSizeGet(void) {
 /**
   unsigned int DRV_UART1_ReceiveBufferSizeGet(void)
  */
-unsigned int DRV_UART1_ReceiveBufferSizeGet(void) {
+unsigned int DRV_UART1_ReceiveBufferSizeGet(void)
+{
     return (UART1_ReceiveBufferSizeGet());
 }
 
-unsigned int UART1_TransmitBufferSizeGet(void) {
-    if (!uart1_obj.txStatus.s.full) {
-        if (uart1_obj.txHead > uart1_obj.txTail) {
+unsigned int UART1_TransmitBufferSizeGet(void)
+{
+    if (!uart1_obj.txStatus.s.full)
+    {
+        if (uart1_obj.txHead > uart1_obj.txTail)
+        {
             return (uart1_obj.txHead - uart1_obj.txTail);
-        } else {
+        }
+        else
+        {
             return (UART1_CONFIG_TX_BYTEQ_LENGTH - (uart1_obj.txTail - uart1_obj.txHead));
         }
     }
@@ -412,40 +473,47 @@ unsigned int UART1_TransmitBufferSizeGet(void) {
 /**
   unsigned int DRV_UART1_TransmitBufferSizeGet(void)
  */
-unsigned int DRV_UART1_TransmitBufferSizeGet(void) {
+unsigned int DRV_UART1_TransmitBufferSizeGet(void)
+{
     return (UART1_TransmitBufferSizeGet());
 }
 
-bool UART1_ReceiveBufferIsEmpty(void) {
+bool UART1_ReceiveBufferIsEmpty(void)
+{
     return (uart1_obj.rxStatus.s.empty);
 }
 
 /**
   bool DRV_UART1_ReceiveBufferIsEmpty(void)
  */
-bool DRV_UART1_ReceiveBufferIsEmpty(void) {
+bool DRV_UART1_ReceiveBufferIsEmpty(void)
+{
     return (UART1_ReceiveBufferIsEmpty());
 }
 
-bool UART1_TransmitBufferIsFull(void) {
+bool UART1_TransmitBufferIsFull(void)
+{
     return (uart1_obj.txStatus.s.full);
 }
 
 /**
   bool DRV_UART1_TransmitBufferIsFull(void)
  */
-bool DRV_UART1_TransmitBufferIsFull(void) {
+bool DRV_UART1_TransmitBufferIsFull(void)
+{
     return (UART1_TransmitBufferIsFull());
 }
 
-UART1_STATUS UART1_StatusGet(void) {
+UART1_STATUS UART1_StatusGet(void)
+{
     return U1STA;
 }
 
 /**
   DRV_UART1_STATUS DRV_UART1_StatusGet (void)
  */
-DRV_UART1_STATUS DRV_UART1_StatusGet(void) {
+DRV_UART1_STATUS DRV_UART1_StatusGet(void)
+{
     return (UART1_StatusGet());
 }
 
