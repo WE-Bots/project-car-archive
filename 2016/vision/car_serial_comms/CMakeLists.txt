@@ -45,6 +45,7 @@ add_message_files(
   msg
   FILES
   ThrottleAndSteering.msg
+  Start.msg
 )
 
 ## Generate added messages and services with any dependencies listed here

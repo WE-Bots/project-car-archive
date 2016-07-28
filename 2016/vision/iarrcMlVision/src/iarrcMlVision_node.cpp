@@ -13,6 +13,7 @@
 
 // Get message prototype for sending to the Arduino managing node
 #include <car_serial_comms/ThrottleAndSteering.h>
+#include <car_serial_comms/Start.h>
 
 // Get code copied from the OpenCV cookbook
 #include "iarrcMlVision/linefinder.h"
@@ -117,7 +118,7 @@ private:
   
 
 public:
-  static const int carAngle = -30; // Specifies the angle of direction of the car relative to the footage
+  static const int carAngle = -45; // Specifies the angle of direction of the car relative to the footage
   static const int warpCombat = 15; // HAX to combat fisheye until it's dewarped
   
   probeVectors(int x, int y, double ang, double mag, int tx, int ty, int ts = 3, cv::Scalar tc = cv::Scalar(0, 255, 0)) : textPos(tx, ty),
@@ -275,6 +276,8 @@ void min_vteTrackbar(int trackbarValue, void* ud)
  */
 class ImageProcessor
 {
+  bool ready;
+
   // Member variables
   ros::NodeHandle nh_;
   // image_transport::ImageTransport it_;
@@ -283,6 +286,8 @@ class ImageProcessor
   ros::Publisher cmd_pub_;
   ros::Subscriber img_sub_; // This is very bad practice, but we're stuck
                               // with what the raspicam_node gives us.
+  ros::Subscriber img_sub_2; // This is very bad practice, but we're stuck
+  // with what the raspicam_node gives us.
 
   std::vector <probeVectors> probes; // Holds the probes
 
@@ -292,11 +297,14 @@ public:
   ImageProcessor()
     //: it_(nh_)
   {
+    ready = false;
     // Something is up here!
     // it_sub_ = it_.subscribe("/camera/image", 1,
     //   &ImageProcessor::proc_img, this);
     img_sub_ = nh_.subscribe<>(
-      "camera/image/compressed", 1, &ImageProcessor::proc_img, this);
+      "camera/left/image_rect_color/compressed", 1, &ImageProcessor::proc_img, this);
+    img_sub_2 = nh_.subscribe<>(
+        "/Start_flag", 1, &ImageProcessor::start, this);
     cmd_pub_ = nh_.advertise<car_serial_comms::ThrottleAndSteering>(
       "vision_controller/drive_cmd", 10);
 
@@ -309,6 +317,10 @@ public:
     #ifdef DISPLAY
     cv::destroyAllWindows();
     #endif
+  }
+
+  void start(const car_serial_comms::Start& msg) {
+    ready = true;
   }
 
   // white_filter - boost white and remove non-white features
@@ -338,6 +350,11 @@ public:
   // proc_img - get new image, move into OpenCV, and process
   void proc_img(const sensor_msgs::CompressedImage& msg) //sensor_msgs::ImageConstPtr& (proper way)
   {
+    if (!ready) {
+      ROS_ERROR_STREAM("Not ready! send on /Start_flag");
+      printf("Not ready! Send start!");
+      return;
+    }
     // Move image into OpenCV - the proper way that I refuse to delete
     // cv_bridge::CvImagePtr im_ptr;
     // try
@@ -358,9 +375,9 @@ public:
     if (probes.empty())
     {
       //Intialize probes
-      probes.push_back(probeVectors(img.cols * .25, img.rows * 0.8, 0, (double)175 * sqrt(pow((double)img.cols/640, 2)+ pow((double)img.rows/480, 2)) / sqrt(2), img.cols *.5, 50, 5, cv::Scalar(0, 255, 0)));
-      probes.push_back(probeVectors(img.cols * .25, img.rows * 0.8, -30, (double)150 * sqrt(pow((double)img.cols/640, 2) + pow((double)img.rows/480, 2)) / sqrt(2), 10, 50, 5, cv::Scalar(255, 255, 0)));
-      probes.push_back(probeVectors(img.cols * .25, img.rows * 0.8, 45, (double)225 * sqrt(pow((double)img.cols/640, 2) + pow((double)img.rows/480, 2)) / sqrt(2), img.cols *.75, 50, 5, cv::Scalar(255,0,100)));
+      probes.push_back(probeVectors(img.cols * .5, img.rows * 0.9, 0, (double)175 * sqrt(pow((double)img.cols/640, 2)+ pow((double)img.rows/480, 2)) / sqrt(2), img.cols *.5, 50, 5, cv::Scalar(0, 255, 0)));
+      probes.push_back(probeVectors(img.cols * .5, img.rows * 0.9, -45, (double)175 * sqrt(pow((double)img.cols/640, 2) + pow((double)img.rows/480, 2)) / sqrt(2), 10, 50, 5, cv::Scalar(255, 255, 0)));
+      probes.push_back(probeVectors(img.cols * .5, img.rows * 0.9, 45, (double)175 * sqrt(pow((double)img.cols/640, 2) + pow((double)img.rows/480, 2)) / sqrt(2), img.cols *.75, 50, 5, cv::Scalar(255,0,100)));
     }
     
     // Display Subscribed Image
@@ -387,8 +404,8 @@ public:
     cv::Mat contours;
     // TUNE Make sure these parameters are good for various conditions
     int a,b;
-    nh_.param("iarrcMlVision/canny_1",a, 85); // These both make the transform reject more.
-    nh_.param("iarrcMlVision/canny_2",b,380); // Originally 50, 350
+    nh_.param("iarrcMlVision/canny_1",a, 50); // These both make the transform reject more.
+    nh_.param("iarrcMlVision/canny_2",b,350); // Originally 50, 350
     cv::Canny(img, contours, a, b);
     #ifdef DISPLAY
     //cv::Mat contoursInv;
@@ -431,8 +448,8 @@ public:
     LineFinder lf; // From OpenCV cookbook, see included linefinder.h
     int min_len, min_gap, min_vte;
     nh_.param("iarrcMlVision/min_len", min_len, 60); // Originally 60
-    nh_.param("iarrcMlVision/min_gap", min_gap, 15); // Originally 10
-    nh_.param("iarrcMlVision/min_vte", min_vte, 15); // Originally  4
+    nh_.param("iarrcMlVision/min_gap", min_gap, 10); // Originally 10
+    nh_.param("iarrcMlVision/min_vte", min_vte, 5); // Originally  4
     lf.setLineLengthAndGap(min_len, min_gap); // min len (pix), min gap (pix)
     lf.setMinVote(min_vte);               // minimum number of points to be a line
     std::vector<cv::Vec4i> lines = lf.findLines(contours); // TODO check if [x1, y1, x2, y2] (use OpenCV's docs)

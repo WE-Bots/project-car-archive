@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   # image_transport
   image_transport
   roscpp
+  rosconsole
   std_msgs
 )
 
@@ -91,6 +92,7 @@ catkin_package(
 #  LIBRARIES iarrcMlVision
   CATKIN_DEPENDS
   roscpp
+  rosconsole
   std_msgs
   sensor_msgs
   image_transport
