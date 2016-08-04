@@ -1,4 +1,3 @@
-
 // Sparkfveun 9DOF Razor IMU AHRS
 // 9 Degree of Measurement Attitude and Heading Reference System
 // Firmware v1.0
@@ -35,7 +34,8 @@
 #include <i2c_t3.h>
 #include <TinyGPS++.h>
 //#include <Wire.h>
-//#include <SPI.h>
+#include <SPI.h>
+#include <SoftwareSerial.h>
 #include "pins_arduino.h"
 #include "ADXL345.h"
 #include "HMC5883L.h"
@@ -76,7 +76,7 @@ int     bytes;
 #define STATUS_LED 13 
 
 TinyGPSPlus gps;
-
+//SoftwareSerial Serial2(1,9);
 int SENSOR_SIGN[9] = {-1,1,-1,1,1,1,-1,-1,-1};  //Correct directions x,y,z - gyros, accels, magnetormeter
 
 float G_Dt=0.0035;    // Integration time (DCM algorithm)  We will run the integration loop at 50Hz if possible *cough* 285 Hz *cough*
@@ -129,7 +129,7 @@ ADXL345  accelerometer;
 
 void setup()
 {
-  Serial.begin(115200);  // Used to communicate with master computer
+  Serial.begin(9600);  // Used to communicate with master computer
   Serial2.begin(4800);   // Connection to GPS 
 
   pinMode (STATUS_LED,OUTPUT);  // Status LED
@@ -171,22 +171,22 @@ void loop() // Main Loop
   while(Serial2.available()>0){
     int c = Serial2.read();
     if (gps.encode(c)){
-//      Serial.print("lat: ");
-//      Serial.print(gps.location.lat());
-//      Serial.print("   lon: ");
-//      Serial.print(gps.location.lng());
-//      Serial.print("   date: ");
-//      Serial.print(gps.date.year());
-//      Serial.print("-");
-//      Serial.print(gps.date.month());
-//      Serial.print("-");
-//      Serial.print(gps.date.day());
-//      Serial.print("   time: ");
-//      Serial.print(gps.time.hour());
-//      Serial.print(":");
-//      Serial.print(gps.time.minute());
-//      Serial.print(":");
-//      Serial.println(gps.time.second());
+      Serial.print("lat: ");
+      Serial.print(gps.location.lat());
+      Serial.print("   lon: ");
+      Serial.print(gps.location.lng());
+      Serial.print("   date: ");
+      Serial.print(gps.date.year());
+      Serial.print("-");
+      Serial.print(gps.date.month());
+      Serial.print("-");
+      Serial.print(gps.date.day());
+      Serial.print("   time: ");
+      Serial.print(gps.time.hour());
+      Serial.print(":");
+      Serial.print(gps.time.minute());
+      Serial.print(":");
+      Serial.println(gps.time.second());
       //Copy updated values into the data array
       float latlng[2];
       latlng[0] = gps.location.lat();
@@ -235,7 +235,7 @@ void loop() // Main Loop
     Drift_correction();
     Euler_angles();
     // ***
-    //printdata();
+    printdata();
     
     // Turn off the LED when you saturate any of the gyros.
     if((abs(Gyro_Vector[0])>=ToRad(1000))||(abs(Gyro_Vector[1])>=ToRad(1000))||(abs(Gyro_Vector[2])>=ToRad(1000)))

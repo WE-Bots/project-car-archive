@@ -71,4 +71,6 @@ funclist
 2016/Power/Battery_Monitoring_2016.X/Makefile
 2016/Power/Battery_Monitoring_2016.X/device_config.mcc
 2016/Power/Battery_Monitoring_2016.X/nbproject/configurations.xml
+/2016/CAR_IMU:GPS/WEbots_CAR_IMU&GPS.X/build/default/
+/2016/WEbots_CAR_IMU&GPS.X/nbproject/private/
 2016/Power/Battery_Monitoring_2016.X/nbproject/project.xml

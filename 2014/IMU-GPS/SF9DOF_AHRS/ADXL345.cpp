@@ -1,5 +1,6 @@
 
 #include "ADXL345.h"
+//#include <Wire.h>
 
 // Get Accelerometer Data
 void ADXL345::getAccelerometerValues(int16_t* array){

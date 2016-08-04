@@ -1,4 +1,5 @@
-#include "hmc5883l.h"
+#include "HMC5883L.h"
+//#include <Wire.h>
 
 // Get Magnetometer Data
 void HMC5883L::getMagnetometerValues(int16_t* array){
