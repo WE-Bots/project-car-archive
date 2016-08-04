@@ -68,3 +68,7 @@ funclist
 **/nbproject/Makefile-*
 **/disassembly/
 2016/CAN_to_USB_transceiver.X/nbproject/configurations.xml
+2016/Power/Battery_Monitoring_2016.X/Makefile
+2016/Power/Battery_Monitoring_2016.X/device_config.mcc
+2016/Power/Battery_Monitoring_2016.X/nbproject/configurations.xml
+2016/Power/Battery_Monitoring_2016.X/nbproject/project.xml
