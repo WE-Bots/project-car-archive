@@ -1,0 +1,40 @@
+WE Bots Vision
+* Zed Camera and SDK
+* CUDA
+* OpenCV
+* ROS
+
+Jetson TK1 Setup 
+* Flash (see desktop)
+* Disable root
+    * sudo passwd -dl root
+* Add ppa:git-core/ppa
+* Install git, aptitude, vim, linux-firmware, curl, ntp
+* Set up credential.helper
+* Add usb_port_owner_info=2 in /boot/extlinux/extlinux.conf
+* Grinch kernel (skip 21.3 flash): https://devtalk.nvidia.com/default/topic/906018/jetson-tk1/-customkernel-the-grinch-21-3-4-for-jetson-tk1-developed/
+* Set admin and sudo group to not need password for sudo
+* X) https://gist.github.com/jetsonhacks/6da905e0675dcb5cba6f (Use if you can’t use Jetpack)
+* X) https://developer.nvidia.com/linux-tegra-r214
+    * $ sudo dpkg -i libopencv4tegra-repo_l4t-r21_2.4.10.1_armhf.deb
+    * $ sudo apt-get update
+    * $ sudo apt-get install libopencv4tegra libopencv4tegra-dev
+    * (Use if you can’t use jetpack)
+* Changed timezone in /etc/timezone to “America/Toronto”, and ran “sudo dpkg-reconfigure --frontend noninteractive tzdata”
+* X) https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-vnc-on-ubuntu-14-04
+    * Swap options line for “OPTIONS="-geometry ${GEOMETRY} :${DISPLAY}"”
+* Installed ROS indigo, desktop
+* Installed ZED SDK
+
+Desktop Setup
+* Installed ROS indigo, full desktop
+* Installed git
+* Set up network interface bridging
+* Installed JetPack (no GameWorks)
+* Installed CUDA 7.5 via Nvidia developer instructions (Note: JetPack reconfigures the default to 7.0, you need to relink /usr/local/CUDA and .bashrc to fix that)
+* Relinked to CUDA 7.5 (symlink in /usr/local, edit the PATH, change LD_LIBRARY_PATH in .bashrc and change the application files in /usr/share/applications)
+* Installed ZED SDK
+* Installed CLion (for development)
+* Followed “creating a catkin workspace” and added the source command to .bashrc
+* Installed apt-get ros-indigo-rtabmap-ros and copies the zed_wrapper and car_ros packages to catkin
+* Installed OpenCV 3.1 with CUDA support (CUDA requires an extra flag on CMake)
