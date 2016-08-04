@@ -1,0 +1,17 @@
+http://myzharbot.robot-home.it/blog/software/ros-nvidia-jetson-tx1-jetson-tk1-opencv-ultimate-guide/
+
+
+Files to change:
+  sudo cp /opt/ros/indigo/lib/pkgconfig/cv_bridge.pc /opt/ros/indigo/lib/pkgconfig/cv_bridge.pc-bak
+  sudo cp /opt/ros/indigo/lib/pkgconfig/image_geometry.pc /opt/ros/indigo/lib/pkgconfig/image_geometry.pc-bak
+  sudo cp /opt/ros/indigo/share/cv_bridge/cmake/cv_bridgeConfig.cmake /opt/ros/indigo/share/cv_bridge/cmake/cv_bridgeConfig.cmake-bak
+  sudo cp /opt/ros/indigo/share/image_geometry/cmake/image_geometryConfig.cmake /opt/ros/indigo/share/image_geometry/cmake/image_geometryConfig.cmake-bak
+  sudo gedit /opt/ros/indigo/lib/pkgconfig/cv_bridge.pc &
+  sudo gedit /opt/ros/indigo/lib/pkgconfig/image_geometry.pc &
+  sudo gedit /opt/ros/indigo/share/cv_bridge/cmake/cv_bridgeConfig.cmake &
+  sudo gedit /opt/ros/indigo/share/image_geometry/cmake/image_geometryConfig.cmake &
+  
+Modifications for each file
+  remove each instance “/usr/lib/arm-linux-gnueabihf/libopencv_ocl.so.2.4.8;“
+  replace each instance of “/usr/lib/arm-linux-gnueabihf/” with “/usr/lib“
+  replace each instance of “2.4.8” with “2.4.12” (or the current version of OpenCV in opencv4tegra package)
